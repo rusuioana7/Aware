@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import TestTailwind from './TestTailwind';
+import TestTailwind from './test';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
