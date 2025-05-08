@@ -1,14 +1,28 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Toggle from './Toggle';
 import CredentialsForm from './CredentialsForm';
 import Divider from './Divider';
-import GoogleLoginButton from './GoogleLoginButton';
+import GoogleButton from './GoogleButton.tsx';
 
 const Container: React.FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
     const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+
+    useEffect(() => {
+        // Set initial state based on URL
+        if (location.pathname === '/register') {
+            setActiveTab('signup');
+        } else {
+            setActiveTab('login');
+        }
+    }, [location.pathname]);
 
     const handleTabChange = (tab: 'login' | 'signup') => {
         setActiveTab(tab);
+        navigate(tab === 'login' ? '/login' : '/register');
     };
 
     return (
@@ -18,11 +32,11 @@ const Container: React.FC = () => {
 
             <Toggle activeTab={activeTab} onTabChange={handleTabChange}/>
 
-            <CredentialsForm/>
+            <CredentialsForm mode={activeTab} />
 
             <Divider/>
 
-            <GoogleLoginButton/>
+            <GoogleButton/>
         </div>
     );
 };

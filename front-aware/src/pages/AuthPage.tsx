@@ -1,6 +1,6 @@
-import Container from '../components/LoginPage/Container.tsx';
+import Container from '../components/AuthPage/Container.tsx';
 
-const LoginPage: React.FC = () => {
+const AuthPage: React.FC = () => {
 
 
     return (
@@ -21,4 +21,4 @@ const LoginPage: React.FC = () => {
     );
 };
 
-export default LoginPage;
+export default AuthPage;
