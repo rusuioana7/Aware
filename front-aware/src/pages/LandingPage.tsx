@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 import Button from '../components/Button.tsx';
 import Header from '../components/Header.tsx';
 import ImageSection from "../components/LandingPage/ImageSection.tsx";
@@ -29,7 +30,9 @@ const LandingPage: React.FC = () => {
                     </h2>
 
                     <div className="flex space-x-8 justify-center">
-                        <Button label="Log in"/>
+                        <Link to="/login">
+                            <Button label="Log in"/>
+                        </Link>
                         <Button label="Get Started"/>
                     </div>
                 </div>

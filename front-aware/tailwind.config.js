@@ -7,7 +7,10 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Belleza', 'sans-serif'], // Adăugăm fontul Belleza
+                sans: ['Belleza', 'sans-serif'],
+            },
+            colors: {
+                navy: '#031A6B',
             },
         },
     },
