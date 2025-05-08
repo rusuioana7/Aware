@@ -33,7 +33,9 @@ const LandingPage: React.FC = () => {
                         <Link to="/login">
                             <Button label="Log in"/>
                         </Link>
+                        <Link to="/register">
                         <Button label="Get Started"/>
+                        </Link>
                     </div>
                 </div>
             </section>

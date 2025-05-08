@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client';
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import './index.css';
 import LandingPage from './pages/LandingPage.tsx';
-import LoginPage from './pages/LoginPage.tsx';
+import AuthPage from './pages/AuthPage.tsx';
+
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
@@ -11,7 +12,9 @@ root.render(
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<LandingPage/>}/>
-                <Route path="/login" element={<LoginPage/>}/>
+                <Route path="/login" element={<AuthPage />} />
+                <Route path="/register" element={<AuthPage />} />
+
             </Routes>
         </BrowserRouter>
     </React.StrictMode>

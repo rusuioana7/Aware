@@ -1,5 +1,9 @@
 import React from 'react';
-import LoginButton from './LoginButton';
+import AuthButton from './AuthButton.tsx';
+
+interface CredentialsFormProps {
+    mode: 'login' | 'signup';
+}
 
 const inputStyle: React.CSSProperties = {
     width: '70%',
@@ -22,6 +26,14 @@ const forgotPasswordStyle: React.CSSProperties = {
     marginTop: '-8px',
 };
 
+const responsiveForgotPasswordTextStyle: React.CSSProperties = {
+    color: '#031A6B',
+    fontSize: '14px',
+    cursor: 'pointer',
+    width: '100%',
+    textAlign: 'left',
+    paddingLeft: '65px',
+};
 
 const formStyle: React.CSSProperties = {
     marginTop: '32px',
@@ -32,16 +44,7 @@ const formStyle: React.CSSProperties = {
     maxWidth: '480px',
 };
 
-const responsiveForgotPasswordTextStyle: React.CSSProperties = {
-    color: '#031A6B',
-    fontSize: '14px',
-    cursor: 'pointer',
-    width: '100%',
-    textAlign: 'left',
-    paddingLeft: '65px',
-};
-
-const CredentialsForm: React.FC = () => {
+const CredentialsForm: React.FC<CredentialsFormProps> = ({ mode }) => {
     return (
         <form style={formStyle}>
             <input
@@ -54,11 +57,22 @@ const CredentialsForm: React.FC = () => {
                 placeholder="Password"
                 style={inputStyle}
             />
-            <div style={forgotPasswordStyle}>
-                <p style={responsiveForgotPasswordTextStyle}>Forgot Password?</p>
-            </div>
 
-            <LoginButton/>
+            {mode === 'signup' && (
+                <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    style={inputStyle}
+                />
+            )}
+
+            {mode === 'login' && (
+                <div style={forgotPasswordStyle}>
+                    <p style={responsiveForgotPasswordTextStyle}>Forgot Password?</p>
+                </div>
+            )}
+
+            <AuthButton label={mode === 'login' ? 'Login' : 'Register'} />
         </form>
     );
 };

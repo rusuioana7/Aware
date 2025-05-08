@@ -24,7 +24,7 @@ const googleIconStyle: React.CSSProperties = {
     height: '20px',
 };
 
-const GoogleLoginButton: React.FC = () => {
+const GoogleButton: React.FC = () => {
     return (
         <button style={googleButtonStyle}>
             <img
@@ -37,4 +37,4 @@ const GoogleLoginButton: React.FC = () => {
     );
 };
 
-export default GoogleLoginButton;
+export default GoogleButton;
