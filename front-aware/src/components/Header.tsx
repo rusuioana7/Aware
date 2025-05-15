@@ -21,7 +21,7 @@ const Header: React.FC = () => {
     const day = today.getDate();
     const suffix = getDateSuffix(day);
     const year = today.getFullYear();
-    const formattedDate = `   ${weekday}   ${month}${day}${suffix},${year}`;
+    const formattedDate = `${weekday}\u00A0\u00A0\u00A0${month} ${day}${suffix}, ${year}`;
     return (
         <header className="bg-gray-800 p-6 text-white">
             <div className="flex flex-col items-center">
@@ -31,7 +31,7 @@ const Header: React.FC = () => {
 
                 <div className="w-full flex items-center relative">
                     <div className="absolute left-4 text-sm font-semibold"
-                         style={{marginTop: '-2px', marginBottom: '4px'}}>
+                         style={{marginTop: '-2px', marginBottom: '4px', paddingLeft: '10px'}}>
                         {formattedDate}
                     </div>
 
