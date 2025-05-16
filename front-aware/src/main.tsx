@@ -4,6 +4,12 @@ import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import './index.css';
 import LandingPage from './pages/LandingPage.tsx';
 import AuthPage from './pages/AuthPage.tsx';
+import Layout from './pages/LayoutPage.tsx';
+import HomePage from './pages/HomePage.tsx';
+import ExplorePage from './pages/ExplorePage.tsx';
+import BookmarksPage from './pages/BookmarksPage.tsx';
+import MyProfilePage from './pages/MyProfilePage.tsx';
+
 
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
@@ -14,6 +20,10 @@ root.render(
                 <Route path="/" element={<LandingPage/>}/>
                 <Route path="/login" element={<AuthPage />} />
                 <Route path="/register" element={<AuthPage />} />
+                <Route path="/home" element={<Layout><HomePage /></Layout>} />
+                <Route path="/explore" element={<Layout><ExplorePage /></Layout>} />
+                <Route path="/bookmarks" element={<Layout><BookmarksPage /></Layout>} />
+                <Route path="/profile" element={<Layout><MyProfilePage /></Layout>} />
 
             </Routes>
         </BrowserRouter>
