@@ -9,7 +9,7 @@ const menuContainerStyle: React.CSSProperties = {
     padding: '16px 0',
     color: '#FFFFFF',
     fontWeight: 500,
-    fontSize: '16px',
+    fontSize: '18px',
     gap: '32px',
 };
 
