@@ -1,15 +1,15 @@
 import React from 'react';
 import LatestNews from '../components/HomePage/LatestNews';
 import SavedForLater from '../components/HomePage/SavedForLater';
-import Feed from '../components/HomePage/Feed';
+import FeedOptions from '../components/HomePage/FeedOptions.tsx';
 import Trending from '../components/HomePage/Trending';
 
 
 const HomePage: React.FC = () => {
     return (
-        <div style={{ padding: '5px'}}>
-            <LatestNews />
-            <SavedForLater />
+        <div style={{padding: '5px'}}>
+            <LatestNews/>
+            <SavedForLater/>
 
             <div
                 style={{
@@ -22,12 +22,12 @@ const HomePage: React.FC = () => {
                     alignItems: 'flex-start',
                 }}
             >
-                <div style={{ flex: 3 }}>
+                <div style={{flex: 3}}>
                     <Trending/>
                 </div>
 
-                <div style={{ flex: 7 }}>
-                    <Feed />
+                <div style={{flex: 7}}>
+                    <FeedOptions/>
                 </div>
 
 
