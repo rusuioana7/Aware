@@ -32,6 +32,10 @@ const FeedOptions: React.FC = () => {
 
     const sortOptions: Array<'Newest' | 'Popular' | 'Verified Only'> = ['Newest', 'Popular', 'Verified Only'];
 
+    const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>('All');
+    const viewOptions: Array<'All' | 'Articles' | 'Threads'> = ['All', 'Articles', 'Threads'];
+
+
     // ordinea topic urilor
     const sortedSelectedTopics = selectedTopics.slice().sort((a, b) => {
         return allTopics.indexOf(a) - allTopics.indexOf(b);
@@ -197,36 +201,67 @@ const FeedOptions: React.FC = () => {
             {/* linie */}
             <div style={{flex: 1, height: 1, backgroundColor: '#CCC', marginBottom: 16}}/>
 
-            {/* sort */}
+            {/* sort si view */}
             <div
                 style={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 60,
+                    flexWrap: 'wrap',
+                    marginBottom: 10,
                 }}
             >
-                <span style={{fontWeight: 500, color: '#031A6B'}}>Sort:</span>
-                {sortOptions.map(option => (
-                    <button
-                        key={option}
-                        onClick={() => setSelectedSort(option)}
-                        style={{
-                            border: '1px solid #031A6B',
-                            backgroundColor: selectedSort === option ? '#031A6B' : 'transparent',
-                            color: selectedSort === option ? 'white' : '#031A6B',
-                            borderRadius: 25,
-                            padding: '6px 16px',
-                            fontSize: 14,
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease-in-out',
-                        }}
-                    >
-                        {option}
-                    </button>
-                ))}
+                {/* sort */}
+                <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                    <span style={{fontWeight: 500, color: '#031A6B'}}>Sort:</span>
+                    {sortOptions.map(option => (
+                        <button
+                            key={option}
+                            onClick={() => setSelectedSort(option)}
+                            style={{
+                                border: '1px solid #031A6B',
+                                backgroundColor: selectedSort === option ? '#031A6B' : 'transparent',
+                                color: selectedSort === option ? 'white' : '#031A6B',
+                                borderRadius: 25,
+                                padding: '6px 16px',
+                                fontSize: 14,
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease-in-out',
+                            }}
+                        >
+                            {option}
+                        </button>
+                    ))}
+                </div>
+
+                {/* view */}
+                <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                    <span style={{fontWeight: 500, color: '#031A6B'}}>View:</span>
+                    {viewOptions.map(option => (
+                        <button
+                            key={option}
+                            onClick={() => setSelectedView(option)}
+                            style={{
+                                border: '1px solid #031A6B',
+                                backgroundColor: selectedView === option ? '#031A6B' : 'transparent',
+                                color: selectedView === option ? 'white' : '#031A6B',
+                                borderRadius: 25,
+                                padding: '6px 16px',
+                                fontSize: 14,
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease-in-out',
+                            }}
+                        >
+                            {option}
+                        </button>
+                    ))}
+                </div>
             </div>
+
+
         </div>
     );
 };
