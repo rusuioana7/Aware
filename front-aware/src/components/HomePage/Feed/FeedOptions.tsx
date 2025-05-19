@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import TopicTag from '../Tags/TopicTag.tsx';
-import { TOPIC_COLORS } from '../Tags/TagColor.tsx';
+import {TOPIC_COLORS} from '../Tags/TagColor.tsx';
 
 type FeedOptionsProps = {
-    onViewChange: (view:'All' | 'Articles' | 'Threads') => void;
+    onViewChange: (view: 'All' | 'Articles' | 'Threads') => void;
 };
 
 const sortOptions: Array<'Newest' | 'Popular' | 'Verified Only'> = ['Newest', 'Popular', 'Verified Only'];
 const viewOptions: Array<'Articles' | 'Threads'> = ['Articles', 'Threads'];
 
-const FeedOptions: React.FC<FeedOptionsProps> = ({ onViewChange }) => {
+const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange}) => {
     const allTopics = Object.keys(TOPIC_COLORS)
         .filter(key => key !== 'general')
         .map(key => key.charAt(0).toUpperCase() + key.slice(1));
@@ -20,7 +20,7 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({ onViewChange }) => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>('All');
 
-    const handleViewChange = (option:'All' | 'Articles' | 'Threads') => {
+    const handleViewChange = (option: 'All' | 'Articles' | 'Threads') => {
         const newView = selectedView === option ? 'All' : option;
         setSelectedView(newView);
         onViewChange(newView);
@@ -60,7 +60,7 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({ onViewChange }) => {
                     paddingRight: 5,
                 }}
             >
-                <h2 style={{ fontSize: 22, fontWeight: 'bold', color: '#000', margin: 0, flexShrink: 0 }}>
+                <h2 style={{fontSize: 22, fontWeight: 'bold', color: '#000', margin: 0, flexShrink: 0}}>
                     Feed
                 </h2>
 
@@ -168,7 +168,7 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({ onViewChange }) => {
                                         <TopicTag
                                             label={topic}
                                             selected={isSelected}
-                                            style={{ cursor: 'default', userSelect: 'none' }}
+                                            style={{cursor: 'default', userSelect: 'none'}}
                                         />
                                         {isSelected && (
                                             <span
@@ -192,7 +192,7 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({ onViewChange }) => {
                 </div>
             </div>
 
-            <div style={{ flex: 1, height: 1, backgroundColor: '#CCC', marginBottom: 16 }} />
+            <div style={{flex: 1, height: 1, backgroundColor: '#CCC', marginBottom: 16}}/>
 
             <div
                 style={{
@@ -204,8 +204,8 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({ onViewChange }) => {
                     marginBottom: 10,
                 }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontWeight: 500, color: '#031A6B' }}>Sort:</span>
+                <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                    <span style={{fontWeight: 500, color: '#031A6B'}}>Sort:</span>
                     {sortOptions.map(option => (
                         <button
                             key={option}
@@ -227,8 +227,8 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({ onViewChange }) => {
                     ))}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontWeight: 500, color: '#031A6B' }}>View:</span>
+                <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                    <span style={{fontWeight: 500, color: '#031A6B'}}>View:</span>
                     {viewOptions.map(option => (
                         <button
                             key={option}

@@ -44,7 +44,7 @@ const formStyle: React.CSSProperties = {
     maxWidth: '480px',
 };
 
-const CredentialsForm: React.FC<CredentialsFormProps> = ({ mode }) => {
+const CredentialsForm: React.FC<CredentialsFormProps> = ({mode}) => {
     return (
         <form style={formStyle}>
             <input
@@ -72,7 +72,7 @@ const CredentialsForm: React.FC<CredentialsFormProps> = ({ mode }) => {
                 </div>
             )}
 
-            <AuthButton label={mode === 'login' ? 'Login' : 'Register'} />
+            <AuthButton label={mode === 'login' ? 'Login' : 'Register'}/>
         </form>
     );
 };

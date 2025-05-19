@@ -23,12 +23,12 @@ const hoverStyle: React.CSSProperties = {
     border: '2px solid #D72638',
 };
 
-const AuthButton: React.FC<LoginButtonProps> = ({ label }) => {
+const AuthButton: React.FC<LoginButtonProps> = ({label}) => {
     const [isHovered, setIsHovered] = React.useState(false);
 
     return (
         <button
-            style={isHovered ? { ...buttonStyle, ...hoverStyle } : buttonStyle}
+            style={isHovered ? {...buttonStyle, ...hoverStyle} : buttonStyle}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >

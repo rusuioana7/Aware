@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 
 const menuContainerStyle: React.CSSProperties = {
     backgroundColor: '#1C1C1C',
@@ -47,19 +47,19 @@ const Menu: React.FC = () => {
     const [hoveredDropdownItem, setHoveredDropdownItem] = useState<string | null>(null);
 
     const menuItems = [
-        { name: 'Explore', path: '/explore' },
-        { name: 'Bookmarks', path: '/bookmarks' },
-        { name: 'My Profile', path: '/profile' },
+        {name: 'Explore', path: '/explore'},
+        {name: 'Bookmarks', path: '/bookmarks'},
+        {name: 'My Profile', path: '/profile'},
     ];
 
     const homeDropdownItems = [
-        { label: 'Feed', id: 'feed' },
-        { label: 'Latest News', id: 'latest' },
-        { label: 'Saved For Later', id: 'saved' },
-        { label: 'Trending', id: 'trending' },
-        { label: 'Top Picks For You', id: 'toppicks' },
-        { label: 'Threads You Follow', id: 'followedthreads' },
-        { label: 'Active Threads', id: 'activethreads' },
+        {label: 'Feed', id: 'feed'},
+        {label: 'Latest News', id: 'latest'},
+        {label: 'Saved For Later', id: 'saved'},
+        {label: 'Trending', id: 'trending'},
+        {label: 'Top Picks For You', id: 'toppicks'},
+        {label: 'Threads You Follow', id: 'followedthreads'},
+        {label: 'Active Threads', id: 'activethreads'},
     ];
 
     const goToSection = (sectionId: string) => {
