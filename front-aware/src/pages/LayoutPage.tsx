@@ -8,7 +8,7 @@ const LayoutPage: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <>
             <Header />
             <Menu />
-            <div style={{ padding: '20px' }}>{children}</div> {/* Page content */}
+            <div style={{ padding: '20px' }}>{children}</div>
         </>
     );
 };
