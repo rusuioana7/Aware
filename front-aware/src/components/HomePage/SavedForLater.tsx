@@ -1,6 +1,6 @@
 import React, {useRef, useEffect, useState} from 'react';
 import ZoomIfSmall from './ZoomIfSmallPicture';
-import TopicTag from './TopicTag';
+import TopicTag from './Tags/TopicTag.tsx';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';

@@ -1,6 +1,6 @@
 import React from "react";
 import ZoomIfSmall from './ZoomIfSmallPicture';
-import TopicTag from './TopicTag';
+import TopicTag from './Tags/TopicTag.tsx';
 
 const LatestNews: React.FC = () => {
     const largeCardHeight = 391;
