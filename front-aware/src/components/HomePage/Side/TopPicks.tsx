@@ -50,7 +50,7 @@ const TopPicks = () => (
         >
             Top Picks For You
         </h2>
-        <div style={{height: '1px', backgroundColor: '#CCCCCC', marginBottom: '12px'}} />
+        <div style={{height: '1px', backgroundColor: '#CCCCCC', marginBottom: '12px'}}/>
 
         <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
             {topPicksArticles.map((article, index) => (

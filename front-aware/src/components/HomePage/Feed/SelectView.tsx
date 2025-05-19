@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import FeedOptions from './FeedOptions.tsx';
 import Feed from './Feed.tsx';
 
@@ -7,8 +7,8 @@ const SelectView: React.FC = () => {
 
     return (
         <div>
-            <FeedOptions onViewChange={setSelectedView} />
-            <Feed selectedView={selectedView} />
+            <FeedOptions onViewChange={setSelectedView}/>
+            <Feed selectedView={selectedView}/>
         </div>
     );
 };

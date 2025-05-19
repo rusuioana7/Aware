@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { useLocation } from 'react-router-dom';
+import {useLocation} from 'react-router-dom';
 
 import LatestNews from '../components/HomePage/LatestNews';
 import SavedForLater from '../components/HomePage/SavedForLater';
@@ -20,19 +20,19 @@ const HomePage: React.FC = () => {
             const id = location.hash.slice(1); // remove the #
             const element = document.getElementById(id);
             if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                element.scrollIntoView({behavior: 'smooth', block: 'start'});
             }
         }
     }, [location]);
 
     return (
-        <div style={{ padding: '5px' }}>
+        <div style={{padding: '5px'}}>
             <div id="latest">
-                <LatestNews />
+                <LatestNews/>
             </div>
 
             <div id="saved">
-                <SavedForLater />
+                <SavedForLater/>
             </div>
 
             <div

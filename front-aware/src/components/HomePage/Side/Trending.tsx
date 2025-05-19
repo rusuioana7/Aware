@@ -1,4 +1,6 @@
 import TopicTag from "../Tags/TopicTag.tsx";
+import ArticleOptions from "../ArticleOptions.tsx";
+import React, {useState} from "react";
 
 const trendingArticles = [
     {
@@ -38,46 +40,56 @@ const trendingArticles = [
     },
 ];
 
-const Trending = () => (
-    <div style={{marginBottom: '30px'}}>
-        <h2
-            style={{
-                fontSize: '22px',
-                fontWeight: 'bold',
-                marginBottom: '7px',
-                color: '#000000',
-            }}
-        >
-            Trending
-        </h2>
-        <div style={{height: '1px', backgroundColor: '#CCCCCC', marginBottom: '12px'}}/>
+const Trending: React.FC = () => {
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    return (
+        <div style={{marginBottom: '30px'}}>
+            <h2
+                style={{
+                    fontSize: '22px',
+                    fontWeight: 'bold',
+                    marginBottom: '7px',
+                    color: '#000000',
+                }}
+            >
+                Trending
+            </h2>
+            <div style={{height: '1px', backgroundColor: '#CCCCCC', marginBottom: '12px'}}/>
 
-        <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-            {trendingArticles.map((article, index) => (
-                <div
-                    key={index}
-                    style={{display: 'flex', gap: '10px', alignItems: 'flex-start', position: 'relative',}}
-                >
-                    <div style={{ position: 'absolute', top: '0px', left:'80px' }}>
-                        <TopicTag label={article.topic} />
+            <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                {trendingArticles.map((article, index) => (
+                    <div
+                        key={index}
+                        style={{display: 'flex', gap: '10px', alignItems: 'flex-start', position: 'relative',}}
+                        onMouseEnter={() => setHoveredIndex(index)}
+                        onMouseLeave={() => setHoveredIndex(null)}
+                    >
+
+                        {hoveredIndex === index &&
+                            <ArticleOptions position="top-right" customStyle={{marginTop: "-12px"}}/>}
+
+                        <div style={{position: 'absolute', top: '0px', left: '80px'}}>
+                            <TopicTag label={article.topic}/>
+                        </div>
+                        <img
+                            src={article.image}
+                            alt={article.title}
+                            style={{width: '70px', height: '70px', objectFit: 'cover',}}
+                        />
+                        <div>
+                            <p style={{fontSize: '15px', color: '#000000', margin: '30px 0 2px'}}>
+                                {article.author} - {article.date}
+                            </p>
+                            <p style={{fontSize: '18px', fontWeight: 550, margin: 0, color: '#222'}}>
+                                {article.title}
+                            </p>
+                        </div>
                     </div>
-                    <img
-                        src={article.image}
-                        alt={article.title}
-                        style={{width: '70px', height: '70px', objectFit: 'cover',}}
-                    />
-                    <div>
-                        <p style={{fontSize: '15px', color: '#000000', margin: '30px 0 2px'}}>
-                            {article.author} - {article.date}
-                        </p>
-                        <p style={{fontSize: '18px', fontWeight: 550, margin: 0, color: '#222'}}>
-                            {article.title}
-                        </p>
-                    </div>
-                </div>
-            ))}
+                ))}
+
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 export default Trending;

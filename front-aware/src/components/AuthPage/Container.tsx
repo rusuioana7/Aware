@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, {useState, useEffect} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 import Toggle from './Toggle';
 import CredentialsForm from './CredentialsForm';
 import Divider from './Divider';
@@ -32,7 +32,7 @@ const Container: React.FC = () => {
 
             <Toggle activeTab={activeTab} onTabChange={handleTabChange}/>
 
-            <CredentialsForm mode={activeTab} />
+            <CredentialsForm mode={activeTab}/>
 
             <Divider/>
 

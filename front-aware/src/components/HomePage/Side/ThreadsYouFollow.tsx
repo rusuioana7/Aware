@@ -1,4 +1,3 @@
-
 import TopicTag from '../Tags/TopicTag.tsx';
 
 const followedThreads = [
@@ -44,9 +43,9 @@ const ThreadsYouFollow = () => (
         >
             Threads You Follow
         </h2>
-        <div style={{ height: '1px', backgroundColor: '#CCCCCC', marginBottom: '12px' }} />
+        <div style={{height: '1px', backgroundColor: '#CCCCCC', marginBottom: '12px'}}/>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
             {followedThreads.map((thread, index) => (
                 <div
                     key={index}
@@ -57,20 +56,20 @@ const ThreadsYouFollow = () => (
                         position: 'relative',
                     }}
                 >
-                    <div style={{ position: 'absolute', top: '0px', left:'80px' }}>
-                        <TopicTag label={thread.topic} />
+                    <div style={{position: 'absolute', top: '0px', left: '80px'}}>
+                        <TopicTag label={thread.topic}/>
                     </div>
 
                     <img
                         src={thread.image}
                         alt={thread.name}
-                        style={{ width: '70px', height: '70px', objectFit: 'cover' }}
+                        style={{width: '70px', height: '70px', objectFit: 'cover'}}
                     />
-                    <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '18px', fontWeight: 550, margin: '30px 0 2px', color: '#222' }}>
+                    <div style={{flex: 1}}>
+                        <p style={{fontSize: '18px', fontWeight: 550, margin: '30px 0 2px', color: '#222'}}>
                             {thread.name}
                         </p>
-                        <p style={{ fontSize: '15px', color: '#000', margin: 0 }}>
+                        <p style={{fontSize: '15px', color: '#000', margin: 0}}>
                             Last updated: {thread.date}
                         </p>
                     </div>
