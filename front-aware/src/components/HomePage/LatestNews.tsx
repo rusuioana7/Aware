@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import ZoomIfSmall from './ZoomIfSmallPicture';
-import TopicTag from './Tags/TopicTag.tsx';
-import ArticleOptions from './ArticleOptions';
+import TopicTag from '../Cards/Tags/TopicTag.tsx';
+import ArticleOptions from '../Cards/ArticleOptions.tsx';
 
 const LatestNews: React.FC = () => {
     const largeCardHeight = 392;
@@ -47,7 +47,7 @@ const LatestNews: React.FC = () => {
                 fontSize: '22px',
                 fontWeight: 'bold',
                 color: '#000',
-                marginTop: '20px',
+                marginTop: '10px',
                 marginBottom: '16px',
                 marginLeft: '3px',
             }}>
@@ -61,7 +61,6 @@ const LatestNews: React.FC = () => {
                             position: 'relative',
                             width: '100%',
                             height: '100%',
-                            borderRadius: '6px',
                             overflow: 'hidden',
                             boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
                             backgroundColor: '#fff',
@@ -106,7 +105,6 @@ const LatestNews: React.FC = () => {
                                     position: 'relative',
                                     width: '100%',
                                     height: '100%',
-                                    borderRadius: '6px',
                                     overflow: 'hidden',
                                     boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
                                     backgroundColor: '#fff',

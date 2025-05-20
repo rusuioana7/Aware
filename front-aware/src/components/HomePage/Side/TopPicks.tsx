@@ -1,4 +1,4 @@
-import TopicTag from "../Tags/TopicTag.tsx";
+import TopicTag from "../../Cards/Tags/TopicTag.tsx";
 
 const topPicksArticles = [
     {

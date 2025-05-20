@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import Button from '../components/Button.tsx';
-import Header from '../components/Header.tsx';
+import Button from '../components/Cards/Button.tsx';
+import Header from '../components/Cards/Header.tsx';
 import ImageSection from "../components/LandingPage/ImageSection.tsx";
 import TextSection from "../components/LandingPage/TextSection.tsx";
 

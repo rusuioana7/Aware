@@ -1,6 +1,7 @@
 import React, {useRef, useEffect, useState} from 'react';
 import ZoomIfSmall from './ZoomIfSmallPicture';
-import TopicTag from './Tags/TopicTag.tsx';
+import TopicTag from '../Cards/Tags/TopicTag.tsx';
+import ArticleOptions from '../Cards/ArticleOptions.tsx';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
@@ -49,9 +50,11 @@ const savedItems = [
     },
 ];
 
+
 const SavedForLater: React.FC = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [hovering, setHovering] = useState(false);
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
     useEffect(() => {
         if (hovering) return;
@@ -114,7 +117,10 @@ const SavedForLater: React.FC = () => {
                             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                             backgroundColor: 'white',
                             flexShrink: 0,
-                        }}>
+                        }}
+                             onMouseEnter={() => setHoveredIndex(idx)}
+                             onMouseLeave={() => setHoveredIndex(null)}
+                        >
                             <ZoomIfSmall
                                 src={item.src}
                                 alt={item.alt}
@@ -122,6 +128,7 @@ const SavedForLater: React.FC = () => {
                                 containerHeight={smallCardHeight}
                                 className="rounded"
                             />
+                            {hoveredIndex === idx && <ArticleOptions position="top-right"/>}
 
 
                             <div style={{position: 'absolute', top: '8px', left: '8px', zIndex: 3}}>
