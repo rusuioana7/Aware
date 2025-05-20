@@ -1,5 +1,5 @@
-import TopicTag from "../Tags/TopicTag.tsx";
-import ArticleOptions from "../ArticleOptions.tsx";
+import TopicTag from "../../Cards/Tags/TopicTag.tsx";
+import ArticleOptions from "../../Cards/ArticleOptions.tsx";
 import React, {useState} from "react";
 
 const trendingArticles = [

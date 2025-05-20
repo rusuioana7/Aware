@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
-import TopicTag from '../Tags/TopicTag.tsx';
-import {TOPIC_COLORS} from '../Tags/TagColor.tsx';
+import TopicTag from '../../Cards/Tags/TopicTag.tsx';
+import {TOPIC_COLORS} from '../../Cards/Tags/TagColor.tsx';
 
 type FeedOptionsProps = {
     onViewChange: (view: 'All' | 'Articles' | 'Threads') => void;
