@@ -1,4 +1,3 @@
-
 type FilterLayoutProps<T extends string> = {
     label: string;
     options: T[];
@@ -6,10 +5,10 @@ type FilterLayoutProps<T extends string> = {
     onSelect: (option: T) => void;
 };
 
-function FilterLayout<T extends string>({ label, options, selected, onSelect }: FilterLayoutProps<T>) {
+function FilterLayout<T extends string>({label, options, selected, onSelect}: FilterLayoutProps<T>) {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 550, color: '#031A6B' }}>{label}:</span>
+        <div style={{display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap'}}>
+            <span style={{fontWeight: 550, color: '#031A6B'}}>{label}:</span>
             {options.map(option => (
                 <button
                     key={option}

@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
-import FilterLayout from './FilterLayout';
-import TopicTag from '../Cards/Tags/TopicTag';
-import {TOPIC_COLORS} from "../Cards/Tags/TagColor.tsx";
+import FilterLayout from './FilterLayout.tsx';
+import TopicTag from '../../Cards/Tags/TopicTag.tsx';
+import {TOPIC_COLORS} from "../../Cards/Tags/TagColor.tsx";
 
 const allTopics = Object.keys(TOPIC_COLORS)
     .filter(key => key !== 'general')
@@ -11,8 +11,7 @@ const timeToReadOptions = ['<1 min', '<5 min', '<10 min', '<20 min', '20 min+'] 
 
 type TimeToReadOption = typeof timeToReadOptions[number];
 
-const SideFilter: React.FC = () => {
-    // Single select
+const FilterPop: React.FC = () => {
     const [view, setView] = useState<'All' | 'Articles' | 'Threads'>('All');
     const [dateRange, setDateRange] = useState<'All' | 'Today' | 'Week' | 'Month'>('All');
     const [sortBy, setSortBy] = useState<'Newest' | 'Oldest' | 'Views' | 'Comments'>('Newest');
@@ -20,13 +19,11 @@ const SideFilter: React.FC = () => {
     const [readingTime, setReadingTime] = useState<TimeToReadOption>('20 min+');
 
 
-    // Multi-select categories with dropdown
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
 
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Close dropdown if click outside
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -54,11 +51,11 @@ const SideFilter: React.FC = () => {
 
     return (
         <div style={{
-            width: '110%',
+            width: '80%',
             padding: '5px',
-            marginLeft: '-50px',
             position: 'relative',
             userSelect: 'none',
+
         }}>
             <h3 style={{
                 fontSize: '22px',
@@ -67,7 +64,7 @@ const SideFilter: React.FC = () => {
                 marginBottom: '10px',
             }}>Filter</h3>
 
-            <div style={{flex: 1, height: 1, backgroundColor: '#CCC', marginBottom: 15}}/>
+            <div style={{flex: 1, height: 1, backgroundColor: '#CCC', marginBottom: 25}}/>
 
             <FilterLayout<'All' | 'Articles' | 'Threads'>
                 label="View"
@@ -76,7 +73,6 @@ const SideFilter: React.FC = () => {
                 onSelect={setView}
             />
 
-            {/* Category dropdown */}
             <div style={{marginBottom: 20, position: 'relative'}} ref={dropdownRef}>
                 <label
                     style={{
@@ -112,8 +108,8 @@ const SideFilter: React.FC = () => {
                     <div
                         style={{
                             position: 'absolute',
-                            top: 36,
-                            right: 0,
+                            top: 20,
+                            left: 100,
                             backgroundColor: 'white',
                             border: '1px solid #CCC',
                             borderRadius: 8,
@@ -194,7 +190,6 @@ const SideFilter: React.FC = () => {
                 onSelect={setLength}
             />
 
-            {/* Time to Read buttons */}
             <div style={{marginBottom: 16}}>
                 <label style={{fontWeight: 550, color: '#031A6B', display: 'block', marginBottom: 6}}>
                     Time to Read:
@@ -228,4 +223,4 @@ const SideFilter: React.FC = () => {
     );
 };
 
-export default SideFilter;
+export default FilterPop;
