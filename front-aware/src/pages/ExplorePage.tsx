@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import SearchBar from '../components/ExplorePage/SearchBar';
 import FilterPop from "../components/ExplorePage/Filter/FilterPop.tsx";
 import {Filter} from 'lucide-react';
+import Trending from "../components/ExplorePage/Trending.tsx";
 
 const ExplorePage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -17,7 +18,14 @@ const ExplorePage: React.FC = () => {
 
     return (
         <div style={{position: 'relative', height: '100vh', padding: '15px'}}>
-            <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px'}}>
+            {/* search  */}
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '10px',
+                marginBottom: '10px'
+            }}>
                 <SearchBar
                     value={searchQuery}
                     onChange={handleSearchChange}
@@ -43,7 +51,21 @@ const ExplorePage: React.FC = () => {
                     <Filter size={20}/>
                 </button>
             </div>
+            <div style={{
+                display: 'flex',
+                gap: '40px',
+                marginBottom: '10px',
+                borderBottom: '2px solid #ddd',
 
+            }}>
+                <h2 style={{fontSize: '25px', marginBottom: '10px'}}>Trending </h2>
+
+
+            </div>
+            <Trending/>
+
+
+            {/* filter */}
             {showFilters && (
                 <>
                     <div

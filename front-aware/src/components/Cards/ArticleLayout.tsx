@@ -1,9 +1,11 @@
 import React from 'react';
 import ArticleOptions from './ArticleOptions.tsx';
+import TopicTag from "./Tags/TopicTag.tsx";
 
 export type ArticleLayout = {
     title: string;
     date: string;
+    topic: string;
     author: string;
     site: string;
     description: string;
@@ -30,6 +32,10 @@ const Article: React.FC<Props> = ({article, id, isHovered, onHover}) => (
                 <ArticleOptions position="top-right"/>
             </div>
         )}
+        <div style={{position: 'absolute', top: '8px', left: '8px', zIndex: 3}}>
+            <TopicTag label={article.topic || 'general'}/>
+
+        </div>
         <img src={article.image} alt={article.title} style={{width: '140px', height: '100px', objectFit: 'cover'}}/>
         <div>
             <h3 style={{margin: '0 0 6px', fontSize: '18px', fontWeight: 600}}>{article.title}</h3>

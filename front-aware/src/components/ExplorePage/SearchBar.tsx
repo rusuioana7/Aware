@@ -10,7 +10,7 @@ type SearchBarProps = {
 const SearchBar: React.FC<SearchBarProps> = ({value, onChange, onSearch, placeholder = 'Search...'}) => {
     return (
 
-        <div style={{display: 'flex', width: '90%',}}>
+        <div style={{display: 'flex', width: '70%',}}>
             <input
                 type="text"
                 value={value}
