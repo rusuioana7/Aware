@@ -6,6 +6,7 @@ import Thread from '../../Cards/ThreadLayout.tsx';
 type Article = {
     title: string;
     date: string;
+    topic: string;
     author: string;
     site: string;
     description: string;
@@ -31,6 +32,7 @@ const feedItems: FeedItem[] = [
     {
         title: 'Breakthrough in Quantum Computing',
         date: '18 May 2025',
+        topic: 'travel',
         author: 'Elena Maxwell',
         site: 'ScienceDaily',
         description:
@@ -47,6 +49,7 @@ const feedItems: FeedItem[] = [
             {
                 title: 'Major Advancements in Renewable Energy',
                 date: '17 May 2025',
+                topic: 'travel',
                 author: 'Thomas Weller',
                 site: 'GreenFuture',
                 description:
@@ -58,6 +61,7 @@ const feedItems: FeedItem[] = [
             {
                 title: 'How Countries are Adopting Clean Power',
                 date: '16 May 2025',
+                topic: 'travel',
                 author: 'Nina Kumar',
                 site: 'EcoNews',
                 description:
@@ -71,6 +75,7 @@ const feedItems: FeedItem[] = [
     {
         title: 'AI-Powered Education Tools Rise Globally',
         date: '16 May 2025',
+        topic: 'travel',
         author: 'Grace Nunez',
         site: 'EdTech Times',
         description:

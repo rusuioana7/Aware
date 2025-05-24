@@ -2,6 +2,7 @@ import React from 'react';
 import {FaComments} from 'react-icons/fa';
 import ArticleOptions from './ArticleOptions.tsx';
 import type {ArticleLayout} from './ArticleLayout.tsx';
+import TopicTag from "./Tags/TopicTag.tsx";
 
 type ThreadLayout = {
     threadTitle: string;
@@ -51,6 +52,11 @@ const Thread: React.FC<Props> = ({thread, threadIndex, hoveredItemId, setHovered
                                         <ArticleOptions position="top-right"/>
                                     </div>
                                 )}
+                                <div style={{position: 'absolute', top: '8px', left: '8px', zIndex: 3}}>
+                                    <TopicTag label={article.topic || 'general'}/>
+
+                                </div>
+
                                 <img src={article.image} alt={article.title}
                                      style={{width: '140px', height: '100px', objectFit: 'cover'}}/>
                                 <div>
