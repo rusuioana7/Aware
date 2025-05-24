@@ -106,7 +106,7 @@ const generatePostCount = () => {
 
 
 const Trending: React.FC = () => {
-    ;
+
     const trendingTopics = [
         'AI revolution in 2025',
         'Election results',
