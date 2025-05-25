@@ -9,7 +9,7 @@ import Layout from './pages/LayoutPage.tsx';
 import HomePage from './pages/HomePage.tsx';
 import ExplorePage from './pages/ExplorePage.tsx';
 import BookmarksPage from './pages/BookmarksPage.tsx';
-import MyProfilePage from './pages/MyProfilePage.tsx';
+import ProfilePage from './pages/ProfilePage.tsx';
 
 import SaveForLater from './components/BookmarksPage/SaveForLater.tsx';
 
@@ -23,7 +23,7 @@ root.render(
                 <Route path="/register" element={<AuthPage/>}/>
                 <Route path="/home" element={<Layout><HomePage/></Layout>}/>
                 <Route path="/explore" element={<Layout><ExplorePage/></Layout>}/>
-                <Route path="/profile" element={<Layout><MyProfilePage/></Layout>}/>
+                <Route path="/profile" element={<Layout><ProfilePage/></Layout>}/>
 
                 <Route path="/bookmarks" element={<Layout><BookmarksPage/></Layout>}>
                     <Route index element={<Navigate to="save-for-later"/>}/>

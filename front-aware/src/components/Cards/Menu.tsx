@@ -49,7 +49,7 @@ const Menu: React.FC = () => {
     const menuItems = [
         {name: 'Explore', path: '/explore'},
         {name: 'Bookmarks', path: '/bookmarks/save-for-later'},
-        {name: 'My Profile', path: '/profile'},
+        {name: 'Profile', path: '/profile'},
     ];
 
     const homeDropdownItems = [
