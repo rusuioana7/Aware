@@ -28,7 +28,7 @@ const Article: React.FC<Props> = ({article, id, isHovered, onHover}) => (
         onMouseLeave={() => onHover(null)}
     >
         {isHovered && (
-            <div style={{position: 'absolute', top: '-15px', right: '50px'}}>
+            <div style={{position: 'absolute', top: '-15px', right: '10px'}}>
                 <ArticleOptions position="top-right"/>
             </div>
         )}

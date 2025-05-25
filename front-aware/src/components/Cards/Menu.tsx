@@ -48,7 +48,7 @@ const Menu: React.FC = () => {
 
     const menuItems = [
         {name: 'Explore', path: '/explore'},
-        {name: 'Bookmarks', path: '/bookmarks'},
+        {name: 'Bookmarks', path: '/bookmarks/save-for-later'},
         {name: 'My Profile', path: '/profile'},
     ];
 
@@ -107,24 +107,31 @@ const Menu: React.FC = () => {
                 )}
             </div>
 
-            {menuItems.map(item => (
-                <div
-                    key={item.name}
-                    onClick={() => navigate(item.path)}
-                    style={{
-                        ...menuItemBaseStyle,
-                        color: location.pathname === item.path ? '#009FFD' : '#FFFFFF',
-                    }}
-                    onMouseEnter={e => ((e.target as HTMLDivElement).style.color = '#009FFD')}
-                    onMouseLeave={e => {
-                        if (location.pathname !== item.path) {
-                            (e.target as HTMLDivElement).style.color = '#FFFFFF';
-                        }
-                    }}
-                >
-                    {item.name}
-                </div>
-            ))}
+            {menuItems.map(item => {
+                const isActive =
+                    item.name === 'Bookmarks'
+                        ? location.pathname.startsWith('/bookmarks')
+                        : location.pathname === item.path;
+
+                return (
+                    <div
+                        key={item.name}
+                        onClick={() => navigate(item.path)}
+                        style={{
+                            ...menuItemBaseStyle,
+                            color: isActive ? '#009FFD' : '#FFFFFF',
+                        }}
+                        onMouseEnter={e => ((e.target as HTMLDivElement).style.color = '#009FFD')}
+                        onMouseLeave={e => {
+                            if (!isActive) {
+                                (e.target as HTMLDivElement).style.color = '#FFFFFF';
+                            }
+                        }}
+                    >
+                        {item.name}
+                    </div>
+                );
+            })}
         </div>
     );
 };
