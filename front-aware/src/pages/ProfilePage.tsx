@@ -1,16 +1,26 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {FaEdit} from 'react-icons/fa';
 import ProfileInfo from '../components/ProfilePage/ProfileInfo.tsx';
 import Settings from '../components/ProfilePage/Settings.tsx';
+import EditProfile from '../components/ProfilePage/EditProfile.tsx';
 
 const ProfilePage: React.FC = () => {
-    const favoriteTopics = ['Lifestyle', 'Sport', 'Politics'];
-    const language = 'English';
-    const country = 'Romania';
-    const dateJoined = 'March 2024';
-    const name = 'Mirela Mirelascu';
-    const email = 'mirelamirelascu@gmail.com';
-    const bio = 'Passionate front-end developer, design enthusiast.';
+    const [profileData, setProfileData] = useState({
+        favoriteTopics: ['Lifestyle', 'Sport', 'Politics'],
+        language: 'English',
+        country: 'Romania',
+        dateJoined: 'March 2024',
+        name: 'Mirela Mirelascu',
+        email: 'mirelamirelascu@gmail.com',
+        bio: 'Passionate front-end developer, design enthusiast.',
+    });
+
+    const [isEditing, setIsEditing] = useState(false);
+
+    const handleSave = (data: typeof profileData) => {
+        setProfileData(data);
+        setIsEditing(false);
+    };
 
     return (
         <div style={{
@@ -18,23 +28,11 @@ const ProfilePage: React.FC = () => {
             minHeight: '100vh',
             padding: '10px',
             backgroundColor: '#f5f7fa',
+            position: 'relative'
         }}>
             <div style={{flex: 4}}>
-                <ProfileInfo
-                    favoriteTopics={favoriteTopics}
-                    language={language}
-                    country={country}
-                    dateJoined={dateJoined}
-                    name={name}
-                    email={email}
-                    bio={bio}
-                />
-
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    marginTop: '20px'
-                }}>
+                <ProfileInfo {...profileData} />
+                <div style={{display: 'flex', justifyContent: 'center', marginTop: '20px'}}>
                     <button
                         style={{
                             display: 'flex',
@@ -47,7 +45,7 @@ const ProfilePage: React.FC = () => {
                             cursor: 'pointer',
                             fontSize: '14px'
                         }}
-                        onClick={() => alert('Edit profile clicked')}
+                        onClick={() => setIsEditing(true)}
                     >
                         <FaEdit style={{marginRight: '6px'}}/>
                         Edit Profile
@@ -58,6 +56,27 @@ const ProfilePage: React.FC = () => {
             <div style={{flex: 6, padding: '20px', marginTop: '-20px'}}>
                 <Settings/>
             </div>
+
+            {isEditing && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 999
+                }}>
+                    <EditProfile
+                        initialData={profileData}
+                        onCancel={() => setIsEditing(false)}
+                        onSave={handleSave}
+                    />
+                </div>
+            )}
         </div>
     );
 };
