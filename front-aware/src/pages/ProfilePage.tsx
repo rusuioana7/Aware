@@ -1,11 +1,16 @@
 import React from 'react';
-import TopicTag from '../components/Cards/Tags/TopicTag';
+import {FaEdit} from 'react-icons/fa';
+import ProfileInfo from '../components/ProfilePage/ProfileInfo.tsx';
+import Settings from '../components/ProfilePage/Settings.tsx';
 
 const ProfilePage: React.FC = () => {
     const favoriteTopics = ['Lifestyle', 'Sport', 'Politics'];
     const language = 'English';
     const country = 'Romania';
-    const dateJoined = 'March 2024'
+    const dateJoined = 'March 2024';
+    const name = 'Mirela Mirelascu';
+    const email = 'mirelamirelascu@gmail.com';
+    const bio = 'Passionate front-end developer, design enthusiast.';
 
     return (
         <div style={{
@@ -14,100 +19,44 @@ const ProfilePage: React.FC = () => {
             padding: '10px',
             backgroundColor: '#f5f7fa',
         }}>
-            <div style={{
-                flex: 3,
-                backgroundColor: '#ffffff',
-                borderRadius: '8px',
-                paddingBottom: '20px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                marginRight: '20px',
-                position: 'relative',
-                overflow: 'hidden'
-            }}>
-                <div style={{
-                    height: '120px',
-                    backgroundImage: "url('/news1.jpg')",
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                }}></div>
+            <div style={{flex: 4}}>
+                <ProfileInfo
+                    favoriteTopics={favoriteTopics}
+                    language={language}
+                    country={country}
+                    dateJoined={dateJoined}
+                    name={name}
+                    email={email}
+                    bio={bio}
+                />
 
                 <div style={{
-                    width: '100px',
-                    height: '100px',
-                    borderRadius: '50%',
-                    overflow: 'hidden',
-                    border: '4px solid white',
-                    position: 'absolute',
-                    top: '90px',
-                    left: '20px',
-                    backgroundColor: '#ccc',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginTop: '20px'
                 }}>
-                    <img
-                        src="/news2.jpg"
-                        alt="Profile"
-                        style={{width: '100%', height: '100%', objectFit: 'cover'}}
-                    />
+                    <button
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            backgroundColor: '#031A6B',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '8px 12px',
+                            cursor: 'pointer',
+                            fontSize: '14px'
+                        }}
+                        onClick={() => alert('Edit profile clicked')}
+                    >
+                        <FaEdit style={{marginRight: '6px'}}/>
+                        Edit Profile
+                    </button>
                 </div>
-
-                <div style={{marginTop: '5px', marginLeft: '140px', padding: '10px'}}>
-                    <h2 style={{margin: 0, color: '#031A6B'}}>Mirela Mirelascu</h2>
-                    <p style={{marginTop: '5px', color: '#031A6B'}}>mirelamirelascu@gmail.com</p>
-                </div>
-
-                <div style={{marginTop: '5px', marginLeft: '20px', padding: '10px'}}>
-                    <p style={{
-                        marginTop: '-15px',
-                        fontSize: '17px',
-                        color: '#666',
-                        lineHeight: 1.4,
-                        maxWidth: '97%',
-                        textAlign: 'center'
-                    }}>
-                        Passionate front-end developer, design enthusiast.
-                    </p>
-                </div>
-
-                <hr style={{
-                    margin: '0 10px',
-                    border: 'none',
-                    borderTop: '1px solid #ddd'
-                }}/>
-
-                <div style={{padding: '0 30px', marginTop: '20px'}}>
-
-                    <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '10px',
-                        marginBottom: '12px'
-                    }}>
-                        <span style={{color: '#031A6B', fontSize: '18px', fontWeight: 600}}>Favorite Topics:</span>
-                        {favoriteTopics.map((topic) => (
-                            <TopicTag key={topic} label={topic}/>
-                        ))}
-                    </div>
-
-                    <p style={{margin: '10px 0', color: '#031A6B', fontSize: '18px'}}>
-                        <strong>Language:</strong> {language}
-                    </p>
-                    <p style={{margin: '10px 0', color: '#031A6B', fontSize: '18px'}}>
-                        <strong>Country:</strong> {country}
-                    </p>
-                    <p style={{margin: '10px 0', color: '#031A6B', fontSize: '18px'}}>
-                        <strong>Date Joined:</strong> {dateJoined}
-                    </p>
-                </div>
-
-
             </div>
 
-            <div style={{
-                flex: 7,
-                padding: '20px',
-            }}>
-                <h2 style={{color: 'black'}}>Settings</h2>
-
+            <div style={{flex: 6, padding: '20px', marginTop: '-20px'}}>
+                <Settings/>
             </div>
         </div>
     );
