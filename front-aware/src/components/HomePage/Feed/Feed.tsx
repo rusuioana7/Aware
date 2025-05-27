@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
-import Article from '../../Cards/ArticleLayout.tsx';
-import Thread from '../../Cards/ThreadLayout.tsx';
+import ArticleFeed from '../../Cards/ArticleFeedLayout.tsx';
+import ThreadFeed from '../../Cards/ThreadFeedLayout.tsx';
 
 type Article = {
     title: string;
@@ -18,11 +18,11 @@ type Article = {
 type Thread = {
     threadTitle: string;
     lastUpdated: string;
-    articles: Article[];
+    articles: ArticleFeed[];
     isThread: true;
 };
 
-type FeedItem = Article | Thread;
+type FeedItem = ArticleFeed | ThreadFeed;
 
 type ViewProps = {
     selectedView: 'All' | 'Articles' | 'Threads';
@@ -100,7 +100,7 @@ const Feed: React.FC<ViewProps> = ({selectedView}) => {
             {filteredItems.map((item, index) => {
                 if ('isThread' in item && item.isThread) {
                     return (
-                        <Thread
+                        <ThreadFeed
                             key={index}
                             thread={item}
                             threadIndex={index}
@@ -109,10 +109,10 @@ const Feed: React.FC<ViewProps> = ({selectedView}) => {
                         />
                     );
                 } else {
-                    const article = item as Article;
+                    const article = item as ArticleFeed;
                     const articleId = `article-${index}`;
                     return (
-                        <Article
+                        <ArticleFeed
                             key={index}
                             article={article}
                             id={articleId}

@@ -2,7 +2,7 @@ import React from 'react';
 import ArticleOptions from './ArticleOptions.tsx';
 import TopicTag from "./Tags/TopicTag.tsx";
 
-export type ArticleLayout = {
+export type ArticleFeedLayout = {
     title: string;
     date: string;
     topic: string;
@@ -15,13 +15,13 @@ export type ArticleLayout = {
 };
 
 type Props = {
-    article: ArticleLayout;
+    article: ArticleFeedLayout;
     id: string;
     isHovered: boolean;
     onHover: (id: string | null) => void;
 };
 
-const Article: React.FC<Props> = ({article, id, isHovered, onHover}) => (
+const ArticleFeed: React.FC<Props> = ({article, id, isHovered, onHover}) => (
     <div
         style={{display: 'flex', gap: '16px', alignItems: 'flex-start', position: 'relative'}}
         onMouseEnter={() => onHover(id)}
@@ -50,4 +50,4 @@ const Article: React.FC<Props> = ({article, id, isHovered, onHover}) => (
     </div>
 );
 
-export default Article;
+export default ArticleFeed;

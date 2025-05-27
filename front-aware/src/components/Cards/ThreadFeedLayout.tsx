@@ -1,24 +1,24 @@
 import React from 'react';
 import {FaComments} from 'react-icons/fa';
 import ArticleOptions from './ArticleOptions.tsx';
-import type {ArticleLayout} from './ArticleLayout.tsx';
+import type {ArticleFeedLayout} from './ArticleFeedLayout.tsx';
 import TopicTag from "./Tags/TopicTag.tsx";
 
-type ThreadLayout = {
+type ThreadFeedLayout = {
     threadTitle: string;
     lastUpdated: string;
-    articles: ArticleLayout[];
+    articles: ArticleFeedLayout[];
     isThread: true;
 };
 
 type Props = {
-    thread: ThreadLayout;
+    thread: ThreadFeedLayout;
     threadIndex: number;
     hoveredItemId: string | null;
     setHoveredItemId: (id: string | null) => void;
 };
 
-const Thread: React.FC<Props> = ({thread, threadIndex, hoveredItemId, setHoveredItemId}) => {
+const ThreadFeed: React.FC<Props> = ({thread, threadIndex, hoveredItemId, setHoveredItemId}) => {
     const visibleArticles = thread.articles.slice(0, 3);
     const remainingCount = thread.articles.length - visibleArticles.length;
 
@@ -92,4 +92,4 @@ const Thread: React.FC<Props> = ({thread, threadIndex, hoveredItemId, setHovered
     );
 };
 
-export default Thread;
+export default ThreadFeed;

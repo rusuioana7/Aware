@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import TopicTag from '../Cards/Tags/TopicTag';
 import {TOPIC_COLORS} from '../Cards/Tags/TagColor';
-import Article from '../Cards/ArticleLayout';
+import ArticleFeed from '../Cards/ArticleFeedLayout.tsx';
 
 const sampleArticles = [
     {
@@ -157,7 +157,7 @@ const Trending: React.FC = () => {
                 </div>
                 <div style={{marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '24px'}}>
                     {sampleArticles.map((article) => (
-                        <Article
+                        <ArticleFeed
                             key={article.id}
                             article={article}
                             id={article.id}
