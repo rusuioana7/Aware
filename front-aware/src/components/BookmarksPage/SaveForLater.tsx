@@ -1,10 +1,10 @@
 import React, {useMemo, useState} from 'react';
-import Article, {type ArticleLayout} from '../Cards/ArticleLayout';
+import ArticleFeed, {type ArticleFeedLayout} from '../Cards/ArticleFeedLayout.tsx';
 import SelectSort from '../Cards/SelectSort.tsx';
 import SelectView from '../Cards/SelectView.tsx';
 import SelectLength from '../Cards/SelectLength.tsx';
 
-const exampleArticles: Record<string, ArticleLayout[]> = {
+const exampleArticles: Record<string, ArticleFeedLayout[]> = {
     saveForLater: [
         {
             title: 'React Hooks Deep Dive',
@@ -126,7 +126,7 @@ const SaveForLater: React.FC = () => {
                 <p>No articles in this folder.</p>
             ) : (
                 sortedArticles.map((article, index) => (
-                    <Article
+                    <ArticleFeed
                         key={index}
                         id={`${folderId}-article-${index}`}
                         article={article}
