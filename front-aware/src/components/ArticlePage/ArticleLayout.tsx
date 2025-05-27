@@ -57,6 +57,7 @@ const Article: React.FC<ArticleProps> = ({
             padding: '25px',
             margin: '20px auto',
             marginLeft: '20px',
+            marginRight: '20px',
             maxWidth: '100%',
             lineHeight: 1.6,
             color: '#222',

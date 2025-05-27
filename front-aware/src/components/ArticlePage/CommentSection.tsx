@@ -39,6 +39,7 @@ const CommentItem: React.FC<{
     return (
         <div style={{
             marginBottom: '15px',
+
             padding: '20px',
             backgroundColor: '#f8f9fa',
             borderRadius: '8px',
@@ -160,7 +161,7 @@ const CommentSection: React.FC = () => {
     };
 
     return (
-        <div style={{marginLeft: '20px', marginTop: '10px', padding: '30px 0'}}>
+        <div style={{marginLeft: '20px',marginRight: '20px', marginTop: '10px', padding: '30px 0'}}>
             <h3 style={{
                 fontSize: '22px',
                 color: '#031A6B',

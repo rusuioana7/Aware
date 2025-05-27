@@ -3,6 +3,8 @@ import TopicTag from '../components/Cards/Tags/TopicTag';
 import {FaComments} from "react-icons/fa";
 import Article from '../components/ArticlePage/ArticleLayout';
 import CommentSection from "../components/ArticlePage/CommentSection.tsx";
+import RelatedArticles from "../components/ArticlePage/Related Articles.tsx";
+import Featured from "../components/ArticlePage/Featured.tsx";
 
 const ArticlePage: React.FC = () => {
     const article = {
@@ -71,6 +73,8 @@ Following these strategies can help remote workers feel more balanced, connected
                 </div>
 
                 <div style={{flex: 3}}>
+                    <RelatedArticles/>
+                    <Featured/>
                 </div>
             </div>
         </div>
