@@ -14,6 +14,7 @@ import ProfilePage from './pages/ProfilePage.tsx';
 import SaveForLater from './components/BookmarksPage/SaveForLater.tsx';
 import ArticlePage from "./pages/ArticlePage.tsx";
 import ThreadPage from "./pages/ThreadPage.tsx";
+import TopicPage from "./pages/TopicPage.tsx";
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
@@ -34,6 +35,7 @@ root.render(
                 </Route>
                 <Route path="/article" element={<Layout><ArticlePage/></Layout>}/>
                 <Route path="/thread" element={<Layout><ThreadPage/></Layout>}/>
+                <Route path="/topic" element={<Layout><TopicPage/></Layout>}/>
             </Routes>
         </BrowserRouter>
     </React.StrictMode>
