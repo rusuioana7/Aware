@@ -1,11 +1,7 @@
-import React, {useState} from "react";
 import TopicTag from '../components/Cards/Tags/TopicTag';
-import SortSelector from "../components/Cards/SelectSort.tsx";
-import ViewSelector from "../components/Cards/SelectView.tsx";
-import ArticleFeed from '../components/Cards/ArticleFeedLayout.tsx';
-import ThreadFeed from '../components/Cards/ThreadFeedLayout.tsx';
 import TopTopicArticles from "../components/TopicPage/TopTopicArticles.tsx";
 import TopTopicThreads from "../components/TopicPage/TopTopicThreads.tsx";
+import TopicFeed from "../components/TopicPage/TopicFeed.tsx";
 
 type Article = {
     title: string;
@@ -85,31 +81,11 @@ const feedItems: FeedItem[] = [
     },
 ];
 
-type OptionsProps = {
-    onViewChange: (view: 'All' | 'Articles' | 'Threads') => void;
-};
 
-const sortOptions: Array<'Newest' | 'Popular' | 'Verified Only'> = ['Newest', 'Popular', 'Verified Only'];
-const viewOptions: Array<'All' | 'Articles' | 'Threads'> = ['All', 'Articles', 'Threads'];
-
-const TopicPage: React.FC<OptionsProps> = ({onViewChange}) => {
+const TopicPage = () => {
     const topic = 'Lifestyle';
-    const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular' | 'Verified Only'>('Newest');
-
-    const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>('All');
-
-    const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
-
-    const filteredItems = feedItems.filter(item => {
-        if (selectedView === 'Articles') return !('isThread' in item);
-        if (selectedView === 'Threads') return 'isThread' in item;
-        return true;
-    });
-
-    const handleViewChange = (option: 'All' | 'Articles' | 'Threads') => {
-        const newView = selectedView === option ? 'All' : option;
-        setSelectedView(newView);
-        onViewChange(newView);
+    const onViewChange = (view: 'All' | 'Articles' | 'Threads') => {
+        console.log('Selected view:', view);
     };
 
     return (
@@ -129,54 +105,7 @@ const TopicPage: React.FC<OptionsProps> = ({onViewChange}) => {
                 </div>
                 <div style={{flex: 1, height: 1, backgroundColor: '#CCC', marginBottom: 16}}/>
 
-                <div
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        gap: 60,
-                        flexWrap: 'wrap',
-                        marginBottom: 10,
-                    }}
-                >
-                    <SortSelector options={sortOptions} selected={selectedSort} onSelect={setSelectedSort}/>
-                    <ViewSelector options={viewOptions} selected={selectedView} onSelect={handleViewChange}/>
-                </div>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '10px',
-                    marginTop: '30px',
-                    marginLeft: '30px'
-                }}>
-                    {filteredItems.map((item, index) => {
-                        if ('isThread' in item && item.isThread) {
-                            return (
-                                <ThreadFeed
-                                    key={index}
-                                    thread={item}
-                                    threadIndex={index}
-                                    hoveredItemId={hoveredItemId}
-                                    setHoveredItemId={setHoveredItemId}
-                                />
-                            );
-                        } else {
-                            const article = item as Article;
-                            const articleId = `article-${index}`;
-                            return (
-                                <ArticleFeed
-                                    key={index}
-                                    article={article}
-                                    id={articleId}
-                                    isHovered={hoveredItemId === articleId}
-                                    onHover={setHoveredItemId}
-                                />
-                            );
-                        }
-                    })}
-                </div>
-
-
+                <TopicFeed feedItems={feedItems} onViewChange={onViewChange}/>
             </div>
 
             <div style={{flex: 3}}>

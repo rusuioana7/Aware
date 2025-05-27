@@ -1,4 +1,3 @@
-// components/TopicPage/TopicFeed.tsx
 import React, { useState } from 'react';
 import SortSelector from '../Cards/SelectSort.tsx';
 import ViewSelector from '../Cards/SelectView.tsx';
