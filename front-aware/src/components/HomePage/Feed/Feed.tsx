@@ -18,11 +18,11 @@ type Article = {
 type Thread = {
     threadTitle: string;
     lastUpdated: string;
-    articles: ArticleFeed[];
+    articles: Article[];
     isThread: true;
 };
 
-type FeedItem = ArticleFeed | ThreadFeed;
+type FeedItem = Article| Thread;
 
 type ViewProps = {
     selectedView: 'All' | 'Articles' | 'Threads';
@@ -109,7 +109,7 @@ const Feed: React.FC<ViewProps> = ({selectedView}) => {
                         />
                     );
                 } else {
-                    const article = item as ArticleFeed;
+                    const article = item as Article;
                     const articleId = `article-${index}`;
                     return (
                         <ArticleFeed

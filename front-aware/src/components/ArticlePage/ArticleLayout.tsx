@@ -1,4 +1,14 @@
 import React from 'react';
+import {
+    FaBookmark,
+    FaDownload,
+    FaFlag,
+    FaHeadphones,
+    FaRegClock,
+    FaFileAlt,
+    FaShareAlt,
+    FaExternalLinkAlt
+} from 'react-icons/fa';
 
 interface ArticleProps {
     title: string;
@@ -13,6 +23,19 @@ interface ArticleProps {
     commentsCount?: number;
     viewsCount?: string;
 }
+
+const buttonStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    fontSize: '13px',
+    padding: '6px 12px',
+    backgroundColor: '#031A6B',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+};
 
 const Article: React.FC<ArticleProps> = ({
                                              title,
@@ -38,7 +61,29 @@ const Article: React.FC<ArticleProps> = ({
             lineHeight: 1.6,
             color: '#222',
             borderRadius: '4px',
+            position: 'relative'
         }}>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '12px',
+                marginBottom: '20px',
+                fontSize: '14px',
+                color: '#555',
+                flexWrap: 'wrap'
+            }}>
+                <button style={buttonStyle}><FaRegClock/> Save For Later</button>
+                <button style={buttonStyle}><FaBookmark/> Bookmark</button>
+                <button style={buttonStyle}><FaExternalLinkAlt/> View Original</button>
+                <button style={buttonStyle}><FaDownload/> Download</button>
+                <button style={buttonStyle}><FaShareAlt/> Share</button>
+                <button style={buttonStyle}><FaFileAlt/> Summarize</button>
+                <button style={buttonStyle}><FaHeadphones/> Listen</button>
+                <button style={buttonStyle}><FaFlag/> Report</button>
+
+
+            </div>
+
             <div style={{
                 textTransform: 'uppercase',
                 fontSize: '14px',
@@ -63,16 +108,37 @@ const Article: React.FC<ArticleProps> = ({
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
+                alignItems: 'center',
                 fontSize: '14px',
                 color: '#666',
                 marginBottom: '20px',
-                flexWrap: 'wrap'
+                flexWrap: 'wrap',
+                textAlign: 'center'
             }}>
-                <div>
+                <div style={{flex: 1, textAlign: 'left', minWidth: '33%'}}>
                     <span style={{fontWeight: 'bold'}}>By {author}</span> | {publisher}
                 </div>
-                <div>
-                    {publishedAt} {publishedTime && `• ${publishedTime}`} {readingTime && `• ${readingTime}`}
+
+                <div style={{flex: 1, minWidth: '33%'}}>
+                    {publishedAt}
+                    {publishedTime && ` • ${publishedTime}`}
+                    {readingTime && ` • ${readingTime}`}
+                </div>
+
+                <div style={{
+                    flex: 1,
+                    textAlign: 'right',
+                    minWidth: '33%',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '15px'
+                }}>
+                    {viewsCount && (
+                        <span><strong>{viewsCount}</strong> views</span>
+                    )}
+                    {commentsCount && (
+                        <span><strong>{commentsCount}</strong> comments</span>
+                    )}
                 </div>
             </div>
 
@@ -124,27 +190,9 @@ const Article: React.FC<ArticleProps> = ({
                 ))}
             </div>
 
-            <div style={{
-                borderTop: '1px solid #eee',
-                paddingTop: '15px',
-                fontSize: '14px',
-                color: '#666',
-                display: 'flex',
-                justifyContent: 'space-between'
-            }}>
-                {commentsCount && (
-                    <div>
-                        <span style={{fontWeight: 'bold'}}>{commentsCount}</span> comments
-                    </div>
-                )}
-                {viewsCount && (
-                    <div>
-                        <span style={{fontWeight: 'bold'}}>{viewsCount}</span> views
-                    </div>
-                )}
-            </div>
         </article>
     );
 };
+
 
 export default Article;

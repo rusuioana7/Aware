@@ -2,6 +2,7 @@ import React from 'react';
 import TopicTag from '../components/Cards/Tags/TopicTag';
 import {FaComments} from "react-icons/fa";
 import Article from '../components/ArticlePage/ArticleLayout';
+import CommentSection from "../components/ArticlePage/CommentSection.tsx";
 
 const ArticlePage: React.FC = () => {
     const article = {
@@ -26,7 +27,9 @@ Following these strategies can help remote workers feel more balanced, connected
         publisher: 'Healthy Living Media',
         publishedAt: 'May 25, 2025',
         publishedTime: '14:30',
-        readingTime: '3 min read'
+        readingTime: '3 min read',
+        commentsCount: 12,
+        viewsCount: '1.2K',
     };
 
     return (
@@ -48,7 +51,7 @@ Following these strategies can help remote workers feel more balanced, connected
                 <span style={{fontWeight: 'bold'}}>{article.title}</span>
             </div>
 
-            <div style={{display: 'flex', gap: '20px'}}>
+            <div style={{display: 'flex', gap: '10px'}}>
                 <div style={{flex: 7}}>
                     <Article
                         title={article.title}
@@ -58,7 +61,13 @@ Following these strategies can help remote workers feel more balanced, connected
                         publisher={article.publisher}
                         publishedAt={article.publishedAt}
                         publishedTime={article.publishedTime}
-                        readingTime={article.readingTime} category={''}/>
+                        readingTime={article.readingTime} category={''}
+                        commentsCount={article.commentsCount}
+                        viewsCount={article.viewsCount}
+                    />
+                    <CommentSection/>
+
+
                 </div>
 
                 <div style={{flex: 3}}>
