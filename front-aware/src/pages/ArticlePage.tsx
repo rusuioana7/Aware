@@ -73,8 +73,9 @@ Following these strategies can help remote workers feel more balanced, connected
                 </div>
 
                 <div style={{flex: 3}}>
-                    <RelatedArticles/>
                     <Featured/>
+                    <RelatedArticles/>
+
                 </div>
             </div>
         </div>

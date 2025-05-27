@@ -103,7 +103,8 @@ const Article: React.FC<ArticleProps> = ({
                 fontWeight: 'bold',
                 lineHeight: 1.3,
                 borderBottom: '1px solid #eee',
-                paddingBottom: '15px'
+                paddingBottom: '15px',
+                textAlign: 'center'
             }}>{title}</h1>
 
             <div style={{
