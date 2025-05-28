@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import ZoomIfSmall from './ZoomIfSmallPicture';
 import TopicTag from '../Cards/Tags/TopicTag.tsx';
-import ArticleOptions from '../Cards/ArticleOptions.tsx';
+import ArticleOptions from '../Cards/ArticleLayouts/ArticleOptions.tsx';
 
 const LatestNews: React.FC = () => {
     const largeCardHeight = 392;

@@ -1,7 +1,7 @@
 import React, {useRef, useEffect, useState} from 'react';
 import ZoomIfSmall from './ZoomIfSmallPicture';
 import TopicTag from '../Cards/Tags/TopicTag.tsx';
-import ArticleOptions from '../Cards/ArticleOptions.tsx';
+import ArticleOptions from '../Cards/ArticleLayouts/ArticleOptions.tsx';
 
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';

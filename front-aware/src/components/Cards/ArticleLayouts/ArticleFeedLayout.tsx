@@ -1,6 +1,6 @@
 import React from 'react';
 import ArticleOptions from './ArticleOptions.tsx';
-import TopicTag from './Tags/TopicTag.tsx';
+import TopicTag from '../Tags/TopicTag.tsx';
 
 export type ArticleFeedLayout = {
     title: string;
@@ -31,7 +31,7 @@ const ArticleFeed: React.FC<Props> = ({article, id, isHovered, onHover}) => (
             <img
                 src={article.image}
                 alt={article.title}
-                style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px'}}
+                style={{width: '100%', height: '100%', objectFit: 'cover'}}
             />
 
             {isHovered && (

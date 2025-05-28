@@ -4,7 +4,7 @@ import TopicTag from '../components/Cards/Tags/TopicTag';
 import RelatedThreads from '../components/ThreadPage/RelatedThreads';
 import TopArticles from '../components/ThreadPage/TopArticles';
 import ThreadLayout from '../components/ThreadPage/ThreadLayout';
-import type {ArticleFeedLayout} from '../components/Cards/ArticleFeedLayout';
+import type {ArticleFeedLayout} from '../components/Cards/ArticleLayouts/ArticleFeedLayout.tsx';
 
 const ThreadPage: React.FC = () => {
     const thread = {

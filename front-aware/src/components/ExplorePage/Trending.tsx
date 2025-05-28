@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import TopicTag from '../Cards/Tags/TopicTag';
 import {TOPIC_COLORS} from '../Cards/Tags/TagColor';
-import ArticleFeed from '../Cards/ArticleFeedLayout.tsx';
+import ArticleFeed from '../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
 
 const sampleArticles = [
     {

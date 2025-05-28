@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import SortSelector from '../Cards/SelectSort.tsx';
-import ViewSelector from '../Cards/SelectView.tsx';
-import ArticleFeed from '../Cards/ArticleFeedLayout.tsx';
-import ThreadFeed from '../Cards/ThreadFeedLayout.tsx';
+import React, {useState} from 'react';
+import SortSelector from '../Cards/SelectMenu/SelectSort.tsx';
+import ViewSelector from '../Cards/SelectMenu/SelectView.tsx';
+import ArticleFeed from '../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
+import ThreadFeed from '../Cards/ThreadLayouts/ThreadFeedLayout.tsx';
 
 type Article = {
     title: string;
@@ -33,7 +33,7 @@ type Props = {
 const sortOptions: Array<'Newest' | 'Popular' | 'Verified Only'> = ['Newest', 'Popular', 'Verified Only'];
 const viewOptions: Array<'All' | 'Articles' | 'Threads'> = ['All', 'Articles', 'Threads'];
 
-const TopicFeed: React.FC<Props> = ({ feedItems, onViewChange }) => {
+const TopicFeed: React.FC<Props> = ({feedItems, onViewChange}) => {
     const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular' | 'Verified Only'>('Newest');
     const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>('All');
     const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
@@ -60,8 +60,8 @@ const TopicFeed: React.FC<Props> = ({ feedItems, onViewChange }) => {
                 flexWrap: 'wrap',
                 marginBottom: 10,
             }}>
-                <SortSelector options={sortOptions} selected={selectedSort} onSelect={setSelectedSort} />
-                <ViewSelector options={viewOptions} selected={selectedView} onSelect={handleViewChange} />
+                <SortSelector options={sortOptions} selected={selectedSort} onSelect={setSelectedSort}/>
+                <ViewSelector options={viewOptions} selected={selectedView} onSelect={handleViewChange}/>
             </div>
 
             <div style={{

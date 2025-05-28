@@ -1,6 +1,6 @@
 import React from 'react';
-import Header from '../components/Cards/Header.tsx';
-import Menu from '../components/Cards/Menu.tsx';
+import Header from '../components/Cards/PageLayout/Header.tsx';
+import Menu from '../components/Cards/PageLayout/Menu.tsx';
 
 
 const LayoutPage: React.FC<{ children: React.ReactNode }> = ({children}) => {

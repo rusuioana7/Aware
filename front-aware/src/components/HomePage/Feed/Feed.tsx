@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
-import ArticleFeed from '../../Cards/ArticleFeedLayout.tsx';
-import ThreadFeed from '../../Cards/ThreadFeedLayout.tsx';
+import ArticleFeed from '../../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
+import ThreadFeed from '../../Cards/ThreadLayouts/ThreadFeedLayout.tsx';
 
 type Article = {
     title: string;
@@ -22,7 +22,7 @@ type Thread = {
     isThread: true;
 };
 
-type FeedItem = Article| Thread;
+type FeedItem = Article | Thread;
 
 type ViewProps = {
     selectedView: 'All' | 'Articles' | 'Threads';

@@ -1,8 +1,8 @@
 import React, {useState, useRef, useEffect} from 'react';
 import TopicTag from '../../Cards/Tags/TopicTag.tsx';
 import {TOPIC_COLORS} from '../../Cards/Tags/TagColor.tsx';
-import SortSelector from '../../Cards/SelectSort.tsx';
-import ViewSelector from '../../Cards/SelectView.tsx';
+import SortSelector from '../../Cards/SelectMenu/SelectSort.tsx';
+import ViewSelector from '../../Cards/SelectMenu/SelectView.tsx';
 
 type FeedOptionsProps = {
     onViewChange: (view: 'All' | 'Articles' | 'Threads') => void;

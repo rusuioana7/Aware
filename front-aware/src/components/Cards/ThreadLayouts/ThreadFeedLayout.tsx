@@ -1,8 +1,8 @@
 import React from 'react';
 import {FaComments} from 'react-icons/fa';
-import ArticleOptions from './ArticleOptions.tsx';
-import type {ArticleFeedLayout} from './ArticleFeedLayout.tsx';
-import TopicTag from "./Tags/TopicTag.tsx";
+import ArticleOptions from '../ArticleLayouts/ArticleOptions.tsx';
+import type {ArticleFeedLayout} from '../ArticleLayouts/ArticleFeedLayout.tsx';
+import TopicTag from "../Tags/TopicTag.tsx";
 
 type ThreadFeedLayout = {
     threadTitle: string;
@@ -55,7 +55,6 @@ const ThreadFeed: React.FC<Props> = ({thread, threadIndex, hoveredItemId, setHov
                                             width: '100%',
                                             height: '100%',
                                             objectFit: 'cover',
-                                            borderRadius: '4px',
                                         }}
                                     />
 

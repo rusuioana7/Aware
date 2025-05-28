@@ -5,10 +5,10 @@ import LatestNews from '../components/HomePage/LatestNews';
 import SavedForLater from '../components/HomePage/SavedForLater';
 import FeedOptions from '../components/HomePage/Feed/FeedOptions.tsx';
 import Trending from '../components/HomePage/Side/Trending.tsx';
-import TopPicks from '../components/HomePage/Side/TopPicks.tsx';
 import ThreadsYouFollow from "../components/HomePage/Side/ThreadsYouFollow.tsx";
 import ActiveThreads from "../components/HomePage/Side/ActiveThreads.tsx";
 import Feed from '../components/HomePage/Feed/Feed.tsx';
+import RecentlyViewed from "../components/HomePage/Side/RecentlyViewed.tsx";
 
 const HomePage: React.FC = () => {
     const location = useLocation();
@@ -50,15 +50,16 @@ const HomePage: React.FC = () => {
                     <div id="trending">
                         <Trending/>
                     </div>
-                    <div id="toppicks">
-                        <TopPicks/>
+                    <div id="activethreads">
+                        <ActiveThreads/>
+                    </div>
+                    <div id="recentlyviewed">
+                        <RecentlyViewed/>
                     </div>
                     <div id="followedthreads">
                         <ThreadsYouFollow/>
                     </div>
-                    <div id="activethreads">
-                        <ActiveThreads/>
-                    </div>
+
                 </div>
 
                 <div style={{flex: 7}}>

@@ -1,8 +1,8 @@
-import TopicTag from "../../Cards/Tags/TopicTag.tsx";
-import ArticleOptions from "../../Cards/ArticleOptions.tsx";
-import React, {useState} from "react";
+import React from "react";
+import SideArticleListLayout from "../../Cards/ArticleLayouts/SideArticleListLayout.tsx";
+import type {Article} from "../../Cards/ArticleLayouts/SideArticleListLayout.tsx";
 
-const trendingArticles = [
+const trendingArticles: Article[] = [
     {
         author: 'Craig Bator',
         date: '27 Dec 2020',
@@ -41,62 +41,7 @@ const trendingArticles = [
 ];
 
 const Trending: React.FC = () => {
-    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-    return (
-        <div style={{marginBottom: '30px'}}>
-            <h2
-                style={{
-                    fontSize: '22px',
-                    fontWeight: 'bold',
-                    marginBottom: '7px',
-                    color: '#000000',
-                }}
-            >
-                Trending
-            </h2>
-            <div style={{height: '1px', backgroundColor: '#CCCCCC', marginBottom: '12px'}}/>
-
-            <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-                {trendingArticles.map((article, index) => (
-                    <div
-                        key={index}
-                        style={{display: 'flex', gap: '10px', alignItems: 'flex-start', position: 'relative'}}
-                        onMouseEnter={() => setHoveredIndex(index)}
-                        onMouseLeave={() => setHoveredIndex(null)}
-                    >
-                        <div style={{position: 'relative'}}>
-                            <img
-                                src={article.image}
-                                alt={article.title}
-                                style={{width: '70px', height: '70px', objectFit: 'cover', display: 'block'}}
-                            />
-
-                            {hoveredIndex === index && (
-                                <div style={{padding: '5px', position: 'absolute', top: 0, right: 0, zIndex: 10}}>
-                                    <ArticleOptions position="top-right"/>
-                                </div>
-                            )}
-
-                            <div style={{position: 'absolute', top: 0, left: '80px'}}>
-                                <TopicTag label={article.topic}/>
-                            </div>
-                        </div>
-
-                        <div>
-                            <p style={{fontSize: '15px', color: '#000000', margin: '30px 0 2px'}}>
-                                {article.author} - {article.date}
-                            </p>
-                            <p style={{fontSize: '18px', fontWeight: 550, margin: 0, color: '#222'}}>
-                                {article.title}
-                            </p>
-                        </div>
-                    </div>
-                ))}
-
-
-            </div>
-        </div>
-    );
+    return <SideArticleListLayout title="Trending For You" articles={trendingArticles}/>;
 };
 
 export default Trending;

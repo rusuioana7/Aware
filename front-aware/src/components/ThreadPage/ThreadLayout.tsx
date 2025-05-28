@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import ArticleOptions from '../Cards/ArticleOptions';
+import ArticleOptions from '../Cards/ArticleLayouts/ArticleOptions.tsx';
 import TopicTag from '../Cards/Tags/TopicTag';
-import type {ArticleFeedLayout} from '../Cards/ArticleFeedLayout';
+import type {ArticleFeedLayout} from '../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
 
 type Props = {
     threadTitle: string;

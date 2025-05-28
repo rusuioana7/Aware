@@ -1,8 +1,8 @@
 import React, {useMemo, useState} from 'react';
-import ArticleFeed, {type ArticleFeedLayout} from '../Cards/ArticleFeedLayout.tsx';
-import SelectSort from '../Cards/SelectSort.tsx';
-import SelectView from '../Cards/SelectView.tsx';
-import SelectLength from "../Cards/SelectLength.tsx";
+import ArticleFeed, {type ArticleFeedLayout} from '../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
+import SelectSort from '../Cards/SelectMenu/SelectSort.tsx';
+import SelectView from '../Cards/SelectMenu/SelectView.tsx';
+import SelectLength from "../Cards/SelectMenu/SelectLength.tsx";
 
 type Props = {
     folderId: string;
