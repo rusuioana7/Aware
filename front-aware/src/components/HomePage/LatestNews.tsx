@@ -74,7 +74,13 @@ const LatestNews: React.FC = () => {
                             containerWidth={containerWidth}
                             containerHeight={largeCardHeight}
                         />
-                        {hoveredIndex === -1 && <ArticleOptions position="top-right"/>}
+
+                        {hoveredIndex === -1 && (
+                            <div style={{position: 'absolute', top: '10px', right: '10px', zIndex: 2}}>
+                                <ArticleOptions position="top-right"/>
+                            </div>
+                        )}
+
                         <div style={{
                             position: 'absolute',
                             top: 0,
@@ -85,6 +91,7 @@ const LatestNews: React.FC = () => {
                             zIndex: 1,
                             pointerEvents: 'none',
                         }}/>
+
                         <TopicTag label="Sport" style={{position: 'absolute', top: '12px', left: '12px', zIndex: 2}}/>
                         <div style={{position: 'absolute', bottom: '16px', left: '16px', zIndex: 2, color: '#fff'}}>
                             <p style={{fontSize: '24px', fontWeight: 'bold', margin: 0}}>
@@ -92,8 +99,6 @@ const LatestNews: React.FC = () => {
                             </p>
                             <p style={{fontSize: '15px', margin: '4px 0 0 0'}}>26 April 2025</p>
                         </div>
-
-
                     </div>
                 </div>
 
@@ -112,13 +117,18 @@ const LatestNews: React.FC = () => {
                                 onMouseEnter={() => setHoveredIndex(idx)}
                                 onMouseLeave={() => setHoveredIndex(null)}
                             >
-                                {hoveredIndex === idx && <ArticleOptions position="top-right"/>}
                                 <ZoomIfSmall
                                     src={item.src}
                                     alt={item.alt}
                                     containerWidth={containerWidth}
                                     containerHeight={smallCardHeight}
                                 />
+
+                                {hoveredIndex === idx && (
+                                    <div style={{position: 'absolute', top: '10px', right: '10px', zIndex: 2}}>
+                                        <ArticleOptions position="top-right"/>
+                                    </div>
+                                )}
 
                                 <div style={{
                                     position: 'absolute',
@@ -130,8 +140,11 @@ const LatestNews: React.FC = () => {
                                     zIndex: 1,
                                     pointerEvents: 'none',
                                 }}/>
-                                <TopicTag label={item.tag}
-                                          style={{position: 'absolute', top: '12px', left: '12px', zIndex: 2}}/>
+
+                                <TopicTag
+                                    label={item.tag}
+                                    style={{position: 'absolute', top: '12px', left: '12px', zIndex: 2}}
+                                />
                                 <div style={{
                                     position: 'absolute',
                                     bottom: '2px',
@@ -139,13 +152,16 @@ const LatestNews: React.FC = () => {
                                     zIndex: 2,
                                     color: '#fff'
                                 }}>
-                                    <p style={{fontSize: '17px', fontWeight: 'bold', margin: 0, lineHeight: '1.1'}}>
+                                    <p style={{
+                                        fontSize: '17px',
+                                        fontWeight: 'bold',
+                                        margin: 0,
+                                        lineHeight: '1.1'
+                                    }}>
                                         {item.title}
                                     </p>
                                     <p style={{fontSize: '12px', marginTop: '3px'}}>{item.date}</p>
                                 </div>
-
-
                             </div>
                         </div>
                     ))}

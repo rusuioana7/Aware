@@ -15,6 +15,7 @@ import SaveForLater from './components/BookmarksPage/SaveForLater.tsx';
 import ArticlePage from "./pages/ArticlePage.tsx";
 import ThreadPage from "./pages/ThreadPage.tsx";
 import TopicPage from "./pages/TopicPage.tsx";
+import CreateProfilePage from "./pages/CreateProfilePage.tsx";
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
@@ -24,6 +25,7 @@ root.render(
                 <Route path="/" element={<LandingPage/>}/>
                 <Route path="/login" element={<AuthPage/>}/>
                 <Route path="/register" element={<AuthPage/>}/>
+                <Route path="/createprofile" element={<CreateProfilePage/>}/>
                 <Route path="/home" element={<Layout><HomePage/></Layout>}/>
                 <Route path="/explore" element={<Layout><ExplorePage/></Layout>}/>
                 <Route path="/profile" element={<Layout><ProfilePage/></Layout>}/>
