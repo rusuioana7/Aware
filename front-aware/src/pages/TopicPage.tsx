@@ -2,6 +2,8 @@ import TopicTag from '../components/Cards/Tags/TopicTag';
 import TopTopicArticles from "../components/TopicPage/TopTopicArticles.tsx";
 import TopTopicThreads from "../components/TopicPage/TopTopicThreads.tsx";
 import TopicFeed from "../components/TopicPage/TopicFeed.tsx";
+import {useState} from "react";
+import {FaStar} from "react-icons/fa";
 
 type Article = {
     title: string;
@@ -84,17 +86,20 @@ const feedItems: FeedItem[] = [
 
 const TopicPage = () => {
     const topic = 'Lifestyle';
+    const [isFavorite, setIsFavorite] = useState(false);
+
     const onViewChange = (view: 'All' | 'Articles' | 'Threads') => {
         console.log('Selected view:', view);
+    };
+
+    const toggleFavorite = () => {
+        setIsFavorite(prev => !prev);
     };
 
     return (
         <div style={{display: 'flex', gap: '24px'}}>
             <div style={{flex: 7}}>
-                <div style={{
-                    marginBottom: '10px',
-                    display: 'inline-block'
-                }}>
+                <div style={{marginBottom: '10px', display: 'inline-flex', alignItems: 'center', gap: '12px'}}>
                     <TopicTag
                         label={topic}
                         style={{
@@ -102,6 +107,24 @@ const TopicPage = () => {
                             padding: '10px 16px',
                         }}
                     />
+                    <button
+                        onClick={toggleFavorite}
+                        aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            fontSize: '22px',
+                            color: isFavorite ? '#FFD700' : '#888',
+                            transition: 'color 0.3s ease',
+                            padding: 0,
+                        }}
+                    >
+                        <FaStar/>
+                    </button>
                 </div>
                 <div style={{flex: 1, height: 1, backgroundColor: '#CCC', marginBottom: 16}}/>
 
@@ -117,3 +140,4 @@ const TopicPage = () => {
 };
 
 export default TopicPage;
+
