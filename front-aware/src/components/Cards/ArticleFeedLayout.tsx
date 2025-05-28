@@ -1,6 +1,6 @@
 import React from 'react';
 import ArticleOptions from './ArticleOptions.tsx';
-import TopicTag from "./Tags/TopicTag.tsx";
+import TopicTag from './Tags/TopicTag.tsx';
 
 export type ArticleFeedLayout = {
     title: string;
@@ -27,17 +27,25 @@ const ArticleFeed: React.FC<Props> = ({article, id, isHovered, onHover}) => (
         onMouseEnter={() => onHover(id)}
         onMouseLeave={() => onHover(null)}
     >
-        {isHovered && (
-            <div style={{position: 'absolute', top: '-15px', right: '10px'}}>
-                <ArticleOptions position="top-right"/>
-            </div>
-        )}
-        <div style={{position: 'absolute', top: '8px', left: '8px', zIndex: 3}}>
-            <TopicTag label={article.topic || 'general'}/>
+        <div style={{position: 'relative', width: '140px', height: '100px'}}>
+            <img
+                src={article.image}
+                alt={article.title}
+                style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px'}}
+            />
 
+            {isHovered && (
+                <div style={{position: 'absolute', top: '6px', right: '6px', zIndex: 2}}>
+                    <ArticleOptions position="top-right"/>
+                </div>
+            )}
+
+            <div style={{position: 'absolute', top: '6px', left: '6px', zIndex: 2}}>
+                <TopicTag label={article.topic || 'general'}/>
+            </div>
         </div>
-        <img src={article.image} alt={article.title} style={{width: '140px', height: '100px', objectFit: 'cover'}}/>
-        <div>
+
+        <div style={{flex: 1}}>
             <h3 style={{margin: '0 0 6px', fontSize: '18px', fontWeight: 600}}>{article.title}</h3>
             <p style={{margin: '0 0 4px', fontSize: '14px', color: '#555'}}>
                 {article.author} - {article.date} - <span style={{fontStyle: 'italic'}}>{article.site}</span>

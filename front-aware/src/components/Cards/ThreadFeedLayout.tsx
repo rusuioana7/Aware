@@ -29,8 +29,8 @@ const ThreadFeed: React.FC<Props> = ({thread, threadIndex, hoveredItemId, setHov
                 <h2 style={{fontSize: '20px', margin: 0}}>
                     {thread.threadTitle}
                     <span style={{fontSize: '14px', fontWeight: 'normal', marginLeft: '10px', color: '#777'}}>
-            • Last updated on {thread.lastUpdated}
-          </span>
+                        • Last updated on {thread.lastUpdated}
+                    </span>
                 </h2>
             </div>
             <div style={{display: 'flex', paddingLeft: '12px'}}>
@@ -47,33 +47,40 @@ const ThreadFeed: React.FC<Props> = ({thread, threadIndex, hoveredItemId, setHov
                                 onMouseEnter={() => setHoveredItemId(articleId)}
                                 onMouseLeave={() => setHoveredItemId(null)}
                             >
-                                {isHovered && (
-                                    <div style={{position: 'absolute', top: '-15px', right: '70px'}}>
-                                        <ArticleOptions position="top-right"/>
-                                    </div>
-                                )}
-                                <div style={{position: 'absolute', top: '8px', left: '8px', zIndex: 3}}>
-                                    <TopicTag label={article.topic || 'general'}/>
+                                <div style={{position: 'relative', width: '140px', height: '100px', flexShrink: 0}}>
+                                    <img
+                                        src={article.image}
+                                        alt={article.title}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                            borderRadius: '4px',
+                                        }}
+                                    />
 
+                                    {isHovered && (
+                                        <div style={{position: 'absolute', top: '6px', right: '6px', zIndex: 2}}>
+                                            <ArticleOptions position="top-right"/>
+                                        </div>
+                                    )}
+
+                                    <div style={{position: 'absolute', top: '6px', left: '6px', zIndex: 2}}>
+                                        <TopicTag label={article.topic || 'general'}/>
+                                    </div>
                                 </div>
 
-                                <img src={article.image} alt={article.title}
-                                     style={{width: '140px', height: '100px', objectFit: 'cover'}}/>
                                 <div>
-                                    <h4 style={{
-                                        margin: '0 0 4px',
-                                        fontSize: '16px',
-                                        fontWeight: 600
-                                    }}>{article.title}</h4>
+                                    <h4 style={{margin: '0 0 4px', fontSize: '16px', fontWeight: 600}}>
+                                        {article.title}
+                                    </h4>
                                     <p style={{margin: '0 0 4px', fontSize: '13px', color: '#555'}}>
-                                        {article.author} - {article.date} - <span
-                                        style={{fontStyle: 'italic'}}>{article.site}</span>
+                                        {article.author} - {article.date} -{' '}
+                                        <span style={{fontStyle: 'italic'}}>{article.site}</span>
                                     </p>
-                                    <p style={{
-                                        fontSize: '14px',
-                                        margin: '6px 0 4px',
-                                        color: '#333'
-                                    }}>{article.description}</p>
+                                    <p style={{fontSize: '14px', margin: '6px 0 4px', color: '#333'}}>
+                                        {article.description}
+                                    </p>
                                     <p style={{fontSize: '12px', color: '#777'}}>
                                         💬 {article.comments} comments &nbsp;&nbsp; 👁️ {article.views} views
                                     </p>

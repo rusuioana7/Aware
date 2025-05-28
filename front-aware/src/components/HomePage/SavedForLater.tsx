@@ -51,6 +51,26 @@ const savedItems = [
 ];
 
 
+const arrowStyle = (side: 'left' | 'right') => ({
+    position: 'absolute' as const,
+    top: '50%',
+    [side]: '-42px',
+    transform: 'translateY(-50%)',
+    background: 'rgba(0,0,0,0.5)',
+    border: 'none',
+    borderRadius: '50%',
+    color: 'white',
+    width: '40px',
+    height: '40px',
+    cursor: 'pointer',
+    zIndex: 10,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: '17px',
+});
+
+
 const SavedForLater: React.FC = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [hovering, setHovering] = useState(false);
@@ -108,18 +128,20 @@ const SavedForLater: React.FC = () => {
                     className="hide-scrollbar"
                 >
                     {savedItems.map((item, idx) => (
-                        <div key={idx} style={{
-                            height: `${smallCardHeight}px`,
-                            minWidth: `${containerWidth}px`,
-                            width: `${containerWidth}px`,
-                            position: 'relative',
-                            overflow: 'hidden',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                            backgroundColor: 'white',
-                            flexShrink: 0,
-                        }}
-                             onMouseEnter={() => setHoveredIndex(idx)}
-                             onMouseLeave={() => setHoveredIndex(null)}
+                        <div
+                            key={idx}
+                            style={{
+                                height: `${smallCardHeight}px`,
+                                minWidth: `${containerWidth}px`,
+                                width: `${containerWidth}px`,
+                                position: 'relative', // important for absolute children
+                                overflow: 'hidden',
+                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                backgroundColor: 'white',
+                                flexShrink: 0,
+                            }}
+                            onMouseEnter={() => setHoveredIndex(idx)}
+                            onMouseLeave={() => setHoveredIndex(null)}
                         >
                             <ZoomIfSmall
                                 src={item.src}
@@ -128,45 +150,56 @@ const SavedForLater: React.FC = () => {
                                 containerHeight={smallCardHeight}
                                 className="rounded"
                             />
-                            {hoveredIndex === idx && <ArticleOptions position="top-right"/>}
 
+
+                            {hoveredIndex === idx && (
+                                <div style={{position: 'absolute', top: '8px', right: '8px', zIndex: 10}}>
+                                    <ArticleOptions position="top-right"/>
+                                </div>
+                            )}
 
                             <div style={{position: 'absolute', top: '8px', left: '8px', zIndex: 3}}>
                                 <TopicTag label={item.topic || 'general'}/>
-
                             </div>
 
-                            <div style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                pointerEvents: 'none',
-                                borderRadius: 'inherit',
-                                zIndex: 1,
-                            }}/>
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                    pointerEvents: 'none',
+                                    borderRadius: 'inherit',
+                                    zIndex: 1,
+                                }}
+                            />
 
-                            <div style={{
-                                position: 'absolute',
-                                bottom: '12px',
-                                left: '8px',
-                                zIndex: 2,
-                                color: 'white',
-                            }}>
-                                <p style={{
-                                    fontSize: '17px',
-                                    fontWeight: 'bold',
-                                    margin: '3px 0 0 0',
-                                    lineHeight: '1.1',
-                                }}>
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '12px',
+                                    left: '8px',
+                                    zIndex: 2,
+                                    color: 'white',
+                                }}
+                            >
+                                <p
+                                    style={{
+                                        fontSize: '17px',
+                                        fontWeight: 'bold',
+                                        margin: '3px 0 0 0',
+                                        lineHeight: '1.1',
+                                    }}
+                                >
                                     {item.title}
                                 </p>
                                 <p style={{fontSize: '12px', margin: '3px 0 0 0'}}>{item.date}</p>
                             </div>
                         </div>
                     ))}
+
                 </div>
 
                 {hovering && (
@@ -184,23 +217,5 @@ const SavedForLater: React.FC = () => {
     );
 };
 
-const arrowStyle = (side: 'left' | 'right') => ({
-    position: 'absolute' as const,
-    top: '50%',
-    [side]: '-42px',
-    transform: 'translateY(-50%)',
-    background: 'rgba(0,0,0,0.5)',
-    border: 'none',
-    borderRadius: '50%',
-    color: 'white',
-    width: '40px',
-    height: '40px',
-    cursor: 'pointer',
-    zIndex: 10,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    fontSize: '17px',
-});
 
 export default SavedForLater;

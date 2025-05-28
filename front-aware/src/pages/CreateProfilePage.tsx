@@ -37,7 +37,7 @@ const CreateProfilePage: React.FC = () => {
                     <EditProfile
                         initialData={profileData}
                         onCancel={() => setIsEditing(false)}
-                        onSave={handleSave}
+                        onSave={handleSave }
                     />
                 </div>
             )}

@@ -155,7 +155,7 @@ const Trending: React.FC = () => {
                             />
                         ))}
                 </div>
-                <div style={{marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '24px'}}>
+                <div style={{marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '24px', marginRight: '50px'}}>
                     {sampleArticles.map((article) => (
                         <ArticleFeed
                             key={article.id}

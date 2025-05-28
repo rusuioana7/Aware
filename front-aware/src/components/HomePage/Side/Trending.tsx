@@ -60,22 +60,28 @@ const Trending: React.FC = () => {
                 {trendingArticles.map((article, index) => (
                     <div
                         key={index}
-                        style={{display: 'flex', gap: '10px', alignItems: 'flex-start', position: 'relative',}}
+                        style={{display: 'flex', gap: '10px', alignItems: 'flex-start', position: 'relative'}}
                         onMouseEnter={() => setHoveredIndex(index)}
                         onMouseLeave={() => setHoveredIndex(null)}
                     >
+                        <div style={{position: 'relative'}}>
+                            <img
+                                src={article.image}
+                                alt={article.title}
+                                style={{width: '70px', height: '70px', objectFit: 'cover', display: 'block'}}
+                            />
 
-                        {hoveredIndex === index &&
-                            <ArticleOptions position="top-right" customStyle={{marginTop: "-12px"}}/>}
+                            {hoveredIndex === index && (
+                                <div style={{padding: '5px', position: 'absolute', top: 0, right: 0, zIndex: 10}}>
+                                    <ArticleOptions position="top-right"/>
+                                </div>
+                            )}
 
-                        <div style={{position: 'absolute', top: '0px', left: '80px'}}>
-                            <TopicTag label={article.topic}/>
+                            <div style={{position: 'absolute', top: 0, left: '80px'}}>
+                                <TopicTag label={article.topic}/>
+                            </div>
                         </div>
-                        <img
-                            src={article.image}
-                            alt={article.title}
-                            style={{width: '70px', height: '70px', objectFit: 'cover',}}
-                        />
+
                         <div>
                             <p style={{fontSize: '15px', color: '#000000', margin: '30px 0 2px'}}>
                                 {article.author} - {article.date}
@@ -86,6 +92,7 @@ const Trending: React.FC = () => {
                         </div>
                     </div>
                 ))}
+
 
             </div>
         </div>
