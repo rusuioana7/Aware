@@ -4,6 +4,93 @@ import FilterPop from "../components/ExplorePage/Filter/FilterPop.tsx";
 import {Filter} from 'lucide-react';
 import Trending from "../components/ExplorePage/Trending.tsx";
 
+const sampleArticles = [
+    {
+        id: '1',
+        title: 'AI Breakthrough Promises to Revolutionize Medicine',
+        date: 'May 21, 2025',
+        topic: 'travel',
+        author: 'Dr. Elena Gomez',
+        site: 'HealthTech Daily',
+        description: 'A new AI model outperforms doctors in diagnosing rare diseases...',
+        comments: 42,
+        views: 10500,
+        image: '/news2.jpg',
+    },
+    {
+        id: '2',
+        title: 'Electric Cars Surpass Gas Vehicles in Europe',
+        date: 'May 19, 2025',
+        topic: 'travel',
+        author: 'Marcus Leung',
+        site: 'Eco Mobility News',
+        description: 'EVs now account for over 55% of new vehicle sales in Europe...',
+        comments: 28,
+        views: 8900,
+        image: '/news2.jpg',
+    },
+    {
+        id: '3',
+        title: 'NASA Unveils New Moon Mission Timeline',
+        date: 'May 18, 2025',
+        topic: 'travel',
+        author: 'Ava Singh',
+        site: 'Science Frontier',
+        description: 'The Artemis program plans to land the next astronauts by 2027...',
+        comments: 17,
+        views: 7200,
+        image: '/news2.jpg',
+    },
+    {
+        id: '4',
+        title: 'NASA Unveils New Moon Mission Timeline',
+        date: 'May 18, 2025',
+        topic: 'travel',
+        author: 'Ava Singh',
+        site: 'Science Frontier',
+        description: 'The Artemis program plans to land the next astronauts by 2027...',
+        comments: 17,
+        views: 7200,
+        image: '/news2.jpg',
+    },
+    {
+        id: '5',
+        title: 'NASA Unveils New Moon Mission Timeline',
+        date: 'May 18, 2025',
+        topic: 'travel',
+        author: 'Ava Singh',
+        site: 'Science Frontier',
+        description: 'The Artemis program plans to land the next astronauts by 2027...',
+        comments: 17,
+        views: 7200,
+        image: '/news2.jpg',
+    },
+    {
+        id: '5',
+        title: 'NASA Unveils New Moon Mission Timeline',
+        date: 'May 18, 2025',
+        topic: 'travel',
+        author: 'Ava Singh',
+        site: 'Science Frontier',
+        description: 'The Artemis program plans to land the next astronauts by 2027...',
+        comments: 17,
+        views: 7200,
+        image: '/news2.jpg',
+    },
+    {
+        id: '5',
+        title: 'NASA Unveils New Moon Mission Timeline',
+        date: 'May 18, 2025',
+        topic: 'travel',
+        author: 'Ava Singh',
+        site: 'Science Frontier',
+        description: 'The Artemis program plans to land the next astronauts by 2027...',
+        comments: 17,
+        views: 7200,
+        image: '/news2.jpg',
+    },
+];
+
 const ExplorePage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showFilters, setShowFilters] = useState(false);
@@ -17,7 +104,7 @@ const ExplorePage: React.FC = () => {
     };
 
     return (
-        <div style={{position: 'relative', height: '100vh', padding: '15px'}}>
+        <div style={{position: 'relative', padding: '15px'}}>
             {/* search  */}
             <div style={{
                 display: 'flex',
@@ -62,7 +149,7 @@ const ExplorePage: React.FC = () => {
 
 
             </div>
-            <Trending/>
+            <Trending articles={sampleArticles}/>
 
 
             {/* filter */}

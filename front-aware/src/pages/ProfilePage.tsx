@@ -25,9 +25,7 @@ const ProfilePage: React.FC = () => {
     return (
         <div style={{
             display: 'flex',
-            minHeight: '100vh',
             padding: '10px',
-            backgroundColor: '#f5f7fa',
             position: 'relative'
         }}>
             <div style={{flex: 4}}>
