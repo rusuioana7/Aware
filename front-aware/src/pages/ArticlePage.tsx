@@ -32,6 +32,7 @@ Following these strategies can help remote workers feel more balanced, connected
         readingTime: '3 min read',
         commentsCount: 12,
         viewsCount: '1.2K',
+        credibilityStatus: 'mostly-true' as const
     };
 
     return (
@@ -66,6 +67,7 @@ Following these strategies can help remote workers feel more balanced, connected
                         readingTime={article.readingTime} category={''}
                         commentsCount={article.commentsCount}
                         viewsCount={article.viewsCount}
+                        credibilityStatus={article.credibilityStatus}
                     />
                     <CommentSection/>
 

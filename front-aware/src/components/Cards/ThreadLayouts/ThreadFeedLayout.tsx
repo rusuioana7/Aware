@@ -3,6 +3,7 @@ import {FaComments} from 'react-icons/fa';
 import ArticleOptions from '../ArticleLayouts/ArticleOptions.tsx';
 import type {ArticleFeedLayout} from '../ArticleLayouts/ArticleFeedLayout.tsx';
 import TopicTag from "../Tags/TopicTag.tsx";
+import CredibilityLabel from "../Tags/CredibilityLabel.tsx";
 
 type ThreadFeedLayout = {
     threadTitle: string;
@@ -80,8 +81,10 @@ const ThreadFeed: React.FC<Props> = ({thread, threadIndex, hoveredItemId, setHov
                                     <p style={{fontSize: '14px', margin: '6px 0 4px', color: '#333'}}>
                                         {article.description}
                                     </p>
-                                    <p style={{fontSize: '12px', color: '#777'}}>
+                                    <p style={{fontSize: '13px', color: '#777', display: 'flex', alignItems: 'center'}}>
                                         💬 {article.comments} comments &nbsp;&nbsp; 👁️ {article.views} views
+                                        {article.credibilityStatus &&
+                                            <CredibilityLabel status={article.credibilityStatus}/>}
                                     </p>
                                 </div>
                             </div>

@@ -13,6 +13,7 @@ type Article = {
     comments: number;
     views: number;
     image: string;
+    credibilityStatus?: 'true' | 'mostly-true' | 'missing-context' | 'false' | 'unverified';
 };
 
 type Thread = {
@@ -40,6 +41,7 @@ const feedItems: FeedItem[] = [
         comments: 23,
         views: 1052,
         image: '/news1.jpg',
+        credibilityStatus: "false",
     },
     {
         isThread: true,
@@ -57,6 +59,7 @@ const feedItems: FeedItem[] = [
                 comments: 41,
                 views: 2379,
                 image: '/news2.jpg',
+                credibilityStatus: "true",
             },
             {
                 title: 'How Countries are Adopting Clean Power',
@@ -69,6 +72,7 @@ const feedItems: FeedItem[] = [
                 comments: 19,
                 views: 1323,
                 image: '/news3.jpg',
+                credibilityStatus: "unverified",
             },
         ],
     },
@@ -83,6 +87,7 @@ const feedItems: FeedItem[] = [
         comments: 17,
         views: 981,
         image: '/news3.jpg',
+        credibilityStatus: "missing-context",
     },
 ];
 

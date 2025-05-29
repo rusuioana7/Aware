@@ -1,4 +1,5 @@
 import React from 'react';
+import CredibilityLabel from "../Cards/Tags/CredibilityLabel.tsx";
 import {
     FaBookmark,
     FaDownload,
@@ -22,6 +23,7 @@ interface ArticleProps {
     readingTime?: string;
     commentsCount?: number;
     viewsCount?: string;
+    credibilityStatus?: 'true' | 'mostly-true' | 'missing-context' | 'false' | 'unverified';
 }
 
 const buttonStyle: React.CSSProperties = {
@@ -48,7 +50,8 @@ const Article: React.FC<ArticleProps> = ({
                                              publishedTime,
                                              readingTime,
                                              commentsCount,
-                                             viewsCount
+                                             viewsCount,
+                                             credibilityStatus,
                                          }) => {
     return (
         <article style={{
@@ -127,20 +130,8 @@ const Article: React.FC<ArticleProps> = ({
                     {readingTime && ` • ${readingTime}`}
                 </div>
 
-                <div style={{
-                    flex: 1,
-                    textAlign: 'right',
-                    minWidth: '33%',
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: '15px'
-                }}>
-                    {viewsCount && (
-                        <span><strong>{viewsCount}</strong> views</span>
-                    )}
-                    {commentsCount && (
-                        <span><strong>{commentsCount}</strong> comments</span>
-                    )}
+                <div style={{flex: 1, textAlign: 'right', minWidth: '33%'}}>
+                    {credibilityStatus && <CredibilityLabel status={credibilityStatus}/>}
                 </div>
             </div>
 
@@ -191,6 +182,26 @@ const Article: React.FC<ArticleProps> = ({
                     </p>
                 ))}
             </div>
+
+            <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                fontSize: '14px',
+                color: '#666',
+                borderTop: '1px solid #eee',
+                paddingTop: '10px',
+                marginTop: '30px',
+                gap: '20px'
+            }}>
+                {viewsCount && (
+                    <span><strong>{viewsCount}</strong> views</span>
+                )}
+                {commentsCount && (
+                    <span><strong>{commentsCount}</strong> comments</span>
+                )}
+            </div>
+
 
         </article>
     );

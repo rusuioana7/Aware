@@ -1,6 +1,7 @@
 import React from 'react';
 import ArticleOptions from './ArticleOptions.tsx';
 import TopicTag from '../Tags/TopicTag.tsx';
+import CredibilityLabel from '../Tags/CredibilityLabel.tsx';
 
 export type ArticleFeedLayout = {
     title: string;
@@ -12,6 +13,7 @@ export type ArticleFeedLayout = {
     comments: number;
     views: number;
     image: string;
+    credibilityStatus?: 'true' | 'mostly-true' | 'missing-context' | 'false' | 'unverified';
 };
 
 type Props = {
@@ -20,6 +22,7 @@ type Props = {
     isHovered: boolean;
     onHover: (id: string | null) => void;
 };
+
 
 const ArticleFeed: React.FC<Props> = ({article, id, isHovered, onHover}) => (
     <div
@@ -51,9 +54,11 @@ const ArticleFeed: React.FC<Props> = ({article, id, isHovered, onHover}) => (
                 {article.author} - {article.date} - <span style={{fontStyle: 'italic'}}>{article.site}</span>
             </p>
             <p style={{fontSize: '15px', margin: '6px 0 8px', color: '#333'}}>{article.description}</p>
-            <p style={{fontSize: '13px', color: '#777'}}>
+            <p style={{fontSize: '13px', color: '#777', display: 'flex', alignItems: 'center'}}>
                 💬 {article.comments} comments &nbsp;&nbsp; 👁️ {article.views} views
+                {article.credibilityStatus && <CredibilityLabel status={article.credibilityStatus}/>}
             </p>
+
         </div>
     </div>
 );
