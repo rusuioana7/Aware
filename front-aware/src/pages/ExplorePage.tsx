@@ -3,6 +3,7 @@ import SearchBar from '../components/ExplorePage/SearchBar';
 import FilterPop from "../components/ExplorePage/Filter/FilterPop.tsx";
 import {Filter} from 'lucide-react';
 import Trending from "../components/ExplorePage/Trending.tsx";
+import Discover from "../components/ExplorePage/Discover.tsx";
 
 const sampleArticles = [
     {
@@ -150,6 +151,19 @@ const ExplorePage: React.FC = () => {
 
             </div>
             <Trending articles={sampleArticles}/>
+
+            <div style={{
+                display: 'flex',
+                gap: '40px',
+                marginBottom: '10px',
+                borderBottom: '2px solid #ddd',
+
+            }}>
+                <h2 style={{fontSize: '25px', marginBottom: '10px'}}>Discover </h2>
+
+
+            </div>
+            <Discover/>
 
 
             {/* filter */}
