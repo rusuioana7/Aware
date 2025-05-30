@@ -4,8 +4,10 @@ import FilterPop from "../components/ExplorePage/Filter/FilterPop.tsx";
 import {Filter} from 'lucide-react';
 import Trending from "../components/ExplorePage/Trending.tsx";
 import Discover from "../components/ExplorePage/Discover.tsx";
+import type {Article} from "../components/ExplorePage/Trending.tsx";
 
-const sampleArticles = [
+
+const sampleArticles: Article[] = [
     {
         id: '1',
         title: 'AI Breakthrough Promises to Revolutionize Medicine',
@@ -17,6 +19,7 @@ const sampleArticles = [
         comments: 42,
         views: 10500,
         image: '/news2.jpg',
+        credibilityStatus: 'verified',
     },
     {
         id: '2',
@@ -29,6 +32,7 @@ const sampleArticles = [
         comments: 28,
         views: 8900,
         image: '/news2.jpg',
+        credibilityStatus: 'suspicious',
     },
     {
         id: '3',
@@ -41,6 +45,7 @@ const sampleArticles = [
         comments: 17,
         views: 7200,
         image: '/news2.jpg',
+        credibilityStatus: 'under-review',
     },
     {
         id: '4',
@@ -53,6 +58,7 @@ const sampleArticles = [
         comments: 17,
         views: 7200,
         image: '/news2.jpg',
+        credibilityStatus: 'unknown',
     },
     {
         id: '5',
@@ -65,6 +71,7 @@ const sampleArticles = [
         comments: 17,
         views: 7200,
         image: '/news2.jpg',
+        credibilityStatus: 'untrustworthy',
     },
     {
         id: '5',
@@ -77,6 +84,7 @@ const sampleArticles = [
         comments: 17,
         views: 7200,
         image: '/news2.jpg',
+        credibilityStatus: 'verified',
     },
     {
         id: '5',
@@ -89,6 +97,7 @@ const sampleArticles = [
         comments: 17,
         views: 7200,
         image: '/news2.jpg',
+        credibilityStatus: 'verified',
     },
 ];
 
