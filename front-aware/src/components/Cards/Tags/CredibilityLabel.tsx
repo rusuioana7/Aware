@@ -1,35 +1,35 @@
 import React from 'react';
 
-type CredibilityStatus = 'true' | 'mostly-true' | 'missing-context' | 'false' | 'unverified';
+type SourceTrustStatus = 'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review';
 
 type Props = {
-    status: CredibilityStatus;
+    status: SourceTrustStatus;
 };
 
-const statusMap: Record<CredibilityStatus, { label: string; color: string }> = {
-    true: {label: 'True', color: '#27ae60'},
-    'mostly-true': {label: 'Mostly True', color: '#2ecc71'},
-    'missing-context': {label: 'Missing Context', color: '#f1c40f'},
-    false: {label: 'False', color: '#e74c3c'},
-    'unverified': {label: 'Unverified', color: '#95a5a6'},
+const trustMap: Record<SourceTrustStatus, { label: string; color: string }> = {
+    verified: {label: 'Verified Source', color: '#2ecc71'},
+    unknown: {label: 'Unknown Source', color: '#95a5a6'},
+    suspicious: {label: 'Suspicious', color: '#e67e22'},
+    untrustworthy: {label: 'Untrustworthy', color: '#e74c3c'},
+    'under-review': {label: 'Under Review', color: '#3498db'},
 };
 
 const CredibilityLabel: React.FC<Props> = ({status}) => {
-    const {label, color} = statusMap[status];
+    const {label, color} = trustMap[status];
 
     return (
         <span
             style={{
                 backgroundColor: color,
                 color: '#fff',
-                padding: '2px 8px',
+                padding: '2px 10px',
                 borderRadius: '12px',
                 fontSize: '15px',
                 fontWeight: 500,
                 marginLeft: '12px',
                 whiteSpace: 'nowrap',
             }}
-            title={`This article is marked as: ${label}`}
+            title={`Source rating: ${label}`}
         >
             {label}
         </span>

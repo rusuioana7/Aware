@@ -23,7 +23,7 @@ interface ArticleProps {
     readingTime?: string;
     commentsCount?: number;
     viewsCount?: string;
-    credibilityStatus?: 'true' | 'mostly-true' | 'missing-context' | 'false' | 'unverified';
+    credibilityStatus?: 'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review';
 }
 
 const buttonStyle: React.CSSProperties = {

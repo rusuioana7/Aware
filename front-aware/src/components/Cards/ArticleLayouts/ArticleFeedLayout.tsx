@@ -13,7 +13,7 @@ export type ArticleFeedLayout = {
     comments: number;
     views: number;
     image: string;
-    credibilityStatus?: 'true' | 'mostly-true' | 'missing-context' | 'false' | 'unverified';
+    credibilityStatus?:  'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review';
 };
 
 type Props = {

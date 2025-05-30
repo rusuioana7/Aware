@@ -3,7 +3,7 @@ import TopicTag from '../Cards/Tags/TopicTag';
 import {TOPIC_COLORS} from '../Cards/Tags/TagColor';
 import ArticleFeed from '../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
 
-type Article = {
+export type Article = {
     id: string;
     title: string;
     date: string;
@@ -14,6 +14,8 @@ type Article = {
     comments: number;
     views: number;
     image: string;
+    credibilityStatus?: 'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review'
+
 };
 
 const Trending: React.FC<{ articles: Article[] }> = ({articles}) => {
