@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AuthButton from './AuthButton.tsx';
+import { useNavigate } from 'react-router-dom';
 
 interface CredentialsFormProps {
     mode: 'login' | 'signup';
@@ -44,18 +45,64 @@ const formStyle: React.CSSProperties = {
     maxWidth: '480px',
 };
 
-const CredentialsForm: React.FC<CredentialsFormProps> = ({mode}) => {
+const CredentialsForm: React.FC<CredentialsFormProps> = ({ mode }) => {
+    const navigate = useNavigate();
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        try {
+            const url = mode === 'login' ? '/auth/login' : '/auth/register';
+            type Payload = { email: string; password: string; confirmPassword?: string };
+            const body: Payload = { email, password };
+            if (mode === 'signup') {
+                body.confirmPassword = confirmPassword;
+            }
+
+            const response = await fetch(`http://localhost:3001${url}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(body),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                setError(errorData.message || 'Something went wrong');
+                return;
+            }
+
+            navigate('/home');
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (err) {
+            setError('Network error');
+        }
+    };
+
     return (
-        <form style={formStyle}>
+        <form style={formStyle} onSubmit={handleSubmit}>
             <input
                 type="email"
                 placeholder="Email address"
                 style={inputStyle}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
             />
             <input
                 type="password"
                 placeholder="Password"
                 style={inputStyle}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
             />
 
             {mode === 'signup' && (
@@ -63,6 +110,10 @@ const CredentialsForm: React.FC<CredentialsFormProps> = ({mode}) => {
                     type="password"
                     placeholder="Confirm Password"
                     style={inputStyle}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
                 />
             )}
 
@@ -72,7 +123,9 @@ const CredentialsForm: React.FC<CredentialsFormProps> = ({mode}) => {
                 </div>
             )}
 
-            <AuthButton label={mode === 'login' ? 'Login' : 'Register'}/>
+            {error && <p style={{ color: 'red' }}>{Array.isArray(error) ? error.join(', ') : error}</p>}
+
+            <AuthButton label={mode === 'login' ? 'Login' : 'Register'} />
         </form>
     );
 };
