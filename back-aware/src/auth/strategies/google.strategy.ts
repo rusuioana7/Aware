@@ -19,6 +19,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: 'http://localhost:3001/auth/google/redirect',
       scope: ['email', 'profile'],
       passReqToCallback: true,
+      state: true,
     });
   }
 
@@ -36,6 +37,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       name: name?.givenName,
       photo: photos?.[0]?.value,
       provider: profile.provider,
+      state: req.query.state,
     };
 
     done(null, user);

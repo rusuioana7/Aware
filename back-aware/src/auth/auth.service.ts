@@ -5,12 +5,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { User } from '@prisma/client';
 
-export interface GoogleUser {
-  email: string;
-  name: string;
-  provider: string;
-}
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -70,12 +64,17 @@ export class AuthService {
     };
   }
 
-  async googleLogin(user) {
+  async googleLogin(user, mode: 'login' | 'signup' = 'login') {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: user.email },
     });
 
-    if (!existingUser) {
+    if (mode === 'signup') {
+      if (existingUser) {
+        throw new BadRequestException(
+          'Account already exists. Please sign in.',
+        );
+      }
       const newUser = await this.prisma.user.create({
         data: {
           email: user.email,
@@ -90,6 +89,10 @@ export class AuthService {
       return { message: 'Registered and logged in with Google', token };
     }
 
+    // mode === 'login'
+    if (!existingUser) {
+      throw new BadRequestException('Account does not exist. Please sign up.');
+    }
     const token = this.jwtService.sign({
       email: existingUser.email,
       sub: existingUser.id,

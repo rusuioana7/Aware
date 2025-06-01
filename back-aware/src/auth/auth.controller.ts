@@ -12,10 +12,10 @@ import {
 import { Response, Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import type { GoogleUser } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
+import 'express-session';
 
 @Controller('auth')
 export class AuthController {
@@ -83,12 +83,54 @@ export class AuthController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
-    // Redirects to Google OAuth consent screen
+    // redirects to Google OAuth consent screen
+  }
+
+  @Get('google/start')
+  async googleStart(@Req() req: Request, @Res() res: Response) {
+    const mode = req.query.mode === 'signup' ? 'signup' : 'login';
+    req.session.mode = mode;
+    console.log('✅ Setat mode în sesiune:', req.session.mode);
+    console.log(' sesiune dupa setare:', req.session);
+    req.session.save(() => {
+      res.redirect('/auth/google');
+    });
   }
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req) {
-    return this.authService.googleLogin(req.user as GoogleUser);
+  async googleAuthRedirect(@Req() req, @Res() res) {
+    const rawMode = req.session?.mode;
+    const mode: 'login' | 'signup' = rawMode === 'signup' ? 'signup' : 'login';
+
+    console.log('➡️ Google Redirect:');
+    console.log('Mode from session:', mode);
+    console.log('User:', req.user);
+    console.log('⛔ Mode în sesiune la redirect:', req.session?.mode);
+
+    try {
+      const result = await this.authService.googleLogin(req.user, mode);
+
+      res.cookie('jwt', result.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 1000 * 60 * 60 * 24,
+      });
+
+      res.redirect('http://localhost:5173/home');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(400).json({ message: 'Unknown error occurred' });
+      }
+    }
+  }
+  @Get('clear-session')
+  clearSession(@Req() req: Request, @Res() res: Response) {
+    req.session.destroy(() => {
+      res.send('Session cleared');
+    });
   }
 }

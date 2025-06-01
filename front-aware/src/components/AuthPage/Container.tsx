@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {useLocation, useNavigate} from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Toggle from './Toggle';
 import CredentialsForm from './CredentialsForm';
 import Divider from './Divider';
@@ -12,7 +12,6 @@ const Container: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
 
     useEffect(() => {
-        // Set initial state based on URL
         if (location.pathname === '/register') {
             setActiveTab('signup');
         } else {
@@ -26,17 +25,19 @@ const Container: React.FC = () => {
     };
 
     return (
-        <div
-            className="w-full max-w-[480px] h-[580px] p-6 rounded-[25px] bg-[#D9D9D9] flex flex-col items-center justify-start mx-auto">
+        <div className="w-full max-w-[480px] h-[580px] p-6 rounded-[25px] bg-[#D9D9D9] flex flex-col items-center justify-start mx-auto">
             <h2 className="text-[40px] font-bold text-[#031A6B] mb-6">Welcome!</h2>
 
-            <Toggle activeTab={activeTab} onTabChange={handleTabChange}/>
+            <Toggle activeTab={activeTab} onTabChange={handleTabChange} />
 
-            <CredentialsForm mode={activeTab}/>
+            <CredentialsForm mode={activeTab} />
 
-            <Divider/>
+            <Divider />
 
-            <GoogleButton/>
+            <GoogleButton
+                label={activeTab === 'signup' ? 'Sign up with Google' : 'Sign in with Google'}
+                mode={activeTab}
+            />
         </div>
     );
 };

@@ -19,5 +19,6 @@
     "noFallthroughCasesInSwitch": false,
     "strict": true,
     "esModuleInterop": true,
-  }
+  },
+  "include": ["src/**/*", "src/auth/express-session.d.ts"]
 }
