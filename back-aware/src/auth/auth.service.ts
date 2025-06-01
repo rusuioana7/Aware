@@ -5,6 +5,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { User } from '@prisma/client';
 
+export interface GoogleUser {
+  email: string;
+  name: string;
+  provider: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -41,10 +47,11 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user: User | null = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { email },
     });
-    if (!user) {
+
+    if (!user || !user.password) {
       return null;
     }
 
@@ -61,5 +68,32 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async googleLogin(user) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: user.email },
+    });
+
+    if (!existingUser) {
+      const newUser = await this.prisma.user.create({
+        data: {
+          email: user.email,
+          name: user.name,
+          provider: user.provider,
+        },
+      });
+      const token = this.jwtService.sign({
+        email: newUser.email,
+        sub: newUser.id,
+      });
+      return { message: 'Registered and logged in with Google', token };
+    }
+
+    const token = this.jwtService.sign({
+      email: existingUser.email,
+      sub: existingUser.id,
+    });
+    return { message: 'Logged in with Google', token };
   }
 }

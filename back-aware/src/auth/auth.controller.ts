@@ -7,10 +7,12 @@ import {
   Res,
   UseGuards,
   BadRequestException,
+  Get,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
+import type { GoogleUser } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -76,5 +78,17 @@ export class AuthController {
     await this.prisma.user.delete({ where: { id: Number(userId) } });
 
     return { message: 'Account deleted successfully' };
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {
+    // Redirects to Google OAuth consent screen
+  }
+
+  @Get('google/redirect')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req) {
+    return this.authService.googleLogin(req.user as GoogleUser);
   }
 }
