@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import AuthButton from './AuthButton.tsx';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 interface CredentialsFormProps {
     mode: 'login' | 'signup';
@@ -45,7 +45,7 @@ const formStyle: React.CSSProperties = {
     maxWidth: '480px',
 };
 
-const CredentialsForm: React.FC<CredentialsFormProps> = ({ mode }) => {
+const CredentialsForm: React.FC<CredentialsFormProps> = ({mode}) => {
     const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
@@ -60,14 +60,14 @@ const CredentialsForm: React.FC<CredentialsFormProps> = ({ mode }) => {
         try {
             const url = mode === 'login' ? '/auth/login' : '/auth/register';
             type Payload = { email: string; password: string; confirmPassword?: string };
-            const body: Payload = { email, password };
+            const body: Payload = {email, password};
             if (mode === 'signup') {
                 body.confirmPassword = confirmPassword;
             }
 
             const response = await fetch(`http://localhost:3001${url}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 credentials: 'include',
                 body: JSON.stringify(body),
             });
@@ -78,9 +78,13 @@ const CredentialsForm: React.FC<CredentialsFormProps> = ({ mode }) => {
                 return;
             }
 
-            navigate('/home');
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            if (mode === 'signup') {
+                navigate('/createprofile', {state: {email}});
+            } else {
+                navigate('/home');
+            }
         } catch (err) {
+            console.log(err);
             setError('Network error');
         }
     };
@@ -123,9 +127,9 @@ const CredentialsForm: React.FC<CredentialsFormProps> = ({ mode }) => {
                 </div>
             )}
 
-            {error && <p style={{ color: 'red' }}>{Array.isArray(error) ? error.join(', ') : error}</p>}
+            {error && <p style={{color: 'red'}}>{Array.isArray(error) ? error.join(', ') : error}</p>}
 
-            <AuthButton label={mode === 'login' ? 'Login' : 'Register'} />
+            <AuthButton label={mode === 'login' ? 'Login' : 'Register'}/>
         </form>
     );
 };

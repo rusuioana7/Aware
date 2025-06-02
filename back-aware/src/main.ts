@@ -32,7 +32,9 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
 
   await app.listen(3001);
 }

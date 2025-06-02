@@ -1,19 +1,23 @@
 import React, {useEffect, useRef, useState} from 'react';
 import TopicTag from '../Cards/Tags/TopicTag';
-import {TOPIC_COLORS} from "../Cards/Tags/TagColor.tsx";
+import {TOPIC_COLORS} from '../Cards/Tags/TagColor';
 
-interface EditProfileProps {
-    initialData: {
-        favoriteTopics: string[];
-        language: string;
-        country: string;
-        name: string;
-        email: string;
-        bio: string;
-        dateJoined: string;
-    };
+export interface ProfileData {
+    favoriteTopics: string[];
+    language: string;
+    country: string;
+    name: string;
+    email: string;
+    bio: string;
+    dateJoined: string;
+    profilePhoto: string;
+    bannerPhoto: string;
+}
+
+export interface EditProfileProps {
+    initialData: ProfileData;
     onCancel: () => void;
-    onSave: (data: EditProfileProps['initialData']) => void;
+    onSave: (data: ProfileData) => void;
 }
 
 const inputStyle: React.CSSProperties = {
@@ -55,63 +59,63 @@ const allTopics = Object.keys(TOPIC_COLORS)
     .map(key => key.charAt(0).toUpperCase() + key.slice(1));
 
 const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}) => {
-    const [formData, setFormData] = useState(initialData);
-    const [selectedTopics, setSelectedTopics] = useState<string[]>(() => {
-        const init = initialData.favoriteTopics || [];
-        return init.slice().sort((a, b) => allTopics.indexOf(a) - allTopics.indexOf(b));
-    });
+    const [formData, setFormData] = useState<ProfileData>(initialData);
+    const [selectedTopics, setSelectedTopics] = useState<string[]>(initialData.favoriteTopics || []);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
+    const fileInputAvatarRef = useRef<HTMLInputElement>(null);
+    const fileInputCoverRef = useRef<HTMLInputElement>(null);
 
     const [isBannerHover, setIsBannerHover] = useState(false);
     const [isProfileHover, setIsProfileHover] = useState(false);
 
-
-    const toggleTopic = (topic: string) => {
-        setSelectedTopics(prev => {
-            let newTopics: string[];
-            if (prev.includes(topic)) {
-                newTopics = prev.filter(t => t !== topic);
-            } else {
-                newTopics = [...prev, topic];
-            }
-            return newTopics.slice().sort((a, b) => allTopics.indexOf(a) - allTopics.indexOf(b));
-        });
-    };
-
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
+        function handler(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setDropdownOpen(false);
             }
         }
 
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
     }, []);
 
-    const handleChange = (field: keyof typeof formData, value: string) => {
-        setFormData({...formData, [field]: value});
+    const handleChange = (field: keyof ProfileData, value: string) => {
+        setFormData(prev => ({...prev, [field]: value}));
+    };
+
+    const handleFileChange = (field: 'profilePhoto' | 'bannerPhoto', file: File | null) => {
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setFormData(prev => ({...prev, [field]: url}));
+        }
+    };
+
+    const toggleTopic = (topic: string) => {
+        setSelectedTopics(prev => {
+            const updated = prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic];
+            return updated.sort((a, b) => allTopics.indexOf(a) - allTopics.indexOf(b));
+        });
     };
 
     return (
-        <div style={{
-            width: '600px',
-            backgroundColor: '#ffffff',
-            borderRadius: '8px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
-            overflow: 'hidden',
-            position: 'relative',
-            maxHeight: '700px',
-            overflowY: 'auto',
-        }}>
+        <div
+            style={{
+                width: '600px',
+                backgroundColor: '#ffffff',
+                borderRadius: '8px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+                overflow: 'hidden',
+                position: 'relative',
+                maxHeight: '700px',
+                overflowY: 'auto',
+            }}
+        >
             <div
                 style={{
                     height: '120px',
-                    backgroundImage: `url('./news1.jpg')`,
+                    backgroundImage: `url(${formData.bannerPhoto})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     position: 'relative',
@@ -119,6 +123,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 }}
                 onMouseEnter={() => setIsBannerHover(true)}
                 onMouseLeave={() => setIsBannerHover(false)}
+                onClick={() => fileInputCoverRef.current?.click()}
             >
                 {isBannerHover && (
                     <div
@@ -138,9 +143,16 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                             fontSize: 16,
                         }}
                     >
-                        Edit Banner
+                        Upload Cover
                     </div>
                 )}
+                <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputCoverRef}
+                    style={{display: 'none'}}
+                    onChange={e => handleFileChange('bannerPhoto', e.target.files?.[0] || null)}
+                />
             </div>
 
             <div
@@ -158,10 +170,11 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 }}
                 onMouseEnter={() => setIsProfileHover(true)}
                 onMouseLeave={() => setIsProfileHover(false)}
+                onClick={() => fileInputAvatarRef.current?.click()}
             >
                 <img
-                    src={'/news2.jpg'}
-                    alt="Profile"
+                    src={formData.profilePhoto}
+                    alt="Avatar"
                     style={{width: '100%', height: '100%', objectFit: 'cover'}}
                 />
                 {isProfileHover && (
@@ -183,18 +196,24 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                             borderRadius: '50%',
                         }}
                     >
-                        Edit Photo
+                        Upload Avatar
                     </div>
                 )}
+                <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputAvatarRef}
+                    style={{display: 'none'}}
+                    onChange={e => handleFileChange('profilePhoto', e.target.files?.[0] || null)}
+                />
             </div>
-
 
             <div style={{marginTop: '5px', marginLeft: '140px', padding: '10px 20px 0 20px'}}>
                 <label style={{...labelStyle, display: 'block'}}>Name:</label>
                 <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
+                    onChange={e => handleChange('name', e.target.value)}
                     style={inputStyle}
                     placeholder="Name"
                 />
@@ -203,9 +222,10 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
+                    onChange={e => handleChange('email', e.target.value)}
                     style={inputStyle}
                     placeholder="Email"
+                    disabled
                 />
             </div>
 
@@ -213,7 +233,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 <label style={{...labelStyle, display: 'block'}}>Bio:</label>
                 <textarea
                     value={formData.bio}
-                    onChange={(e) => handleChange('bio', e.target.value)}
+                    onChange={e => handleChange('bio', e.target.value)}
                     style={{...inputStyle, height: '100px', resize: 'vertical'}}
                     placeholder="Bio"
                 />
@@ -225,24 +245,12 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 <div style={{position: 'relative'}} ref={dropdownRef}>
                     <label
                         style={{
-                            fontWeight: 'bold',
-                            color: '#031A6B',
-                            minWidth: '90px',
-                            fontSize: '18px',
+                            ...labelStyle,
                             display: 'block',
                             marginBottom: 6,
                             cursor: 'pointer',
-                            minHeight: 32,
-                            marginRight: '20px'
                         }}
                         onClick={() => setDropdownOpen(open => !open)}
-                        aria-haspopup="listbox"
-                        aria-expanded={dropdownOpen}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={e => {
-                            if (e.key === 'Enter' || e.key === ' ') setDropdownOpen(open => !open);
-                        }}
                     >
                         Topics:
                         <div style={{display: 'inline-flex', flexWrap: 'wrap', gap: 6, marginTop: 6}}>
@@ -250,7 +258,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                                 <span style={{color: '#888', fontStyle: 'italic'}}>Select...</span>
                             ) : (
                                 selectedTopics.map(topic => (
-                                    <TopicTag key={topic} label={topic} selected={true} style={{userSelect: 'none'}}/>
+                                    <TopicTag key={topic} label={topic} selected={true}/>
                                 ))
                             )}
                         </div>
@@ -271,9 +279,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                                 minWidth: 180,
                                 maxHeight: 180,
                                 overflowY: 'auto',
-                                userSelect: 'none',
                             }}
-                            role="listbox"
                         >
                             {allTopics.map(topic => {
                                 const isSelected = selectedTopics.includes(topic);
@@ -289,30 +295,11 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                                             borderRadius: 6,
                                             cursor: 'pointer',
                                             backgroundColor: isSelected ? '#e0e7ff' : 'transparent',
-                                            transition: 'background-color 0.2s ease',
                                             justifyContent: 'space-between',
                                         }}
-                                        onMouseEnter={e => {
-                                            e.currentTarget.style.backgroundColor = '#f0f0f0';
-                                        }}
-                                        onMouseLeave={e => {
-                                            e.currentTarget.style.backgroundColor = isSelected ? '#e0e7ff' : 'transparent';
-                                        }}
-                                        role="option"
-                                        aria-selected={isSelected}
-                                        tabIndex={0}
-                                        onKeyDown={e => {
-                                            if (e.key === 'Enter' || e.key === ' ') {
-                                                e.preventDefault();
-                                                toggleTopic(topic);
-                                            }
-                                        }}
                                     >
-                                        <TopicTag label={topic} selected={isSelected}
-                                                  style={{cursor: 'default', userSelect: 'none'}}/>
-                                        {isSelected && (
-                                            <span style={{color: '#031A6B', fontWeight: 'bold', fontSize: 18}}>✓</span>
-                                        )}
+                                        <TopicTag label={topic} selected={isSelected}/>
+                                        {isSelected && <span style={{color: '#031A6B', fontWeight: 'bold'}}>✓</span>}
                                     </div>
                                 );
                             })}
@@ -326,9 +313,10 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                     <label style={labelStyle}>Language:</label>
                     <select
                         value={formData.language}
-                        onChange={(e) => handleChange('language', e.target.value)}
+                        onChange={e => handleChange('language', e.target.value)}
                         style={selectStyle}
                     >
+                        <option value="">Select...</option>
                         <option value="English">English</option>
                         <option value="Romanian">Romanian</option>
                         <option value="Spanish">Spanish</option>
@@ -340,9 +328,10 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                     <label style={labelStyle}>Country:</label>
                     <select
                         value={formData.country}
-                        onChange={(e) => handleChange('country', e.target.value)}
+                        onChange={e => handleChange('country', e.target.value)}
                         style={selectStyle}
                     >
+                        <option value="">Select...</option>
                         <option value="Romania">Romania</option>
                         <option value="USA">USA</option>
                         <option value="UK">UK</option>
@@ -350,13 +339,16 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                     </select>
                 </div>
 
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    gap: '10px',
-                    marginTop: '20px',
-                    marginBottom: '20px',
-                }}>
+                {/* Buttons */}
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: '10px',
+                        marginTop: '20px',
+                        marginBottom: '20px',
+                    }}
+                >
                     <button
                         onClick={onCancel}
                         style={{
@@ -372,12 +364,12 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                         Cancel
                     </button>
                     <button
-                        onClick={() => {
+                        onClick={() =>
                             onSave({
                                 ...formData,
                                 favoriteTopics: selectedTopics,
-                            });
-                        }}
+                            })
+                        }
                         style={{
                             backgroundColor: '#031A6B',
                             color: 'white',

@@ -12,16 +12,14 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(
-    registerUserDto: RegisterUserDto,
-  ): Promise<{ message: string; userId: number }> {
+  async register(registerUserDto: RegisterUserDto): Promise<User> {
     const { email, password, confirmPassword } = registerUserDto;
 
     if (password !== confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
 
-    const existingUser: User | null = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
     if (existingUser) {
@@ -29,15 +27,11 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await this.prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-      },
+      data: { email, password: hashedPassword },
     });
 
-    return { message: 'Registration successful', userId: user.id };
+    return user;
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {
