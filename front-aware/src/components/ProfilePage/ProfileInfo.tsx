@@ -9,8 +9,8 @@ interface ProfileInfoProps {
     name: string;
     email: string;
     bio: string;
-    coverImage?: string;
-    profileImage?: string;
+    bannerPhoto?: string;
+    profilePhoto?: string;
 }
 
 const ProfileInfo: React.FC<ProfileInfoProps> = ({
@@ -21,8 +21,8 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
                                                      name,
                                                      email,
                                                      bio,
-                                                     coverImage = '/news1.jpg',
-                                                     profileImage = '/news2.jpg'
+                                                     bannerPhoto = '/news1.jpg',
+                                                     profilePhoto = '/news2.jpg'
                                                  }) => {
     return (
         <div style={{
@@ -40,7 +40,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
         }}>
             <div style={{
                 height: '120px',
-                backgroundImage: `url('${coverImage}')`,
+                backgroundImage: `url('${bannerPhoto}')`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
             }}></div>
@@ -57,7 +57,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
                 backgroundColor: '#ccc',
             }}>
                 <img
-                    src={profileImage}
+                    src={profilePhoto}
                     alt="Profile"
                     style={{width: '100%', height: '100%', objectFit: 'cover'}}
                 />

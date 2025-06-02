@@ -77,6 +77,9 @@ const CredentialsForm: React.FC<CredentialsFormProps> = ({mode}) => {
                 setError(errorData.message || 'Something went wrong');
                 return;
             }
+            const {accessToken} = await response.json();
+            localStorage.setItem('authToken', accessToken);
+
 
             if (mode === 'signup') {
                 navigate('/createprofile', {state: {email}});

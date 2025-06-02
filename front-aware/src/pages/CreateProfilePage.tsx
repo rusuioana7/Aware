@@ -6,15 +6,29 @@ const CreateProfilePage: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const {email: registeredEmail} = (location.state as { email?: string }) || {};
-
     const [profileData, setProfileData] = useState<ProfileData | null>(null);
     const [isEditing, setIsEditing] = useState(true);
 
     useEffect(() => {
-        if (registeredEmail) {
+        console.log('[CreateProfilePage] location.search =', location.search);
+
+        const params = new URLSearchParams(location.search);
+        const queryEmail = params.get('email');
+        const token = params.get('accessToken');
+
+        if (token) {
+            console.log('[CreateProfilePage] Found accessToken in URL:', token);
+            localStorage.setItem('authToken', token);
+            params.delete('accessToken');
+            const newSearch = params.toString();
+            const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '');
+            window.history.replaceState({}, '', newUrl);
+        }
+
+        if (queryEmail) {
+            console.log('[CreateProfilePage] Found email in URL:', queryEmail);
             const emptyProfile: ProfileData = {
-                email: registeredEmail,
+                email: queryEmail,
                 name: '',
                 bio: '',
                 favoriteTopics: [],
@@ -28,16 +42,29 @@ const CreateProfilePage: React.FC = () => {
             return;
         }
 
-        fetch('http://localhost:3001/users/me', {
-            credentials: 'include',
-        })
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error('Not authenticated');
+
+        console.log('[CreateProfilePage] No accessToken or email in URL → fetching /users/me');
+        (async () => {
+            try {
+                const res = await fetch('http://localhost:3001/users/me', {
+                    method: 'GET',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
+                });
+
+                console.log('[CreateProfilePage] GET /users/me status =', res.status);
+                if (res.status === 401 || res.status === 404) {
+                    console.error('[CreateProfilePage] /users/me returned 401/404, redirecting to /login');
+                    navigate('/login');
+                    return;
                 }
-                return res.json();
-            })
-            .then(data => {
+                if (!res.ok) {
+                    throw new Error(`Failed to load user (${res.status})`);
+                }
+
+                const data = await res.json();
+                console.log('[CreateProfilePage] GET /users/me JSON =', data);
+
                 const emptyProfile: ProfileData = {
                     email: data.email || '',
                     name: '',
@@ -47,21 +74,27 @@ const CreateProfilePage: React.FC = () => {
                     country: '',
                     profilePhoto: '/default-avatar.png',
                     bannerPhoto: '',
-                    dateJoined: data.createdAt || '',
+                    dateJoined: data.createdAt || new Date().toISOString(),
                 };
                 setProfileData(emptyProfile);
-            })
-            .catch(() => {
+            } catch (err) {
+                console.error('[CreateProfilePage] Error in fetch /users/me:', err);
                 navigate('/login');
-            });
-    }, [registeredEmail, navigate]);
+            }
+        })();
+    }, [location, navigate]);
 
     if (!profileData) {
-        return <div style={{color: 'white', textAlign: 'center', marginTop: '2rem'}}>Loading profile...</div>;
+        return (
+            <div style={{color: 'white', textAlign: 'center', marginTop: '2rem'}}>
+                Loading profile...
+            </div>
+        );
     }
 
     const handleSave = async (updatedData: ProfileData) => {
         try {
+            console.log('[CreateProfilePage] Saving profile with data:', updatedData);
             const {name, bio, favoriteTopics, language, country, profilePhoto, bannerPhoto} = updatedData;
             const payload = {name, bio, favoriteTopics, language, country, profilePhoto, bannerPhoto};
 
@@ -72,18 +105,17 @@ const CreateProfilePage: React.FC = () => {
                 body: JSON.stringify(payload),
             });
 
+            console.log('[CreateProfilePage] PUT /users/profile status =', res.status);
             if (!res.ok) {
                 const errorText = await res.text();
                 throw new Error(`Failed to save profile: ${errorText}`);
             }
 
-            const savedProfile = await res.json();
-            setProfileData(prev => ({...(prev || {}), ...savedProfile}));
+            console.log('[CreateProfilePage] Profile saved successfully');
             setIsEditing(false);
-
             navigate('/home');
         } catch (err) {
-            console.error('Error saving profile:', err);
+            console.error('[CreateProfilePage] Error saving profile:', err);
             alert('Error saving profile. Please try again.');
         }
     };
@@ -105,7 +137,11 @@ const CreateProfilePage: React.FC = () => {
                         zIndex: 999,
                     }}
                 >
-                    <EditProfile initialData={profileData} onCancel={() => setIsEditing(false)} onSave={handleSave}/>
+                    <EditProfile
+                        initialData={profileData}
+                        onCancel={() => setIsEditing(false)}
+                        onSave={handleSave}
+                    />
                 </div>
             )}
         </div>

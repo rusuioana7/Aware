@@ -29,9 +29,16 @@ interface GoogleButtonProps {
     mode?: 'login' | 'signup';
 }
 
-const GoogleButton: React.FC<GoogleButtonProps> = ({label = 'Sign in with Google', mode = 'login'}) => {
+const GoogleButton: React.FC<GoogleButtonProps> = ({
+                                                       label = 'Sign in with Google',
+                                                       mode = 'login',
+                                                   }) => {
     const handleGoogleLogin = async () => {
-        await fetch('http://localhost:3001/auth/logout', {method: 'POST', credentials: 'include'});
+        await fetch('http://localhost:3001/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+        });
+
         window.location.href = `http://localhost:3001/auth/google/start?mode=${mode}`;
     };
 
@@ -46,6 +53,5 @@ const GoogleButton: React.FC<GoogleButtonProps> = ({label = 'Sign in with Google
         </button>
     );
 };
-
 
 export default GoogleButton;
