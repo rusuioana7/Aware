@@ -1,21 +1,25 @@
 import {
-  Controller,
-  Post,
-  Delete,
+  BadRequestException,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
   Req,
   Res,
   UseGuards,
-  BadRequestException,
-  Get,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
 import 'express-session';
+
+interface GoogleUser {
+  email: string;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -102,8 +106,7 @@ export class AuthController {
 
   @Get('google/start')
   async googleStart(@Req() req: Request, @Res() res: Response) {
-    const mode = req.query.mode === 'signup' ? 'signup' : 'login';
-    req.session.mode = mode;
+    req.session.mode = req.query.mode === 'signup' ? 'signup' : 'login';
     console.log('✅ Setat mode în sesiune:', req.session.mode);
     console.log(' sesiune dupa setare:', req.session);
     req.session.save(() => {
@@ -113,18 +116,15 @@ export class AuthController {
 
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req, @Res() res) {
+  async googleAuthRedirect(
+    @Req() req: Request & { user: GoogleUser },
+    @Res() res: Response,
+  ) {
     const rawMode = req.session?.mode;
     const mode: 'login' | 'signup' = rawMode === 'signup' ? 'signup' : 'login';
 
-    console.log('➡️ Google Redirect:');
-    console.log('Mode from session:', mode);
-    console.log('User:', req.user);
-    console.log('⛔ Mode în sesiune la redirect:', req.session?.mode);
-
     try {
       const result = await this.authService.googleLogin(req.user, mode);
-
       res.cookie('jwt', result.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -132,12 +132,19 @@ export class AuthController {
         maxAge: 1000 * 60 * 60 * 24,
       });
 
-      res.redirect('http://localhost:5173/home');
+      if (mode === 'signup') {
+        const email = encodeURIComponent(req.user.email);
+        return res.redirect(
+          `http://localhost:5173/createprofile?email=${email}`,
+        );
+      }
+
+      return res.redirect('http://localhost:5173/home');
     } catch (error: unknown) {
       if (error instanceof Error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
       } else {
-        res.status(400).json({ message: 'Unknown error occurred' });
+        return res.status(400).json({ message: 'Unknown error occurred' });
       }
     }
   }

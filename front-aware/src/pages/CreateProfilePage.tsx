@@ -6,7 +6,12 @@ const CreateProfilePage: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const {email: registeredEmail} = (location.state as { email?: string }) || {};
+    const stateEmail = (location.state as { email?: string })?.email;
+
+    const queryParams = new URLSearchParams(location.search);
+    const queryEmail = queryParams.get('email') || '';
+
+    const registeredEmail = stateEmail || queryEmail;
 
     const [profileData, setProfileData] = useState<ProfileData | null>(null);
     const [isEditing, setIsEditing] = useState(true);
@@ -32,9 +37,7 @@ const CreateProfilePage: React.FC = () => {
             credentials: 'include',
         })
             .then(res => {
-                if (!res.ok) {
-                    throw new Error('Not authenticated');
-                }
+                if (!res.ok) throw new Error('Not authenticated');
                 return res.json();
             })
             .then(data => {
