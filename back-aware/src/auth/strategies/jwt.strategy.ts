@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy, StrategyOptionsWithRequest } from 'passport-jwt';
+import { Strategy, ExtractJwt, StrategyOptionsWithRequest } from 'passport-jwt';
 import { Request } from 'express';
 
-interface JwtPayload {
+export interface JwtPayload {
   sub: number;
+  email: string;
+}
+
+export interface JwtUser {
+  id: number;
   email: string;
 }
 
@@ -13,8 +18,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        (req: Request) => req?.cookies?.jwt || null,
+        (req: Request | null): string | null => {
+          if (
+            req &&
+            typeof req.cookies === 'object' &&
+            typeof req.cookies.jwt === 'string'
+          ) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return req.cookies.jwt;
+          }
+          return null;
+        },
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET,
@@ -22,7 +37,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     } as StrategyOptionsWithRequest);
   }
 
-  validate(req: Request, payload: JwtPayload) {
-    return { userId: payload.sub, email: payload.email };
+  validate(req: Request, payload: JwtPayload): JwtUser {
+    const user: JwtUser = {
+      id: payload.sub,
+      email: payload.email,
+    };
+    return user;
   }
 }

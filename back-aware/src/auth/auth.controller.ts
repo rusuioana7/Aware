@@ -25,8 +25,22 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(@Body() registerDto: RegisterUserDto) {
-    return this.authService.register(registerDto);
+  async register(
+    @Body() registerDto: RegisterUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const user = await this.authService.register(registerDto);
+
+    const token = this.authService.login(user).access_token;
+
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    });
+
+    return { message: 'Registration successful' };
   }
 
   @Post('login')
@@ -127,6 +141,7 @@ export class AuthController {
       }
     }
   }
+
   @Get('clear-session')
   clearSession(@Req() req: Request, @Res() res: Response) {
     req.session.destroy(() => {

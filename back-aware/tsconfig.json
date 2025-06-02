@@ -20,5 +20,5 @@
     "strict": true,
     "esModuleInterop": true,
   },
-  "include": ["src/**/*", "src/auth/express-session.d.ts"]
+  "include": ["src/**/*", "src/auth/express-session.d.ts","./src/types"]
 }
