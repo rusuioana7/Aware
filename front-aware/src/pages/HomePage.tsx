@@ -14,6 +14,19 @@ const HomePage: React.FC = () => {
     const location = useLocation();
     const [view, setView] = useState<'All' | 'Articles' | 'Threads'>('All');
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('accessToken');
+        if (token) {
+            localStorage.setItem('authToken', token);
+
+            params.delete('accessToken');
+            const newSearch = params.toString();
+            const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '');
+            window.history.replaceState({}, '', newUrl);
+        }
+    }, []);
+
 
     useEffect(() => {
         if (location.hash) {

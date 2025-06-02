@@ -7,11 +7,23 @@ import {
   Req,
   HttpCode,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UserProfile, UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthenticatedRequest } from '../types/express';
-import { User } from '@prisma/client';
+
+interface FullProfileResponse {
+  id: number;
+  email: string;
+  name: string | null;
+  bio: string | null;
+  language: string | null;
+  country: string | null;
+  favoriteTopics: string[];
+  createdAt: string;
+  profilePhoto?: string | null;
+  bannerPhoto?: string | null;
+}
 
 @Controller('users')
 export class UsersController {
@@ -19,12 +31,21 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getMe(@Req() req: AuthenticatedRequest) {
+  async getMe(@Req() req: AuthenticatedRequest): Promise<FullProfileResponse> {
     const userId = req.user.id;
-    const user = await this.usersService.findById(userId);
+    const user: UserProfile = await this.usersService.findById(userId);
+
     return {
-      email: user?.email || '',
-      createdAt: user?.createdAt.toISOString() || '',
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      bio: user.bio,
+      language: user.language,
+      country: user.country,
+      favoriteTopics: user.favoriteTopics || [],
+      createdAt: user.createdAt.toISOString(),
+      profilePhoto: user.profilePhoto ?? null,
+      bannerPhoto: user.bannerPhoto ?? null,
     };
   }
 
@@ -34,7 +55,7 @@ export class UsersController {
   async updateProfile(
     @Req() req: AuthenticatedRequest,
     @Body() data: UpdateProfileDto,
-  ): Promise<User> {
+  ): Promise<UserProfile> {
     const userId = req.user.id;
     return this.usersService.updateProfile(userId, data);
   }

@@ -34,7 +34,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = await this.authService.register(registerDto);
-
     const token = this.authService.login(user).access_token;
 
     res.cookie('jwt', token, {
@@ -44,7 +43,7 @@ export class AuthController {
       maxAge: 1000 * 60 * 60 * 24, // 1 day
     });
 
-    return { message: 'Registration successful' };
+    return { accessToken: token };
   }
 
   @Post('login')
@@ -56,21 +55,21 @@ export class AuthController {
       loginDto.email,
       loginDto.password,
     );
-
     if (!user) {
       throw new BadRequestException('Invalid credentials');
     }
 
-    const token = this.authService.login(user);
+    const tokenObj = this.authService.login(user);
+    const jwt = tokenObj.access_token;
 
-    res.cookie('jwt', token.access_token, {
+    res.cookie('jwt', jwt, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: 1000 * 60 * 60 * 24,
     });
 
-    return { message: 'Login successful' };
+    return { accessToken: jwt };
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -86,15 +85,11 @@ export class AuthController {
     if (!req.user) {
       throw new BadRequestException('User not authenticated');
     }
-
     const userId = req.user['userId'] ?? req.user['sub'];
-
     if (!userId) {
       throw new BadRequestException('User ID not found');
     }
-
     await this.prisma.user.delete({ where: { id: Number(userId) } });
-
     return { message: 'Account deleted successfully' };
   }
 
@@ -107,8 +102,6 @@ export class AuthController {
   @Get('google/start')
   async googleStart(@Req() req: Request, @Res() res: Response) {
     req.session.mode = req.query.mode === 'signup' ? 'signup' : 'login';
-    console.log('✅ Setat mode în sesiune:', req.session.mode);
-    console.log(' sesiune dupa setare:', req.session);
     req.session.save(() => {
       res.redirect('/auth/google');
     });
@@ -125,7 +118,9 @@ export class AuthController {
 
     try {
       const result = await this.authService.googleLogin(req.user, mode);
-      res.cookie('jwt', result.token, {
+      const jwt = result.token;
+
+      res.cookie('jwt', jwt, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -135,11 +130,11 @@ export class AuthController {
       if (mode === 'signup') {
         const email = encodeURIComponent(req.user.email);
         return res.redirect(
-          `http://localhost:5173/createprofile?email=${email}`,
+          `http://localhost:5173/createprofile?email=${email}&accessToken=${jwt}`,
         );
       }
 
-      return res.redirect('http://localhost:5173/home');
+      return res.redirect(`http://localhost:5173/home?accessToken=${jwt}`);
     } catch (error: unknown) {
       if (error instanceof Error) {
         return res.status(400).json({ message: error.message });

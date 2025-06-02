@@ -38,6 +38,7 @@ const GoogleButton: React.FC<GoogleButtonProps> = ({
             method: 'POST',
             credentials: 'include',
         });
+
         window.location.href = `http://localhost:3001/auth/google/start?mode=${mode}`;
     };
 

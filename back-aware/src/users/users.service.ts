@@ -1,42 +1,75 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { User } from '@prisma/client';
+
+export type UserProfile = {
+  id: number;
+  email: string;
+  name: string | null;
+  bio: string | null;
+  language: string | null;
+  country: string | null;
+  favoriteTopics: string[];
+  createdAt: Date;
+  profilePhoto: string | null;
+  bannerPhoto: string | null;
+};
 
 @Injectable()
 export class UsersService {
-  private readonly logger = new Logger(UsersService.name);
+  constructor(private readonly prisma: PrismaService) {}
 
-  constructor(private prisma: PrismaService) {}
-
-  async findById(userId: number): Promise<User | null> {
-    return this.prisma.user.findUnique({
+  async findById(userId: number): Promise<UserProfile> {
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        bio: true,
+        language: true,
+        country: true,
+        favoriteTopics: true,
+        createdAt: true,
+        profilePhoto: true,
+        bannerPhoto: true,
+      },
     });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found.`);
+    }
+
+    return user;
   }
 
-  async updateProfile(userId: number, data: UpdateProfileDto): Promise<User> {
-    this.logger.log(
-      `Updating user ${userId} with data: ${JSON.stringify(data)}`,
-    );
-    try {
-      const updated = await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          name: data.name,
-          bio: data.bio,
-          language: data.language,
-          country: data.country,
-          favoriteTopics: data.favoriteTopics,
-          profilePhoto: data.profilePhoto,
-          bannerPhoto: data.bannerPhoto,
-        },
-      });
-      this.logger.log(`Updated user: ${JSON.stringify(updated)}`);
-      return updated;
-    } catch (error: unknown) {
-      this.logger.error(`Failed to update user ${userId}: ${error}`);
-      throw error;
-    }
+  async updateProfile(
+    userId: number,
+    data: UpdateProfileDto,
+  ): Promise<UserProfile> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        name: data.name,
+        bio: data.bio,
+        language: data.language,
+        country: data.country,
+        favoriteTopics: data.favoriteTopics,
+        profilePhoto: data.profilePhoto,
+        bannerPhoto: data.bannerPhoto,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        bio: true,
+        language: true,
+        country: true,
+        favoriteTopics: true,
+        createdAt: true,
+        profilePhoto: true,
+        bannerPhoto: true,
+      },
+    });
   }
 }
