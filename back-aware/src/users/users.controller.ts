@@ -17,8 +17,8 @@ interface FullProfileResponse {
   email: string;
   name: string | null;
   bio: string | null;
-  language: string | null;
-  country: string | null;
+  language: string[];
+  country: string[];
   favoriteTopics: string[];
   createdAt: string;
   profilePhoto?: string | null;

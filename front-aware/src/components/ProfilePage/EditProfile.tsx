@@ -1,11 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import TopicTag from '../Cards/Tags/TopicTag';
-import {TOPIC_COLORS} from '../Cards/Tags/TagColor';
+import { TOPIC_COLORS } from '../Cards/Tags/TagColor';
 
 export interface ProfileData {
     favoriteTopics: string[];
-    language: string;
-    country: string;
+    language: string[];
+    country: string[];
     name: string;
     email: string;
     bio: string;
@@ -31,15 +31,6 @@ const inputStyle: React.CSSProperties = {
     outline: 'none',
 };
 
-const selectStyle: React.CSSProperties = {
-    padding: '10px',
-    fontSize: '16px',
-    borderRadius: '8px',
-    border: '1px solid #ccc',
-    backgroundColor: '#f5f5f5',
-    width: '70%',
-};
-
 const labelStyle: React.CSSProperties = {
     fontWeight: 'bold',
     color: '#031A6B',
@@ -47,44 +38,83 @@ const labelStyle: React.CSSProperties = {
     fontSize: '18px',
 };
 
-const rowStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: '16px',
-    gap: '10px',
-};
-
 const allTopics = Object.keys(TOPIC_COLORS)
     .filter(key => key !== 'general' && key !== 'all')
     .map(key => key.charAt(0).toUpperCase() + key.slice(1));
 
-const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}) => {
+const allLanguages = ['Romanian', 'English', 'French', 'Spanish', 'German'];
+
+const allCountries = [
+    'Albania','Andorra','Armenia','Austria','Azerbaijan',
+    'Belarus','Belgium','Bosnia and Herzegovina','Bulgaria',
+    'Croatia','Cyprus','Czech Republic','Denmark','Estonia',
+    'Finland','France','Georgia','Germany','Greece','Hungary',
+    'Iceland','Ireland','Italy','Kazakhstan','Kosovo','Latvia',
+    'Liechtenstein','Lithuania','Luxembourg','Malta','Moldova',
+    'Monaco','Montenegro','Netherlands','North Macedonia','Norway',
+    'Poland','Portugal','Romania','Russia','San Marino','Serbia',
+    'Slovakia','Slovenia','Spain','Sweden','Switzerland','Turkey',
+    'Ukraine','United Kingdom','Vatican City'
+];
+
+const EditProfile: React.FC<EditProfileProps> = ({
+                                                     initialData,
+                                                     onCancel,
+                                                     onSave,
+                                                 }) => {
     const [formData, setFormData] = useState<ProfileData>(initialData);
-    const [selectedTopics, setSelectedTopics] = useState<string[]>(initialData.favoriteTopics || []);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const [selectedTopics, setSelectedTopics] = useState<string[]>(
+        initialData.favoriteTopics || []
+    );
+    const [topicsDropdownOpen, setTopicsDropdownOpen] = useState(false);
+    const topicsDropdownRef = useRef<HTMLDivElement>(null);
+
+    const [selectedLanguages, setSelectedLanguages] = useState<string[]>(
+        initialData.language || []
+    );
+    const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+    const langDropdownRef = useRef<HTMLDivElement>(null);
+
+    const [selectedCountries, setSelectedCountries] = useState<string[]>(
+        initialData.country || []
+    );
+    const [countryDropdownOpen, setCountryDropdownOpen] = useState(false);
+    const countryDropdownRef = useRef<HTMLDivElement>(null);
 
     const fileInputAvatarRef = useRef<HTMLInputElement>(null);
     const fileInputCoverRef = useRef<HTMLInputElement>(null);
-
     const [isBannerHover, setIsBannerHover] = useState(false);
     const [isProfileHover, setIsProfileHover] = useState(false);
 
     useEffect(() => {
         function handler(event: MouseEvent) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setDropdownOpen(false);
+            if (
+                topicsDropdownRef.current &&
+                !topicsDropdownRef.current.contains(event.target as Node)
+            ) {
+                setTopicsDropdownOpen(false);
+            }
+            if (
+                langDropdownRef.current &&
+                !langDropdownRef.current.contains(event.target as Node)
+            ) {
+                setLangDropdownOpen(false);
+            }
+            if (
+                countryDropdownRef.current &&
+                !countryDropdownRef.current.contains(event.target as Node)
+            ) {
+                setCountryDropdownOpen(false);
             }
         }
-
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
 
     const handleChange = (field: keyof ProfileData, value: string) => {
-        setFormData(prev => ({...prev, [field]: value}));
+        setFormData(prev => ({ ...prev, [field]: value }));
     };
-
 
     const handleFileChange = async (
         field: 'profilePhoto' | 'bannerPhoto',
@@ -94,7 +124,6 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
         try {
             const form = new FormData();
             form.append('image', file);
-
             const uploadRes = await fetch('http://localhost:3001/upload', {
                 method: 'POST',
                 body: form,
@@ -103,12 +132,12 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 const errorJson = await uploadRes.json();
                 throw new Error(errorJson.message || 'Upload failed');
             }
-            const {url} = await uploadRes.json();
-            setFormData(prev => ({...prev, [field]: url}));
+            const { url } = await uploadRes.json();
+            setFormData(prev => ({ ...prev, [field]: url }));
         } catch (err: unknown) {
-            console.error('File upload error:', err);
+            console.error('Upload error:', err);
             if (err instanceof Error) {
-                alert(`Upload error: ${err.message}`);
+                alert(`Upload failed: ${err.message}`);
             } else {
                 alert('Unknown upload error');
             }
@@ -117,8 +146,34 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
 
     const toggleTopic = (topic: string) => {
         setSelectedTopics(prev => {
-            const updated = prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic];
-            return updated.sort((a, b) => allTopics.indexOf(a) - allTopics.indexOf(b));
+            const updated = prev.includes(topic)
+                ? prev.filter(t => t !== topic)
+                : [...prev, topic];
+            return updated.sort(
+                (a, b) => allTopics.indexOf(a) - allTopics.indexOf(b)
+            );
+        });
+    };
+
+    const toggleLanguage = (lang: string) => {
+        setSelectedLanguages(prev => {
+            const updated = prev.includes(lang)
+                ? prev.filter(l => l !== lang)
+                : [...prev, lang];
+            return updated.sort(
+                (a, b) => allLanguages.indexOf(a) - allLanguages.indexOf(b)
+            );
+        });
+    };
+
+    const toggleCountry = (ctr: string) => {
+        setSelectedCountries(prev => {
+            const updated = prev.includes(ctr)
+                ? prev.filter(c => c !== ctr)
+                : [...prev, ctr];
+            return updated.sort(
+                (a, b) => allCountries.indexOf(a) - allCountries.indexOf(b)
+            );
         });
     };
 
@@ -129,13 +184,13 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 backgroundColor: '#ffffff',
                 borderRadius: '8px',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
-                overflow: 'hidden',
+                /* Allow dropdown panels to overflow */
+                overflow: 'visible',
                 position: 'relative',
-                maxHeight: '700px',
-                overflowY: 'auto',
+                maxHeight: '90vh',
             }}
         >
-            {/* banner photo */}
+            {/* banner */}
             <div
                 style={{
                     height: '120px',
@@ -162,7 +217,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            zIndex: 1,
+                            zIndex: 2,
                             fontWeight: 'bold',
                             fontSize: 16,
                         }}
@@ -174,12 +229,14 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                     type="file"
                     accept="image/*"
                     ref={fileInputCoverRef}
-                    style={{display: 'none'}}
-                    onChange={e => handleFileChange('bannerPhoto', e.target.files?.[0] || null)}
+                    style={{ display: 'none' }}
+                    onChange={e =>
+                        handleFileChange('bannerPhoto', e.target.files?.[0] || null)
+                    }
                 />
             </div>
 
-            {/* profile photo */}
+            {/* profile */}
             <div
                 style={{
                     width: '100px',
@@ -200,7 +257,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 <img
                     src={formData.profilePhoto}
                     alt="Avatar"
-                    style={{width: '100%', height: '100%', objectFit: 'cover'}}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 {isProfileHover && (
                     <div
@@ -215,7 +272,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            zIndex: 1,
+                            zIndex: 2,
                             fontWeight: 'bold',
                             fontSize: 14,
                             borderRadius: '50%',
@@ -228,14 +285,16 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                     type="file"
                     accept="image/*"
                     ref={fileInputAvatarRef}
-                    style={{display: 'none'}}
-                    onChange={e => handleFileChange('profilePhoto', e.target.files?.[0] || null)}
+                    style={{ display: 'none' }}
+                    onChange={e =>
+                        handleFileChange('profilePhoto', e.target.files?.[0] || null)
+                    }
                 />
             </div>
 
-            {/* name and email */}
-            <div style={{marginTop: '5px', marginLeft: '140px', padding: '10px 20px 0 20px'}}>
-                <label style={{...labelStyle, display: 'block'}}>Name:</label>
+            {/* Name + Email */}
+            <div style={{ marginTop: '5px', marginLeft: '140px', padding: '10px 20px 0 20px' }}>
+                <label style={{ ...labelStyle, display: 'block' }}>Name:</label>
                 <input
                     type="text"
                     value={formData.name}
@@ -244,7 +303,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                     placeholder="Name"
                 />
 
-                <label style={{...labelStyle, display: 'block'}}>Email:</label>
+                <label style={{ ...labelStyle, display: 'block' }}>Email:</label>
                 <input
                     type="email"
                     value={formData.email}
@@ -255,22 +314,22 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 />
             </div>
 
-            {/* bio */}
-            <div style={{marginLeft: '140px', padding: '0 20px'}}>
-                <label style={{...labelStyle, display: 'block'}}>Bio:</label>
+            {/* Bio */}
+            <div style={{ marginLeft: '140px', padding: '0 20px' }}>
+                <label style={{ ...labelStyle, display: 'block' }}>Bio:</label>
                 <textarea
                     value={formData.bio}
                     onChange={e => handleChange('bio', e.target.value)}
-                    style={{...inputStyle, height: '100px', resize: 'vertical'}}
+                    style={{ ...inputStyle, height: '100px', resize: 'vertical' }}
                     placeholder="Bio"
                 />
             </div>
 
-            <hr style={{margin: '20px 10px', borderTop: '1px solid #ddd'}}/>
+            <hr style={{ margin: '20px 10px', borderTop: '1px solid #ddd' }} />
 
-            {/* favorite topics */}
-            <div style={{padding: '0px 30px'}}>
-                <div style={{position: 'relative'}} ref={dropdownRef}>
+            {/* Favorite Topics  */}
+            <div style={{ padding: '0px 30px' }}>
+                <div style={{ position: 'relative' }} ref={topicsDropdownRef}>
                     <label
                         style={{
                             ...labelStyle,
@@ -278,33 +337,33 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                             marginBottom: 6,
                             cursor: 'pointer',
                         }}
-                        onClick={() => setDropdownOpen(open => !open)}
+                        onClick={() => setTopicsDropdownOpen(open => !open)}
                     >
                         Topics:
-                        <div style={{display: 'inline-flex', flexWrap: 'wrap', gap: 6, marginTop: 6}}>
+                        <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
                             {selectedTopics.length === 0 ? (
-                                <span style={{color: '#888', fontStyle: 'italic'}}>Select...</span>
+                                <span style={{ color: '#888', fontStyle: 'italic' }}>Select...</span>
                             ) : (
                                 selectedTopics.map(topic => (
-                                    <TopicTag key={topic} label={topic} selected={true}/>
+                                    <TopicTag key={topic} label={topic} selected={true} />
                                 ))
                             )}
                         </div>
                     </label>
 
-                    {dropdownOpen && (
+                    {topicsDropdownOpen && (
                         <div
                             style={{
                                 position: 'absolute',
-                                top: 0,
-                                left: 300,
+                                top: '100%',
+                                left: 0,
                                 backgroundColor: 'white',
                                 border: '1px solid #CCC',
                                 borderRadius: 8,
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                                 padding: 8,
                                 zIndex: 10,
-                                minWidth: 180,
+                                minWidth: 200,
                                 maxHeight: 180,
                                 overflowY: 'auto',
                             }}
@@ -326,8 +385,8 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                                             justifyContent: 'space-between',
                                         }}
                                     >
-                                        <TopicTag label={topic} selected={isSelected}/>
-                                        {isSelected && <span style={{color: '#031A6B', fontWeight: 'bold'}}>✓</span>}
+                                        <span style={{ color: '#031A6B' }}>{topic}</span>
+                                        {isSelected && <span style={{ fontWeight: 'bold' }}>✓</span>}
                                     </div>
                                 );
                             })}
@@ -336,45 +395,149 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 </div>
             </div>
 
-            {/* language and country */}
-            <div style={{padding: '0 30px', marginTop: '10px'}}>
-                <div style={rowStyle}>
-                    <label style={labelStyle}>Language:</label>
-                    <select
-                        value={formData.language}
-                        onChange={e => handleChange('language', e.target.value)}
-                        style={selectStyle}
+            {/* Language */}
+            <div style={{ padding: '0px 30px', marginTop: '10px' }}>
+                <div style={{ position: 'relative' }} ref={langDropdownRef}>
+                    <label
+                        style={{
+                            ...labelStyle,
+                            display: 'block',
+                            marginBottom: 6,
+                            cursor: 'pointer',
+                        }}
+                        onClick={() => setLangDropdownOpen(open => !open)}
                     >
-                        <option value="">Select...</option>
-                        <option value="English">English</option>
-                        <option value="Romanian">Romanian</option>
-                        <option value="Spanish">Spanish</option>
-                        <option value="French">French</option>
-                    </select>
-                </div>
+                        Languages:
+                        <div style={{ display: 'inline-flex', gap: 6, marginTop: 6 }}>
+                            {selectedLanguages.length === 0 ? (
+                                <span style={{ color: '#888', fontStyle: 'italic' }}>Select...</span>
+                            ) : (
+                                <span style={{ color: '#031A6B' }}>
+                  {selectedLanguages.join(', ')}
+                </span>
+                            )}
+                        </div>
+                    </label>
 
-                <div style={rowStyle}>
-                    <label style={labelStyle}>Country:</label>
-                    <select
-                        value={formData.country}
-                        onChange={e => handleChange('country', e.target.value)}
-                        style={selectStyle}
+                    {langDropdownOpen && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                backgroundColor: 'white',
+                                border: '1px solid #CCC',
+                                borderRadius: 8,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                padding: 8,
+                                zIndex: 10,
+                                minWidth: 200,
+                                maxHeight: 180,
+                                overflowY: 'auto',
+                            }}
+                        >
+                            {allLanguages.map(lang => {
+                                const isSelected = selectedLanguages.includes(lang);
+                                return (
+                                    <div
+                                        key={lang}
+                                        onClick={() => toggleLanguage(lang)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                            padding: '6px 10px',
+                                            borderRadius: 6,
+                                            cursor: 'pointer',
+                                            backgroundColor: isSelected ? '#e0e7ff' : 'transparent',
+                                            justifyContent: 'space-between',
+                                        }}
+                                    >
+                                        <span style={{ color: '#031A6B' }}>{lang}</span>
+                                        {isSelected && <span style={{ fontWeight: 'bold' }}>✓</span>}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Country */}
+            <div style={{ padding: '0px 30px', marginTop: '10px' }}>
+                <div style={{ position: 'relative' }} ref={countryDropdownRef}>
+                    <label
+                        style={{
+                            ...labelStyle,
+                            display: 'block',
+                            marginBottom: 6,
+                            cursor: 'pointer',
+                        }}
+                        onClick={() => setCountryDropdownOpen(open => !open)}
                     >
-                        <option value="">Select...</option>
-                        <option value="Romania">Romania</option>
-                        <option value="USA">USA</option>
-                        <option value="UK">UK</option>
-                        <option value="Germany">Germany</option>
-                    </select>
-                </div>
+                        Countries:
+                        <div style={{ display: 'inline-flex', gap: 6, marginTop: 6 }}>
+                            {selectedCountries.length === 0 ? (
+                                <span style={{ color: '#888', fontStyle: 'italic' }}>Select...</span>
+                            ) : (
+                                <span style={{ color: '#031A6B' }}>
+                  {selectedCountries.join(', ')}
+                </span>
+                            )}
+                        </div>
+                    </label>
 
-                {/* buttons */}
+                    {countryDropdownOpen && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: 0,
+                                backgroundColor: 'white',
+                                border: '1px solid #CCC',
+                                borderRadius: 8,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                padding: 8,
+                                zIndex: 10,
+                                minWidth: 240,
+                                maxHeight: 150,
+                                overflowY: 'auto',
+                            }}
+                        >
+                            {allCountries.map(ctr => {
+                                const isSelected = selectedCountries.includes(ctr);
+                                return (
+                                    <div
+                                        key={ctr}
+                                        onClick={() => toggleCountry(ctr)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                            padding: '6px 10px',
+                                            borderRadius: 6,
+                                            cursor: 'pointer',
+                                            backgroundColor: isSelected ? '#e0e7ff' : 'transparent',
+                                            justifyContent: 'space-between',
+                                        }}
+                                    >
+                                        <span style={{ color: '#031A6B' }}>{ctr}</span>
+                                        {isSelected && <span style={{ fontWeight: 'bold' }}>✓</span>}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Cancel / Save Buttons */}
+            <div style={{ padding: '0 30px', marginTop: '20px' }}>
                 <div
                     style={{
                         display: 'flex',
                         justifyContent: 'flex-end',
                         gap: '10px',
-                        marginTop: '20px',
                         marginBottom: '20px',
                     }}
                 >
@@ -397,6 +560,8 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                             onSave({
                                 ...formData,
                                 favoriteTopics: selectedTopics,
+                                language: selectedLanguages, // array
+                                country: selectedCountries,  // array
                             })
                         }
                         style={{

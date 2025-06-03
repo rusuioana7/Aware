@@ -13,8 +13,8 @@ model User {
   password       String?
   name           String?
   bio            String?
-  language       String?
-  country        String?
+  language       String[]
+  country        String[]
   favoriteTopics String[]
   createdAt      DateTime @default(now())
   profilePhoto   String?
