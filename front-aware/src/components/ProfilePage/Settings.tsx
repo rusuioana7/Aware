@@ -1,6 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {MdOutlineLogout, MdDelete} from 'react-icons/md';
 import {CgExport} from 'react-icons/cg';
+import {useNavigate} from 'react-router-dom';
 
 const containerStyle: React.CSSProperties = {
     maxWidth: '100%',
@@ -28,7 +29,6 @@ const buttonGroupStyle: React.CSSProperties = {
     display: 'flex',
     gap: '12px',
 };
-
 const actionButtonStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -89,10 +89,16 @@ const notificationSectionStyle: React.CSSProperties = {
     marginTop: '10px',
 };
 
+const notificationHeaderStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '10px',
+};
+
 const notificationTitleStyle: React.CSSProperties = {
     fontSize: '20px',
     fontWeight: 'bold',
-    marginBottom: '20px',
     color: '#031A6B',
 };
 
@@ -109,6 +115,7 @@ const notificationRowStyle: React.CSSProperties = {
     alignItems: 'center',
     marginBottom: '10px',
 };
+
 
 const toggleSwitchStyle: React.CSSProperties = {
     position: 'relative',
@@ -146,7 +153,6 @@ const toggleSliderBeforeStyle: React.CSSProperties = {
     transform: 'translateX(0)',
 };
 
-
 interface ToggleProps {
     checked: boolean;
     onChange: () => void;
@@ -178,6 +184,14 @@ const Toggle: React.FC<ToggleProps> = ({checked, onChange, disabled}) => (
     </label>
 );
 
+const profileVisibilityStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: '20px',
+    width: '50%',
+};
+
 const connectedAccountsContainerStyle: React.CSSProperties = {
     marginTop: '20px',
     width: '50%',
@@ -196,14 +210,6 @@ const accountNameStyle: React.CSSProperties = {
     fontSize: '16px',
 };
 
-const statusStyle: React.CSSProperties = {
-    fontSize: '14px',
-    color: '#555',
-    marginRight: '20px',
-    minWidth: '80px',
-    textAlign: 'center',
-};
-
 const linkButtonStyle: React.CSSProperties = {
     padding: '6px 14px',
     backgroundColor: '#031A6B',
@@ -220,50 +226,272 @@ const unlinkButtonStyle: React.CSSProperties = {
 };
 
 const Settings: React.FC = () => {
-    const [email, setEmail] = useState('user@example.com');
-    const [password, setPassword] = useState('********');
-    const [editEmail, setEditEmail] = useState(false);
-    const [editPassword, setEditPassword] = useState(false);
+    const navigate = useNavigate();
 
-    const [emailNotifs, setEmailNotifs] = useState(true);
-    const [pushNotifs, setPushNotifs] = useState(true);
-    const [weeklySummary, setWeeklySummary] = useState(true);
-    const [dailySummary, setDailySummary] = useState(true);
-    const [topicAlerts, setTopicAlerts] = useState(true);
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [editEmail, setEditEmail] = useState<boolean>(false);
+    const [editPassword, setEditPassword] = useState<boolean>(false);
 
-    const [linkedAccounts, setLinkedAccounts] = useState({
-        google: true,
-        facebook: false,
-        twitter: true,
+    const [notifyWeeklyEmail, setNotifyWeeklyEmail] = useState<boolean>(false);
+    const [notifyDailyEmail, setNotifyDailyEmail] = useState<boolean>(false);
+    const [notifyTopicAlertsEmail, setNotifyTopicAlertsEmail] = useState<boolean>(false);
+    const [notifyWeeklyPush, setNotifyWeeklyPush] = useState<boolean>(false);
+    const [notifyDailyPush, setNotifyDailyPush] = useState<boolean>(false);
+    const [notifyTopicAlertsPush, setNotifyTopicAlertsPush] = useState<boolean>(false);
+
+    const [isProfilePublic, setIsProfilePublic] = useState<boolean>(true);
+
+    const [linkedGoogle, setLinkedGoogle] = useState<boolean>(false);
+
+    const getToken = () => localStorage.getItem('authToken') || '';
+
+    const getAuthHeaders = () => ({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
     });
 
-    const toggleAccount = (account: keyof typeof linkedAccounts) => {
-        setLinkedAccounts((prev) => ({
-            ...prev,
-            [account]: !prev[account],
-        }));
+    useEffect(() => {
+        async function fetchSettings() {
+            try {
+                const res = await fetch('http://localhost:3001/settings/export', {
+                    method: 'GET',
+                    headers: getAuthHeaders(),
+                });
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        navigate('/login');
+                        return;
+                    }
+                    throw new Error(`Failed to load settings (${res.status})`);
+                }
+                const data = await res.json();
+                setEmail(data.email);
+
+                setNotifyWeeklyEmail(data.notifyWeeklyEmail);
+                setNotifyDailyEmail(data.notifyDailyEmail);
+                setNotifyTopicAlertsEmail(data.notifyTopicAlertsEmail);
+                setNotifyWeeklyPush(data.notifyWeeklyPush);
+                setNotifyDailyPush(data.notifyDailyPush);
+                setNotifyTopicAlertsPush(data.notifyTopicAlertsPush);
+
+                setIsProfilePublic(data.isPublic);
+
+                setLinkedGoogle(data.provider === 'google');
+
+                setPassword('********');
+            } catch (err) {
+                console.error('Error fetching settings:', err);
+            }
+        }
+
+        fetchSettings();
+    }, [navigate]);
+
+    const handleLogout = async () => {
+        try {
+            await fetch('http://localhost:3001/settings/logout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+            });
+
+            localStorage.removeItem('authToken');
+            navigate('/login');
+        } catch (err) {
+            console.error('Logout failed', err);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (!window.confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+            return;
+        }
+        try {
+            const res = await fetch('http://localhost:3001/settings/account', {
+                method: 'DELETE',
+                headers: getAuthHeaders(),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Delete account failed');
+            }
+            localStorage.removeItem('authToken');
+            navigate('/');
+        } catch (err) {
+            console.error('Delete account failed', err);
+            alert('Error deleting account');
+        }
+    };
+
+    const handleExportData = async () => {
+        try {
+            const res = await fetch('http://localhost:3001/settings/export', {
+                method: 'GET',
+                headers: getAuthHeaders(),
+            });
+            if (!res.ok) {
+                throw new Error(`Export failed (${res.status})`);
+            }
+            const data = await res.json();
+            const blob = new Blob([JSON.stringify(data, null, 2)], {
+                type: 'application/json',
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'user_data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Export data failed', err);
+            alert('Error exporting data');
+        }
+    };
+
+    const handleSaveEmail = async () => {
+        try {
+            const res = await fetch('http://localhost:3001/settings/email', {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({newEmail: email}),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Update email failed');
+            }
+            setEditEmail(false);
+        } catch (err: unknown) {
+            console.error('Update email failed', err);
+            if (err instanceof Error) {
+                alert(`Error updating email: ${err.message}`);
+            } else {
+                alert(`Error updating email: ${String(err)}`);
+            }
+        }
+    };
+
+    const handleSavePassword = async () => {
+        try {
+            const res = await fetch('http://localhost:3001/settings/password', {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({newPassword: password}),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Update password failed');
+            }
+            setEditPassword(false);
+            setPassword('********');
+        } catch (err: unknown) {
+            console.error('Update password failed', err);
+            if (err instanceof Error) {
+                alert(`Error updating password: ${err.message}`);
+            } else {
+                alert(`Error updating password: ${String(err)}`);
+            }
+        }
+    };
+
+    const handleToggleNotifications = async () => {
+        const payload = {
+            notifyWeeklyEmail,
+            notifyDailyEmail,
+            notifyTopicAlertsEmail,
+            notifyWeeklyPush,
+            notifyDailyPush,
+            notifyTopicAlertsPush,
+        };
+        try {
+            const res = await fetch('http://localhost:3001/settings/notifications', {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || 'Failed to update notifications');
+            }
+        } catch (err: unknown) {
+            console.error('Update notifications failed', err);
+            if (err instanceof Error) {
+                alert(`Error updating notifications: ${err.message}`);
+            } else {
+                alert(`Error updating notifications: ${String(err)}`);
+            }
+        }
+    };
+
+
+    const handleToggleVisibility = async () => {
+        try {
+            const res = await fetch('http://localhost:3001/settings/visibility', {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({isPublic: !isProfilePublic}),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Update visibility failed');
+            }
+            const data = await res.json();
+            setIsProfilePublic(data.isPublic);
+        } catch (err: unknown) {
+            console.error('Update visibility failed', err);
+            if (err instanceof Error) {
+                alert(`Error updating visibility: ${err.message}`);
+            } else {
+                alert(`Error updating visibility: ${String(err)}`);
+            }
+        }
+    };
+
+    const handleUnlinkGoogle = async () => {
+        if (!window.confirm('Are you sure you want to unlink your Google account?')) return;
+        try {
+            const res = await fetch('http://localhost:3001/settings/unlink', {
+                method: 'DELETE',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({provider: 'google'}),
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message || 'Unlink Google failed');
+            }
+            setLinkedGoogle(false);
+        } catch (err: unknown) {
+            console.error('Update unlink failed', err);
+            if (err instanceof Error) {
+                alert(`Error updating unlink: ${err.message}`);
+            } else {
+                alert(`Error updating unlink: ${String(err)}`);
+            }
+        }
     };
 
     return (
         <div style={containerStyle}>
+            {/* header */}
             <div style={headerStyle}>
                 <div style={sectionTitleStyle}>Account</div>
                 <div style={buttonGroupStyle}>
-                    <button style={actionButtonStyle}>
+                    <button style={actionButtonStyle} onClick={handleLogout}>
                         <MdOutlineLogout size={18}/>
                         Logout
                     </button>
-                    <button style={deleteButtonStyle}>
+                    <button style={deleteButtonStyle} onClick={handleDeleteAccount}>
                         <MdDelete size={18}/>
                         Delete Account
                     </button>
-                    <button style={actionButtonStyle}>
+                    <button style={actionButtonStyle} onClick={handleExportData}>
                         <CgExport size={18}/>
                         Export Data
                     </button>
                 </div>
             </div>
 
+            {/* email + password */}
             <div style={rowGroupStyle}>
                 <div style={rowStyle}>
                     <div style={labelStyle}>Email:</div>
@@ -277,12 +505,15 @@ const Settings: React.FC = () => {
                     ) : (
                         <div style={{flex: 1, marginRight: '10px'}}>{email}</div>
                     )}
-                    <button
-                        onClick={() => setEditEmail(!editEmail)}
-                        style={editButtonStyle}
-                    >
-                        {editEmail ? 'Save' : 'Edit'}
-                    </button>
+                    {editEmail ? (
+                        <button style={editButtonStyle} onClick={handleSaveEmail}>
+                            Save
+                        </button>
+                    ) : (
+                        <button style={editButtonStyle} onClick={() => setEditEmail(true)}>
+                            Edit
+                        </button>
+                    )}
                 </div>
 
                 <div style={rowStyle}>
@@ -297,86 +528,177 @@ const Settings: React.FC = () => {
                     ) : (
                         <div style={{flex: 1, marginRight: '10px'}}>{password}</div>
                     )}
-                    <button
-                        onClick={() => setEditPassword(!editPassword)}
-                        style={editButtonStyle}
-                    >
-                        {editPassword ? 'Save' : 'Edit'}
-                    </button>
+                    {editPassword ? (
+                        <button style={editButtonStyle} onClick={handleSavePassword}>
+                            Save
+                        </button>
+                    ) : (
+                        <button style={editButtonStyle} onClick={() => setEditPassword(true)}>
+                            Edit
+                        </button>
+                    )}
                 </div>
             </div>
 
+            {/* notifications */}
             <div style={notificationSectionStyle}>
-                <div style={notificationTitleStyle}>Notifications</div>
+                <div style={notificationHeaderStyle}>
+                    <div style={notificationTitleStyle}>Notifications</div>
+                    <button style={actionButtonStyle} onClick={handleToggleNotifications}>
+                        Save
+                    </button>
+                </div>
 
                 <div style={notificationGridStyle}>
+                    {/* email notifications */}
                     <div>
                         <div style={notificationRowStyle}>
                             <div>Email Notifications</div>
                             <Toggle
-                                checked={emailNotifs}
-                                onChange={() => setEmailNotifs(!emailNotifs)}
+                                checked={notifyWeeklyEmail || notifyDailyEmail || notifyTopicAlertsEmail}
+                                onChange={() => {
+                                    const newVal = !(
+                                        notifyWeeklyEmail ||
+                                        notifyDailyEmail ||
+                                        notifyTopicAlertsEmail
+                                    );
+                                    setNotifyWeeklyEmail(newVal);
+                                    setNotifyDailyEmail(newVal);
+                                    setNotifyTopicAlertsEmail(newVal);
+                                }}
                             />
                         </div>
-                        <div style={{marginLeft: '10px', opacity: emailNotifs ? 1 : 0.5}}>
+                        <div
+                            style={{
+                                marginLeft: '10px',
+                                opacity:
+                                    notifyWeeklyEmail ||
+                                    notifyDailyEmail ||
+                                    notifyTopicAlertsEmail
+                                        ? 1
+                                        : 0.5,
+                            }}
+                        >
                             <div style={notificationRowStyle}>
-                                <div>Weekly Summary</div>
+                                <div>Weekly Summary (Email)</div>
                                 <Toggle
-                                    checked={weeklySummary}
-                                    onChange={() => setWeeklySummary(!weeklySummary)}
-                                    disabled={!emailNotifs}
+                                    checked={notifyWeeklyEmail}
+                                    onChange={() => setNotifyWeeklyEmail((prev) => !prev)}
+                                    disabled={
+                                        !(
+                                            notifyWeeklyEmail ||
+                                            notifyDailyEmail ||
+                                            notifyTopicAlertsEmail
+                                        )
+                                    }
                                 />
                             </div>
                             <div style={notificationRowStyle}>
-                                <div>Daily Summary</div>
+                                <div>Daily Summary (Email)</div>
                                 <Toggle
-                                    checked={dailySummary}
-                                    onChange={() => setDailySummary(!dailySummary)}
-                                    disabled={!emailNotifs}
+                                    checked={notifyDailyEmail}
+                                    onChange={() => setNotifyDailyEmail((prev) => !prev)}
+                                    disabled={
+                                        !(
+                                            notifyWeeklyEmail ||
+                                            notifyDailyEmail ||
+                                            notifyTopicAlertsEmail
+                                        )
+                                    }
                                 />
                             </div>
                             <div style={notificationRowStyle}>
-                                <div>Topic Alerts</div>
+                                <div>Topic Alerts (Email)</div>
                                 <Toggle
-                                    checked={topicAlerts}
-                                    onChange={() => setTopicAlerts(!topicAlerts)}
-                                    disabled={!emailNotifs}
+                                    checked={notifyTopicAlertsEmail}
+                                    onChange={() => setNotifyTopicAlertsEmail((prev) => !prev)}
+                                    disabled={
+                                        !(
+                                            notifyWeeklyEmail ||
+                                            notifyDailyEmail ||
+                                            notifyTopicAlertsEmail
+                                        )
+                                    }
                                 />
                             </div>
                         </div>
                     </div>
 
+                    {/* push notifications */}
                     <div>
                         <div style={notificationRowStyle}>
                             <div>Push Notifications</div>
                             <Toggle
-                                checked={pushNotifs}
-                                onChange={() => setPushNotifs(!pushNotifs)}
+                                checked={
+                                    notifyWeeklyPush ||
+                                    notifyDailyPush ||
+                                    notifyTopicAlertsPush
+                                }
+                                onChange={() => {
+                                    const newVal = !(
+                                        notifyWeeklyPush ||
+                                        notifyDailyPush ||
+                                        notifyTopicAlertsPush
+                                    );
+                                    setNotifyWeeklyPush(newVal);
+                                    setNotifyDailyPush(newVal);
+                                    setNotifyTopicAlertsPush(newVal);
+                                }}
                             />
                         </div>
-                        <div style={{marginLeft: '10px', opacity: pushNotifs ? 1 : 0.5}}>
+                        <div
+                            style={{
+                                marginLeft: '10px',
+                                opacity:
+                                    notifyWeeklyPush ||
+                                    notifyDailyPush ||
+                                    notifyTopicAlertsPush
+                                        ? 1
+                                        : 0.5,
+                            }}
+                        >
                             <div style={notificationRowStyle}>
-                                <div>Weekly Summary</div>
+                                <div>Weekly Summary (Push)</div>
                                 <Toggle
-                                    checked={weeklySummary}
-                                    onChange={() => setWeeklySummary(!weeklySummary)}
-                                    disabled={!pushNotifs}
+                                    checked={notifyWeeklyPush}
+                                    onChange={() => setNotifyWeeklyPush((prev) => !prev)}
+                                    disabled={
+                                        !(
+                                            notifyWeeklyPush ||
+                                            notifyDailyPush ||
+                                            notifyTopicAlertsPush
+                                        )
+                                    }
                                 />
                             </div>
                             <div style={notificationRowStyle}>
-                                <div>Daily Summary</div>
+                                <div>Daily Summary (Push)</div>
                                 <Toggle
-                                    checked={dailySummary}
-                                    onChange={() => setDailySummary(!dailySummary)}
-                                    disabled={!pushNotifs}
+                                    checked={notifyDailyPush}
+                                    onChange={() => setNotifyDailyPush((prev) => !prev)}
+                                    disabled={
+                                        !(
+                                            notifyWeeklyPush ||
+                                            notifyDailyPush ||
+                                            notifyTopicAlertsPush
+                                        )
+                                    }
                                 />
                             </div>
                             <div style={notificationRowStyle}>
-                                <div>Topic Alerts</div>
+                                <div>Topic Alerts (Push)</div>
                                 <Toggle
-                                    checked={topicAlerts}
-                                    onChange={() => setTopicAlerts(!topicAlerts)}
-                                    disabled={!pushNotifs}
+                                    checked={notifyTopicAlertsPush}
+                                    onChange={() =>
+                                        setNotifyTopicAlertsPush((prev) => !prev)
+                                    }
+                                    disabled={
+                                        !(
+                                            notifyWeeklyPush ||
+                                            notifyDailyPush ||
+                                            notifyTopicAlertsPush
+                                        )
+                                    }
                                 />
                             </div>
                         </div>
@@ -384,24 +706,34 @@ const Settings: React.FC = () => {
                 </div>
             </div>
 
+            {/* connected accounts + visibility */}
             <div style={connectedAccountsContainerStyle}>
                 <div style={sectionTitleStyle}>Connected Accounts</div>
-                {(['google', 'facebook', 'twitter'] as const).map((acc) => (
-                    <div key={acc} style={connectedRowStyle}>
-                        <div style={accountNameStyle}>
-                            {acc.charAt(0).toUpperCase() + acc.slice(1)}
-                        </div>
-                        <div style={statusStyle}>
-                            {linkedAccounts[acc] ? 'Linked' : 'Not linked'}
-                        </div>
-                        <button
-                            style={linkedAccounts[acc] ? unlinkButtonStyle : linkButtonStyle}
-                            onClick={() => toggleAccount(acc)}
-                        >
-                            {linkedAccounts[acc] ? 'Unlink' : 'Link'}
+
+                <div style={connectedRowStyle}>
+                    <div style={accountNameStyle}>Google</div>
+                    {linkedGoogle ? (
+                        <button style={unlinkButtonStyle} onClick={handleUnlinkGoogle}>
+                            Unlink
                         </button>
-                    </div>
-                ))}
+                    ) : (
+                        <button
+                            style={linkButtonStyle}
+                            onClick={() => {
+                                window.location.href = 'http://localhost:3001/auth/google/start?mode=login';
+                            }}
+                        >
+                            Link
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            <div style={profileVisibilityStyle}>
+                <div style={sectionTitleStyle}>Profile Visibility</div>
+                <button style={isProfilePublic ? unlinkButtonStyle : linkButtonStyle} onClick={handleToggleVisibility}>
+                    {isProfilePublic ? 'Make Private' : 'Make Public'}
+                </button>
             </div>
         </div>
     );

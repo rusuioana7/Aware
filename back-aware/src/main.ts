@@ -4,6 +4,8 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import passport from 'passport';
+import express from 'express';
+import { join } from 'path';
 import 'dotenv/config';
 
 async function bootstrap() {
@@ -34,6 +36,10 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
+  app.use(
+    '/uploads',
+    express.static(join(__dirname, '..', 'public', 'uploads')),
   );
 
   await app.listen(3001);
