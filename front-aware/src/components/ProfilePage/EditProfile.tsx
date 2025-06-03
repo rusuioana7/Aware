@@ -85,10 +85,33 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
         setFormData(prev => ({...prev, [field]: value}));
     };
 
-    const handleFileChange = (field: 'profilePhoto' | 'bannerPhoto', file: File | null) => {
-        if (file) {
-            const url = URL.createObjectURL(file);
+
+    const handleFileChange = async (
+        field: 'profilePhoto' | 'bannerPhoto',
+        file: File | null
+    ) => {
+        if (!file) return;
+        try {
+            const form = new FormData();
+            form.append('image', file);
+
+            const uploadRes = await fetch('http://localhost:3001/upload', {
+                method: 'POST',
+                body: form,
+            });
+            if (!uploadRes.ok) {
+                const errorJson = await uploadRes.json();
+                throw new Error(errorJson.message || 'Upload failed');
+            }
+            const {url} = await uploadRes.json();
             setFormData(prev => ({...prev, [field]: url}));
+        } catch (err: unknown) {
+            console.error('File upload error:', err);
+            if (err instanceof Error) {
+                alert(`Upload error: ${err.message}`);
+            } else {
+                alert('Unknown upload error');
+            }
         }
     };
 
@@ -112,6 +135,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 overflowY: 'auto',
             }}
         >
+            {/* banner photo */}
             <div
                 style={{
                     height: '120px',
@@ -155,6 +179,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 />
             </div>
 
+            {/* profile photo */}
             <div
                 style={{
                     width: '100px',
@@ -208,6 +233,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 />
             </div>
 
+            {/* name and email */}
             <div style={{marginTop: '5px', marginLeft: '140px', padding: '10px 20px 0 20px'}}>
                 <label style={{...labelStyle, display: 'block'}}>Name:</label>
                 <input
@@ -229,6 +255,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 />
             </div>
 
+            {/* bio */}
             <div style={{marginLeft: '140px', padding: '0 20px'}}>
                 <label style={{...labelStyle, display: 'block'}}>Bio:</label>
                 <textarea
@@ -241,6 +268,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
 
             <hr style={{margin: '20px 10px', borderTop: '1px solid #ddd'}}/>
 
+            {/* favorite topics */}
             <div style={{padding: '0px 30px'}}>
                 <div style={{position: 'relative'}} ref={dropdownRef}>
                     <label
@@ -308,6 +336,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                 </div>
             </div>
 
+            {/* language and country */}
             <div style={{padding: '0 30px', marginTop: '10px'}}>
                 <div style={rowStyle}>
                     <label style={labelStyle}>Language:</label>
@@ -339,7 +368,7 @@ const EditProfile: React.FC<EditProfileProps> = ({initialData, onCancel, onSave}
                     </select>
                 </div>
 
-                {/* Buttons */}
+                {/* buttons */}
                 <div
                     style={{
                         display: 'flex',
