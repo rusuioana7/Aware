@@ -7,9 +7,9 @@ import EditProfile, {type ProfileData} from '../components/ProfilePage/EditProfi
 
 interface ProfileDTO {
     favoriteTopics: string[];
-    language: string;
-    country: string;
-    dateJoined: string;   // e.g. "March 2024"
+    language: string[];
+    country: string[];
+    dateJoined: string;
     name: string;
     email: string;
     bio: string;

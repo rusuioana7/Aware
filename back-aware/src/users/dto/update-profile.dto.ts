@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  ArrayNotEmpty,
+  ArrayUnique,
+} from 'class-validator';
 
 export class UpdateProfileDto {
   @IsString()
@@ -9,16 +15,20 @@ export class UpdateProfileDto {
   bio?: string;
 
   @IsOptional()
-  @IsString()
-  language?: string;
-
-  @IsOptional()
-  @IsString()
-  country?: string;
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  language?: string[];
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
+  @ArrayNotEmpty()
+  @ArrayUnique()
+  country?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
   favoriteTopics?: string[];
 
   @IsOptional()

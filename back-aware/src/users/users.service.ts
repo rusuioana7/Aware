@@ -18,8 +18,8 @@ export type UserProfile = {
   email: string;
   name: string | null;
   bio: string | null;
-  language: string | null;
-  country: string | null;
+  language: string[];
+  country: string[];
   favoriteTopics: string[];
   createdAt: Date;
   profilePhoto: string | null;
