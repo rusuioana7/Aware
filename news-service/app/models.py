@@ -45,15 +45,18 @@ class Article(BaseModel):
 
 
 class Thread(BaseModel):
-    id: PyObjectId = Field(..., alias="_id")
+    id: str = Field(alias="_id")
     title: str
-    language: str
+    language: Optional[str]
     last_updated: str
-    articles: List[PyObjectId]
+    articles: List[str]
 
     model_config = {
         "populate_by_name": True,
-        "json_encoders": {ObjectId: lambda v: str(v)}
+        "json_encoders": {
+            ObjectId: lambda v: str(v),
+            datetime: lambda v: v.isoformat(),
+        },
     }
 
 
