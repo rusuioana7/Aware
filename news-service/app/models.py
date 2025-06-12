@@ -44,6 +44,28 @@ class Article(BaseModel):
     }
 
 
+class Thread(BaseModel):
+    id: PyObjectId = Field(..., alias="_id")
+    title: str
+    language: str
+    last_updated: str
+    articles: List[PyObjectId]
+
+    model_config = {
+        "populate_by_name": True,
+        "json_encoders": {ObjectId: lambda v: str(v)}
+    }
+
+
 class CrawlResponse(BaseModel):
     success: bool
     crawled: int
+
+
+class FeedResponse(BaseModel):
+    articles: Optional[List[Article]] = None
+    threads: Optional[List[Thread]] = None
+
+    model_config = {
+        "populate_by_name": True,
+    }
