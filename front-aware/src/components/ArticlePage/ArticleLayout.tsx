@@ -21,6 +21,7 @@ interface ArticleProps {
     publishedAt: string;
     publishedTime?: string;
     readingTime?: string;
+    originalUrl?: string;
     commentsCount?: number;
     viewsCount?: string;
     credibilityStatus?: 'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review';
@@ -41,7 +42,6 @@ const buttonStyle: React.CSSProperties = {
 
 const Article: React.FC<ArticleProps> = ({
                                              title,
-                                             category,
                                              image,
                                              content,
                                              author,
@@ -49,6 +49,7 @@ const Article: React.FC<ArticleProps> = ({
                                              publishedAt,
                                              publishedTime,
                                              readingTime,
+                                             originalUrl,
                                              commentsCount,
                                              viewsCount,
                                              credibilityStatus,
@@ -78,7 +79,16 @@ const Article: React.FC<ArticleProps> = ({
             }}>
                 <button style={buttonStyle}><FaRegClock/> Save For Later</button>
                 <button style={buttonStyle}><FaBookmark/> Bookmark</button>
-                <button style={buttonStyle}><FaExternalLinkAlt/> View Original</button>
+
+                <a
+                    href={originalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={buttonStyle}
+                >
+                    <FaExternalLinkAlt/> View Original
+
+                </a>
                 <button style={buttonStyle}><FaDownload/> Download</button>
                 <button style={buttonStyle}><FaShareAlt/> Share</button>
                 <button style={buttonStyle}><FaFileAlt/> Summarize</button>
@@ -88,16 +98,6 @@ const Article: React.FC<ArticleProps> = ({
 
             </div>
 
-            <div style={{
-                textTransform: 'uppercase',
-                fontSize: '14px',
-                color: '#031A6B',
-                fontWeight: 'bold',
-                letterSpacing: '1px',
-                marginBottom: '8px'
-            }}>
-                {category}
-            </div>
 
             <h1 style={{
                 fontSize: '28px',

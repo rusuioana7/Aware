@@ -1,35 +1,35 @@
-import SideThreadsListLayout from "../Cards/ThreadLayouts/SideThreadsListLayout.tsx";
-import type {Thread} from "../Cards/ThreadLayouts/SideThreadsListLayout.tsx";
+import React from 'react';
+import SideThreadsListLayout, {
+    type Thread as UIThread,
+} from '../Cards/ThreadLayouts/SideThreadsListLayout';
+import type {ThreadData} from '../../pages/ArticlePage';
 
-const featuredThreads: Thread[] = [
-    {
-        name: 'Global AI Ethics',
-        date: '18 May 2025',
-        topic: 'Tech',
-        image: '/news2.jpg',
-    },
-    {
-        name: 'UEFA Finals Commentary',
-        date: '17 May 2025',
-        topic: 'Sport',
-        image: '/news2.jpg',
-    },
-    {
-        name: 'Presidential Debate Highlights',
-        date: '16 May 2025',
-        topic: 'Politics',
-        image: '/news2.jpg',
-    },
-    {
-        name: 'Q2 Market Trends',
-        date: '15 May 2025',
-        topic: 'Economy',
-        image: '/news2.jpg',
-    },
-];
+interface FeaturedProps {
+    thread?: ThreadData | null;
+}
 
-const Featured = () => (
-    <SideThreadsListLayout title="Featured In" threads={featuredThreads}/>
-);
+const Featured: React.FC<FeaturedProps> = ({thread}) => {
+    console.log('[Featured] got thread prop →', thread);
+
+    let threadsToShow: UIThread[] = [];
+
+    if (thread && thread.articles.length > 1) {
+        threadsToShow = [
+            {
+                name: thread.title,
+                date: new Date(thread.last_updated).toLocaleDateString(),
+                topic: thread.topic || 'General',
+                image: thread.image || '',
+            },
+        ];
+    }
+
+    return (
+        <SideThreadsListLayout
+            title="Featured In"
+            threads={threadsToShow}
+        />
+    );
+};
 
 export default Featured;

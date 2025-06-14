@@ -51,7 +51,7 @@ const styles: Record<string, React.CSSProperties> = {
         left: "80px",
     },
     nameText: {
-        fontSize: "18px",
+        fontSize: "15px",
         fontWeight: 550,
         margin: "30px 0 2px",
         color: "#222",
@@ -70,22 +70,32 @@ const SideThreadsListLayout: React.FC<SideThreadsListLayoutProps> = ({title, thr
             <div style={styles.divider}/>
 
             <div style={styles.list}>
-                {threads.map((thread, index) => (
-                    <div key={index} style={styles.item}>
-                        <div style={styles.tag}>
-                            <TopicTag label={thread.topic}/>
-                        </div>
-
-                        <img src={thread.image} alt={thread.name} style={styles.image}/>
-
-                        <div style={{flex: 1}}>
-                            <p style={styles.nameText}>{thread.name}</p>
-                            <p style={styles.lastUpdated}>
-                                Last updated on {thread.date}
-                            </p>
-                        </div>
+                {threads.length === 0 ? (
+                    <div style={{fontStyle: 'italic', color: '#666', padding: '8px 0'}}>
+                        Not included in any thread.
                     </div>
-                ))}
+                ) : (
+                    threads.map((threadItem, index) => (
+                        <div key={index} style={styles.item}>
+                            <div style={styles.tag}>
+                                <TopicTag label={threadItem.topic}/>
+                            </div>
+
+                            <img
+                                src={threadItem.image}
+                                alt={threadItem.name}
+                                style={styles.image}
+                            />
+
+                            <div style={{flex: 1}}>
+                                <p style={styles.nameText}>{threadItem.name}</p>
+                                <p style={styles.lastUpdated}>
+                                    Last updated on {threadItem.date}
+                                </p>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );

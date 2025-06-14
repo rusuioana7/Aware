@@ -24,6 +24,24 @@ class PyObjectId(ObjectId):
         return string_schema
 
 
+class Thread(BaseModel):
+    id: str = Field(alias="_id")
+    title: str
+    language: Optional[str]
+    last_updated: str
+    image: Optional[str] = None
+    topic: Optional[str] = None
+    articles: List[str]
+
+    model_config = {
+        "populate_by_name": True,
+        "json_encoders": {
+            ObjectId: lambda v: str(v),
+            datetime: lambda v: v.isoformat(),
+        },
+    }
+
+
 class Article(BaseModel):
     id: PyObjectId = Field(..., alias="_id")
     url: str
@@ -36,27 +54,12 @@ class Article(BaseModel):
     image: Optional[str]
     topics: List[str]
     fetched_at: datetime
+    thread: Optional[Thread]
 
     model_config = {
         "validate_by_name": True,
         "json_schema_mode": "validation",
         "json_encoders": {ObjectId: lambda v: str(v)}
-    }
-
-
-class Thread(BaseModel):
-    id: str = Field(alias="_id")
-    title: str
-    language: Optional[str]
-    last_updated: str
-    articles: List[str]
-
-    model_config = {
-        "populate_by_name": True,
-        "json_encoders": {
-            ObjectId: lambda v: str(v),
-            datetime: lambda v: v.isoformat(),
-        },
     }
 
 
