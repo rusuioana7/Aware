@@ -65,7 +65,7 @@ const styles: Record<string, React.CSSProperties> = {
         margin: "30px 0 2px",
     },
     titleText: {
-        fontSize: "18px",
+        fontSize: "15px",
         fontWeight: 550,
         margin: 0,
         color: "#222",

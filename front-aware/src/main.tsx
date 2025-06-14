@@ -35,7 +35,7 @@ root.render(
                     <Route path="/bookmarks/:folderName?" element={<Layout><BookmarksPage/></Layout>}/>
 
                 </Route>
-                <Route path="/article" element={<Layout><ArticlePage/></Layout>}/>
+                <Route path="/article/:id" element={<Layout><ArticlePage/></Layout>}/>
                 <Route path="/thread" element={<Layout><ThreadPage/></Layout>}/>
                 <Route path="/topic" element={<Layout><TopicPage/></Layout>}/>
             </Routes>

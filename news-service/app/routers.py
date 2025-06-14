@@ -34,6 +34,32 @@ async def get_article(id: str):
         t = doc.get("topic")
         doc["topics"] = [t] if t else []
 
+    thr_doc = await threads_col.find_one({"articles": oid})
+    if thr_doc:
+        thr_doc["_id"] = str(thr_doc["_id"])
+        thr_doc["articles"] = [str(a) for a in thr_doc.get("articles", [])]
+
+        lu = thr_doc.get("last_updated")
+        if isinstance(lu, datetime):
+            thr_doc["last_updated"] = lu.isoformat()
+
+        thr_doc["language"] = thr_doc.get("language", "en")
+
+        if thr_doc["articles"]:
+            first_oid = ObjectId(thr_doc["articles"][0])
+            art = await articles_col.find_one(
+                {"_id": first_oid},
+                {"image": 1, "topics": 1, "topic": 1}
+            )
+            if art:
+                thr_doc["image"] = art.get("image")
+                topics = art.get("topics") or ([art.get("topic")] if art.get("topic") else [])
+                thr_doc["topic"] = topics[0] if topics else None
+
+        doc["thread"] = thr_doc
+    else:
+        doc["thread"] = None
+
     return doc
 
 
@@ -45,10 +71,8 @@ async def get_article(id: str):
 async def get_thread(
         thread_id: str = Path(..., description="Either the integer cluster ID or a Mongo ObjectId")
 ):
-    query = None
     if thread_id.isdigit():
         query = {"_id": int(thread_id)}
-
     else:
         try:
             oid = ObjectId(thread_id)
@@ -56,21 +80,29 @@ async def get_thread(
             raise HTTPException(status_code=400, detail="Invalid thread ID format")
         query = {"_id": oid}
 
-    thr = await threads_col.find_one(query)
-    if not thr:
+    thr_doc = await threads_col.find_one(query)
+    if not thr_doc:
         raise HTTPException(status_code=404, detail="Thread not found")
 
-    thr["language"] = thr.get("language", "en")
-
-    lu = thr.get("last_updated")
+    thr_doc["language"] = thr_doc.get("language", "en")
+    lu = thr_doc.get("last_updated")
     if isinstance(lu, datetime):
-        thr["last_updated"] = lu.isoformat()
+        thr_doc["last_updated"] = lu.isoformat()
+    thr_doc["_id"] = str(thr_doc["_id"])
+    thr_doc["articles"] = [str(a) for a in thr_doc.get("articles", [])]
 
-    thr["_id"] = str(thr["_id"])
+    if thr_doc["articles"]:
+        first_oid = ObjectId(thr_doc["articles"][0])
+        art = await articles_col.find_one(
+            {"_id": first_oid},
+            {"image": 1, "topics": 1, "topic": 1}
+        )
+        if art:
+            thr_doc["image"] = art.get("image")
+            topics = art.get("topics") or ([art.get("topic")] if art.get("topic") else [])
+            thr_doc["topic"] = topics[0] if topics else None
 
-    thr["articles"] = [str(a) for a in thr.get("articles", [])]
-
-    return Thread.model_validate(thr)
+    return Thread.model_validate(thr_doc)
 
 
 @router.get(
@@ -154,13 +186,10 @@ async def get_feed(
             d["_id"] = str(d["_id"])
             if isinstance(d.get("published"), datetime):
                 d["published"] = d["published"].isoformat()
-            # ensure topics list
             if "topics" not in d:
                 d["topics"] = [d.get("topic")] if d.get("topic") else []
-            # thread_id as str
             if "thread_id" in d:
                 d["thread_id"] = str(d["thread_id"])
-            # fetched_at
             if isinstance(d.get("fetched_at"), datetime):
                 d["fetched_at"] = d["fetched_at"].isoformat()
 
