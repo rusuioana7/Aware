@@ -1,64 +1,112 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import {Link, useParams} from 'react-router-dom';
 import {FaComments} from 'react-icons/fa';
 import TopicTag from '../components/Cards/Tags/TopicTag';
+import ThreadLayout from '../components/ThreadPage/ThreadLayout';
 import RelatedThreads from '../components/ThreadPage/RelatedThreads';
 import TopArticles from '../components/ThreadPage/TopArticles';
-import ThreadLayout from '../components/ThreadPage/ThreadLayout';
-import type {ArticleFeedLayout} from '../components/Cards/ArticleLayouts/ArticleFeedLayout.tsx';
+import {BASE_URL} from '../api/config';
 
-const ThreadPage: React.FC = () => {
-    const thread = {
-        topic: 'Lifestyle',
-        thread: 'Fitness',
-        lastUpdated: 'May 25, 2025',
-        articles: [
-            {
-                topic: 'Lifestyle',
-                title: 'How to Stay Healthy While Working Remotely',
-                image: '../news1.jpg',
-                author: 'Mirela Mirelascu',
-                date: 'May 24, 2025',
-                site: 'Healthy Living',
-                description: 'Tips for staying active and healthy while working from home.',
-                comments: 12,
-                views: '1.2K',
-            },
-            {
-                topic: 'Wellness',
-                title: 'Morning Routines of Productive People',
-                image: '../news2.jpg',
-                author: 'John Fitzen',
-                date: 'May 22, 2025',
-                site: 'Mind Matters',
-                description: 'Discover how top performers start their days with purpose.',
-                comments: 8,
-                views: '980',
-            },
-        ] as unknown as ArticleFeedLayout[],
-    };
+interface RawThread {
+    _id: string;
+    title: string;
+    last_updated: string;
+    articles: string[];
+}
+
+interface RawArticle {
+    _id: string;
+    source: string;
+    title: string;
+    description?: string;
+    published: string;
+    author?: string;
+    image?: string;
+    topics: string[];
+}
+
+export const ThreadPage: React.FC = () => {
+    const {id} = useParams<{ id: string }>();
+    const [thread, setThread] = useState<RawThread | null>(null);
+    const [articles, setArticles] = useState<RawArticle[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!id) return;
+
+        const load = async () => {
+            try {
+                setLoading(true);
+
+                const thrRes = await fetch(`${BASE_URL}/threads/${id}`);
+                if (!thrRes.ok) throw new Error(`Thread ${id} not found`);
+                const thrJson: RawThread = await thrRes.json();
+                setThread(thrJson);
+
+                const arts = await Promise.all(
+                    thrJson.articles.map(async aid => {
+                        const aRes = await fetch(`${BASE_URL}/articles/${aid}`);
+                        if (!aRes.ok) throw new Error(`Article ${aid} failed`);
+                        return aRes.json() as Promise<RawArticle>;
+                    })
+                );
+                setArticles(arts);
+            } catch (err) {
+                console.error('Error loading thread page', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        load();
+    }, [id]);
+
+    if (loading) return <div>Loading thread…</div>;
+    if (!thread) return <div>Thread not found.</div>;
+
+    const mainTopic = articles[0]?.topics[0] || 'General';
+
+    const feedItems = articles.map(a => ({
+        topic: a.topics[0] || 'General',
+        title: a.title,
+        image: a.image || '',
+        author: a.author || 'Unknown',
+        date: new Date(a.published).toLocaleDateString(),
+        site: a.source,
+        description: a.description || '',
+        comments: 0,
+        views: 0,
+        id: a._id,
+    }));
 
     return (
-        <div style={{position: 'relative'}}>
+        <div style={{padding: 20}}>
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                marginBottom: '16px',
-                gap: '8px',
-                fontSize: '14px',
+                marginBottom: 16,
+                gap: 8,
+                fontSize: 14,
                 color: '#031A6B',
-                fontWeight: 500
+                fontWeight: 500,
             }}>
-                <TopicTag label={thread.topic}/>
+                <Link
+                    key="topic"
+                    to={`/topic/${encodeURIComponent(mainTopic)}`}
+                    style={{textDecoration: 'none', color: '#031A6B', marginRight: 4}}
+                >
+                    <TopicTag label={mainTopic}/>
+                </Link>
                 <span>&gt;</span>
                 <FaComments size={18}/>
-                <span>{thread.thread}</span>
+                <span>{thread.title}</span>
             </div>
 
-            <div style={{display: 'flex', gap: '24px'}}>
+            <div style={{display: 'flex', gap: 24}}>
                 <ThreadLayout
-                    threadTitle={thread.thread}
-                    lastUpdated={thread.lastUpdated}
-                    articles={thread.articles}
+                    threadTitle={thread.title}
+                    lastUpdated={new Date(thread.last_updated).toLocaleDateString()}
+                    articles={feedItems}
                 />
 
                 <div style={{flex: 3}}>

@@ -16,6 +16,7 @@ const Featured: React.FC<FeaturedProps> = ({thread}) => {
     if (thread && thread.articles.length > 1) {
         threadsToShow = [
             {
+                id: thread.id,
                 name: thread.title,
                 date: new Date(thread.last_updated).toLocaleDateString(),
                 topic: thread.topic || 'General',

@@ -106,6 +106,58 @@ async def get_thread(
 
 
 @router.get(
+    "/threads/{thread_id}/related",
+    response_model=List[Thread],
+    summary="Get up to 4 threads whose titles match this one (fallback to same topic)"
+)
+async def get_related_threads(
+        thread_id: str = Path(..., description="Mongo ObjectId of the thread"),
+        max_results: int = Query(4, ge=1, le=10, description="Maximum number of related threads")
+):
+    try:
+        base_oid = ObjectId(thread_id)
+    except Exception:
+        raise HTTPException(400, detail="Invalid thread ID format")
+    base = await threads_col.find_one({"_id": base_oid})
+    if not base:
+        raise HTTPException(404, detail="Thread not found")
+
+    base["_id"] = str(base["_id"])
+    base["articles"] = [str(a) for a in base.get("articles", [])]
+    if isinstance(base.get("last_updated"), datetime):
+        base["last_updated"] = base["last_updated"].isoformat()
+
+    related = await threads_col.find(
+        {"$text": {"$search": base["title"]}, "_id": {"$ne": base_oid}}
+    ).limit(max_results).to_list(length=max_results)
+
+    if len(related) < max_results:
+        topic = base.get("topic")
+        if not topic and base["articles"]:
+            art = await articles_col.find_one(
+                {"_id": ObjectId(base["articles"][0])},
+                {"topics": 1}
+            )
+            topic = (art.get("topics") or [None])[0] if art else None
+
+        if topic:
+            more = await threads_col.find(
+                {"_id": {"$ne": base_oid}, "topic": topic}
+            ).limit(max_results - len(related)).to_list(length=max_results)
+            related.extend(more)
+
+    output: List[Thread] = []
+    for doc in related:
+        doc["_id"] = str(doc["_id"])
+        doc["articles"] = [str(a) for a in doc.get("articles", [])]
+        lu = doc.get("last_updated")
+        if isinstance(lu, datetime):
+            doc["last_updated"] = lu.isoformat()
+        output.append(Thread.model_validate(doc))
+    return output
+
+
+@router.get(
     "/topics/{topics}/articles",
     response_model=List[Article],
     summary="List articles by one or more topics",
@@ -160,6 +212,7 @@ async def get_feed(
         page: int = Query(1, ge=1),
         size: int = Query(20, ge=1, le=100),
 ) -> FeedResponse:
+    global count_articles
     skip = (page - 1) * size
     result = FeedResponse()
 
@@ -193,6 +246,8 @@ async def get_feed(
             if isinstance(d.get("fetched_at"), datetime):
                 d["fetched_at"] = d["fetched_at"].isoformat()
 
+            d["thread"] = None
+
         result.articles = [Article.model_validate(d) for d in docs]
 
     # --- THREADS ---
@@ -209,9 +264,14 @@ async def get_feed(
         art_id_docs = await art_ids_cursor.to_list(None)
         art_ids = [doc["_id"] for doc in art_id_docs]
 
+        thr_q = {
+            "articles": {"$in": art_ids},
+            "$expr": {"$gte": [{"$size": "$articles"}, 2]},
+        }
+
         thr_cursor = (
             threads_col
-            .find({"articles": {"$in": art_ids}})
+            .find(thr_q)
             .sort("last_updated", -1)
             .skip(skip)
             .limit(size)
