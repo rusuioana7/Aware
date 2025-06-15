@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {Link} from 'react-router-dom';
 import ArticleOptions from '../Cards/ArticleLayouts/ArticleOptions.tsx';
 import TopicTag from '../Cards/Tags/TopicTag';
 import type {ArticleFeedLayout} from '../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
@@ -31,8 +32,8 @@ const ThreadLayout: React.FC<Props> = ({threadTitle, lastUpdated, articles}) => 
             >
                 {threadTitle}
                 <span style={{fontSize: '16px', fontWeight: 'normal', color: '#777'}}>
-                    • Last updated on {lastUpdated} •
-                </span>
+          • Last updated on {lastUpdated} •
+        </span>
 
                 <button
                     onClick={toggleFollow}
@@ -59,11 +60,19 @@ const ThreadLayout: React.FC<Props> = ({threadTitle, lastUpdated, articles}) => 
                 <div style={{width: '2px', backgroundColor: '#BDBDBD', marginRight: '28px'}}/>
                 <div style={{display: 'flex', flexDirection: 'column', gap: '20px', flex: 1}}>
                     {articles.map((article, idx) => (
-                        <div
-                            key={idx}
-                            style={{display: 'flex', gap: '20px', position: 'relative'}}
+                        <Link
+                            key={article.id}
+                            to={`/article/${article.id}`}
                             onMouseEnter={() => setHoveredArticle(idx)}
                             onMouseLeave={() => setHoveredArticle(null)}
+                            style={{
+                                display: 'flex',
+                                gap: '20px',
+                                position: 'relative',
+                                textDecoration: 'none',
+                                color: 'inherit',
+                                cursor: 'pointer',
+                            }}
                         >
                             <div style={{position: 'relative'}}>
                                 <img
@@ -87,7 +96,7 @@ const ThreadLayout: React.FC<Props> = ({threadTitle, lastUpdated, articles}) => 
                                 <TopicTag label={article.topic || 'general'}/>
                             </div>
 
-                            <div style={{flex: 1}}>
+                            <div style={{flex: 1, minWidth: 0}}>
                                 <h4 style={{margin: '0 0 6px', fontSize: '18px', fontWeight: 600, color: '#1a1a1a'}}>
                                     {article.title}
                                 </h4>
@@ -107,7 +116,7 @@ const ThreadLayout: React.FC<Props> = ({threadTitle, lastUpdated, articles}) => 
                                     💬 {article.comments} comments &nbsp;&nbsp; 👁️ {article.views} views
                                 </p>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

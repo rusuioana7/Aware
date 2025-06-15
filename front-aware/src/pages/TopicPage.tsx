@@ -1,137 +1,217 @@
+import React, {useEffect, useState} from 'react';
+import {useParams} from 'react-router-dom';
+import {FaArrowLeft, FaArrowRight, FaStar} from 'react-icons/fa';
 import TopicTag from '../components/Cards/Tags/TopicTag';
-import TopTopicArticles from "../components/TopicPage/TopTopicArticles.tsx";
-import TopTopicThreads from "../components/TopicPage/TopTopicThreads.tsx";
-import TopicFeed from "../components/TopicPage/TopicFeed.tsx";
-import {useState} from "react";
-import {FaStar} from "react-icons/fa";
+import ArticleFeed from '../components/Cards/ArticleLayouts/ArticleFeedLayout';
+import ThreadFeed from '../components/Cards/ThreadLayouts/ThreadFeedLayout';
+import TopTopicArticles from '../components/TopicPage/TopTopicArticles';
+import TopTopicThreads from '../components/TopicPage/TopTopicThreads';
+import {BASE_URL} from '../api/config';
 
-type Article = {
+interface ArticleDto {
+    _id: string;
+    source: string;
     title: string;
-    date: string;
+    description?: string;
+    published: string;
+    author?: string;
+    image?: string;
+    topics: string[];
+}
+
+interface ThreadDto {
+    _id: string;
+    title: string;
+    last_updated: string;
+    articles: string[];
+}
+
+type ArticleFeedLayout = {
+    id: string;
     topic: string;
+    title: string;
+    image: string;
     author: string;
+    date: string;
     site: string;
     description: string;
     comments: number;
     views: number;
-    image: string;
+    rawDate: string;
+    isThread: false;
 };
 
-type Thread = {
+type ThreadFeedLayout = {
+    id: string;
     threadTitle: string;
     lastUpdated: string;
-    articles: Article[];
+    articles: ArticleFeedLayout[];
+    rawDate: string;
     isThread: true;
 };
 
-type FeedItem = Article | Thread;
-const feedItems: FeedItem[] = [
-    {
-        title: 'Breakthrough in Quantum Computing',
-        date: '18 May 2025',
-        topic: 'lifestyle',
-        author: 'Elena Maxwell',
-        site: 'ScienceDaily',
-        description:
-            'Researchers have made a significant leap in quantum processing power, opening new doors for tech innovation.',
-        comments: 23,
-        views: 1052,
-        image: '/news1.jpg',
-    },
-    {
-        isThread: true,
-        threadTitle: 'The Future of Renewable Energy',
-        lastUpdated: '17 May 2025',
-        articles: [
-            {
-                title: 'Major Advancements in Renewable Energy',
-                date: '17 May 2025',
-                topic: 'lifestyle',
-                author: 'Thomas Weller',
-                site: 'GreenFuture',
-                description:
-                    'The latest innovations in solar and wind tech may soon replace traditional fossil fuels on a large scale.',
-                comments: 41,
-                views: 2379,
-                image: '/news2.jpg',
-            },
-            {
-                title: 'How Countries are Adopting Clean Power',
-                date: '16 May 2025',
-                topic: 'lifestyle',
-                author: 'Nina Kumar',
-                site: 'EcoNews',
-                description:
-                    'Governments worldwide are making strategic moves toward energy independence and clean power.',
-                comments: 19,
-                views: 1323,
-                image: '/news3.jpg',
-            },
-        ],
-    },
-    {
-        title: 'AI-Powered Education Tools Rise Globally',
-        date: '16 May 2025',
-        topic: 'lifestyle',
-        author: 'Grace Nunez',
-        site: 'EdTech Times',
-        description:
-            'Artificial intelligence is reshaping the classroom experience, aiding both teachers and students worldwide.',
-        comments: 17,
-        views: 981,
-        image: '/news3.jpg',
-    },
-];
+type CombinedItem = ArticleFeedLayout | ThreadFeedLayout;
 
+const PAGE_SIZE = 10;
 
-const TopicPage = () => {
-    const topic = 'Lifestyle';
+const TopicPage: React.FC = () => {
+    const {topic} = useParams<{ topic: string }>();
+    const [page, setPage] = useState(1);
+    const [fullCount, setFullCount] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [feed, setFeed] = useState<CombinedItem[]>([]);
     const [isFavorite, setIsFavorite] = useState(false);
 
-    const onViewChange = (view: 'All' | 'Articles' | 'Threads') => {
-        console.log('Selected view:', view);
-    };
+    const toggleFavorite = () => setIsFavorite(f => !f);
 
-    const toggleFavorite = () => {
-        setIsFavorite(prev => !prev);
-    };
+    useEffect(() => {
+        if (!topic) return;
+        loadFeed();
+    }, [topic, page]);
 
+    async function loadFeed() {
+        setLoading(true);
+        try {
+            const url =
+                `${BASE_URL}/feed?feed_type=both` +
+                `&topics=${encodeURIComponent(topic!)}` +
+                `&page=${page}&size=${PAGE_SIZE}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(res.statusText);
+
+            const {articles: aDtos, threads: tDtos} = (await res.json()) as {
+                articles: ArticleDto[];
+                threads: ThreadDto[];
+            };
+
+            const arts: ArticleFeedLayout[] = aDtos.map(a => ({
+                id: a._id,
+                topic: a.topics[0] || 'General',
+                title: a.title,
+                image: a.image || '',
+                author: a.author || 'Unknown',
+                date: new Date(a.published).toLocaleDateString(),
+                site: a.source,
+                description: a.description || '',
+                comments: 0,
+                views: 0,
+                rawDate: a.published,
+                isThread: false,
+            }));
+
+            const ths: ThreadFeedLayout[] = await Promise.all(
+                tDtos
+                    .filter(t => t.articles.length >= 2)
+                    .map(async t => {
+                        const previews: ArticleFeedLayout[] = await Promise.all(
+                            t.articles.slice(0, 3).map(async aid => {
+                                const rr = await fetch(`${BASE_URL}/articles/${aid}`);
+                                const art = (await rr.json()) as ArticleDto;
+                                return {
+                                    id: art._id,
+                                    topic: art.topics[0] || 'General',
+                                    title: art.title,
+                                    image: art.image || '',
+                                    author: art.author || 'Unknown',
+                                    date: new Date(art.published).toLocaleDateString(),
+                                    site: art.source,
+                                    description: art.description || '',
+                                    comments: 0,
+                                    views: 0,
+                                    rawDate: art.published,
+                                    isThread: false,
+                                };
+                            })
+                        );
+                        return {
+                            id: t._id,
+                            threadTitle: t.title,
+                            lastUpdated: new Date(t.last_updated).toLocaleDateString(),
+                            articles: previews,
+                            rawDate: t.last_updated,
+                            isThread: true,
+                        };
+                    })
+            );
+
+            const combinedAll: CombinedItem[] = [...arts, ...ths].sort(
+                (a, b) => new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime()
+            );
+            setFullCount(combinedAll.length);
+            setFeed(combinedAll.slice(0, PAGE_SIZE));
+        } catch (err) {
+            console.error('Error loading topic feed:', err);
+            setFeed([]);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const prevPage = () => setPage(p => Math.max(1, p - 1));
+    const nextPage = () => {
+        if (fullCount > PAGE_SIZE) setPage(p => p + 1);
+    };
     return (
-        <div style={{display: 'flex', gap: '24px'}}>
+        <div style={{display: 'flex', gap: 24, padding: 16}}>
             <div style={{flex: 7}}>
-                <div style={{marginBottom: '10px', display: 'inline-flex', alignItems: 'center', gap: '12px'}}>
-                    <TopicTag
-                        label={topic}
-                        style={{
-                            fontSize: '18px',
-                            padding: '10px 16px',
-                        }}
-                    />
+                <div style={{marginBottom: 8, display: 'inline-flex', alignItems: 'center', gap: 12}}>
+                    <TopicTag label={topic || 'General'} style={{fontSize: 18, padding: '6px 10px'}}/>
                     <button
                         onClick={toggleFavorite}
-                        aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                         style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            border: 'none',
                             background: 'transparent',
+                            border: 'none',
                             cursor: 'pointer',
-                            fontSize: '22px',
+                            fontSize: 22,
                             color: isFavorite ? '#FFD700' : '#888',
-                            transition: 'color 0.3s ease',
-                            padding: 0,
                         }}
                     >
                         <FaStar/>
                     </button>
                 </div>
-                <div style={{flex: 1, height: 1, backgroundColor: '#CCC', marginBottom: 16}}/>
+                <hr style={{marginBottom: 16}}/>
 
-                <TopicFeed feedItems={feedItems} onViewChange={onViewChange}/>
+                {loading ? (
+                    <div>Loading…</div>
+                ) : (
+                    <div style={{display: 'flex', flexDirection: 'column', gap: 20}}>
+                        {feed.map((item, idx) =>
+                            item.isThread ? (
+                                <ThreadFeed
+                                    key={item.id}
+                                    thread={item}
+                                    threadIndex={idx}
+                                    hoveredItemId={null}
+                                    setHoveredItemId={() => {
+                                    }}
+                                />
+                            ) : (
+                                <ArticleFeed
+                                    key={item.id}
+                                    article={item}
+                                    id={item.id}
+                                    isHovered={false}
+                                    onHover={() => {
+                                    }}
+                                />
+                            )
+                        )}
+                    </div>
+                )}
+
+                <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12, marginTop: 24}}>
+                    <button onClick={prevPage} disabled={page === 1}>
+                        <FaArrowLeft/> Prev
+                    </button>
+                    <span>Page {page}</span>
+                    <button onClick={nextPage}>
+                        Next <FaArrowRight/>
+                    </button>
+                </div>
             </div>
 
-            <div style={{flex: 3}}>
+            <div style={{flex: 3, display: 'flex', flexDirection: 'column', gap: 16}}>
                 <TopTopicArticles/>
                 <TopTopicThreads/>
             </div>
@@ -140,4 +220,3 @@ const TopicPage = () => {
 };
 
 export default TopicPage;
-

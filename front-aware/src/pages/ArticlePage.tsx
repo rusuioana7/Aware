@@ -1,20 +1,20 @@
 import React, {useEffect, useState} from 'react';
-import {useParams} from 'react-router-dom';
+import {Link, useParams} from 'react-router-dom';
 import TopicTag from '../components/Cards/Tags/TopicTag';
 import {FaComments} from 'react-icons/fa';
 import Article from '../components/ArticlePage/ArticleLayout';
 import Featured from '../components/ArticlePage/Featured';
 import RelatedArticles from '../components/ArticlePage/RelatedArticles';
+import CommentSection from "../components/ArticlePage/CommentSection";
 import {BASE_URL} from '../api/config';
-import CommentSection from "../components/ArticlePage/CommentSection.tsx";
 
 export interface ThreadData {
-    image?: string;
-    topic?: string;
     id: string;
     title: string;
     articles: string[];
     last_updated: string;
+    image?: string;
+    topic?: string;
 }
 
 interface ArticleData {
@@ -37,6 +37,7 @@ const ArticlePage: React.FC = () => {
 
     useEffect(() => {
         if (!id) return;
+
         const fetchUrl = `${BASE_URL}/articles/${id}`;
         console.log('[ArticlePage] fetching:', fetchUrl);
 
@@ -44,9 +45,25 @@ const ArticlePage: React.FC = () => {
             try {
                 const res = await fetch(fetchUrl);
                 console.log('[ArticlePage] response status:', res.status);
-                const data: ArticleData = await res.json();
-                console.log('[ArticlePage] got article.thread:', data.thread);
-                setArticle(data);
+                const raw = await res.json() as any;
+
+                const normalized: ArticleData = {
+                    ...raw,
+                    _id: raw._id,
+                    thread: raw.thread
+                        ? {
+                            id: raw.thread._id,
+                            title: raw.thread.title,
+                            articles: raw.thread.articles,
+                            last_updated: raw.thread.last_updated,
+                            image: raw.thread.image,
+                            topic: raw.thread.topic,
+                        }
+                        : null,
+                };
+
+                console.log('[ArticlePage] normalized thread:', normalized.thread);
+                setArticle(normalized);
             } catch (err) {
                 console.error('[ArticlePage] fetch error:', err);
             }
@@ -60,15 +77,25 @@ const ArticlePage: React.FC = () => {
     const mainTopic = article.topics[0] || 'General';
 
     const crumbs: React.ReactNode[] = [
-        <TopicTag key="topic" label={mainTopic}/>,
+        <Link
+            key="topic"
+            to={`/topic/${encodeURIComponent(mainTopic)}`}
+            style={{textDecoration: 'none', color: '#031A6B', marginRight: 4}}
+        >
+            <TopicTag key="topic" label={mainTopic}/>
+        </Link>
     ];
     if (article.thread && article.thread.articles.length > 1) {
         crumbs.push(<span key="sep1">&nbsp;&gt;&nbsp;</span>);
         crumbs.push(<FaComments key="icon" size={14}/>);
         crumbs.push(
-            <span key="thread" style={{margin: '0 4px'}}>
-        {article.thread.title}
-      </span>
+            <Link
+                key="thread"
+                to={`/thread/${article.thread.id}`}
+                style={{textDecoration: 'none', color: '#031A6B', margin: '0 4px'}}
+            >
+                {article.thread.title}
+            </Link>
         );
     }
     crumbs.push(<span key="sep2">&nbsp;&gt;&nbsp;</span>);
@@ -76,17 +103,20 @@ const ArticlePage: React.FC = () => {
 
     return (
         <div style={{padding: 8}}>
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginBottom: 16,
-                gap: 4,
-                fontSize: 14,
-                color: '#031A6B',
-                fontWeight: 500,
-            }}>
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: 16,
+                    gap: 4,
+                    fontSize: 14,
+                    color: '#031A6B',
+                    fontWeight: 500,
+                }}
+            >
                 {crumbs}
             </div>
+
             <div style={{display: 'flex', gap: 20}}>
                 <div style={{flex: 7}}>
                     <Article
@@ -102,12 +132,10 @@ const ArticlePage: React.FC = () => {
                     />
                     <CommentSection/>
                 </div>
+
                 <div style={{flex: 3}}>
                     <Featured thread={article.thread || undefined}/>
-                    <RelatedArticles
-                        thread={article.thread}
-                        currentId={article._id}
-                    />
+                    <RelatedArticles thread={article.thread} currentId={article._id}/>
                 </div>
             </div>
         </div>

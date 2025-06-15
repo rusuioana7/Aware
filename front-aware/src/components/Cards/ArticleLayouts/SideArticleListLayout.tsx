@@ -1,8 +1,10 @@
 import React, {useState} from "react";
-import TopicTag from "../Tags/TopicTag.tsx";
-import ArticleOptions from "./ArticleOptions.tsx";
+import {Link} from "react-router-dom";
+import TopicTag from "../Tags/TopicTag";
+import ArticleOptions from "./ArticleOptions";
 
 export interface Article {
+    id: string;
     author: string;
     date: string;
     title: string;
@@ -82,33 +84,46 @@ const SideArticleListLayout: React.FC<SideArticleListProps> = ({title, articles}
 
             <div style={styles.list}>
                 {articles.map((article, index) => (
-                    <div
-                        key={index}
-                        style={styles.item}
-                        onMouseEnter={() => setHoveredIndex(index)}
-                        onMouseLeave={() => setHoveredIndex(null)}
+                    <Link
+                        key={article.id}
+                        to={`/article/${article.id}`}
+                        style={{
+                            textDecoration: "none",
+                            color: "inherit",
+                            display: "block",
+                        }}
                     >
-                        <div style={{position: "relative"}}>
-                            <img src={article.image} alt={article.title} style={styles.image}/>
+                        <div
+                            style={styles.item}
+                            onMouseEnter={() => setHoveredIndex(index)}
+                            onMouseLeave={() => setHoveredIndex(null)}
+                        >
+                            <div style={{position: "relative"}}>
+                                <img
+                                    src={article.image}
+                                    alt={article.title}
+                                    style={styles.image}
+                                />
 
-                            {hoveredIndex === index && (
-                                <div style={styles.options}>
-                                    <ArticleOptions position="top-right"/>
+                                {hoveredIndex === index && (
+                                    <div style={styles.options}>
+                                        <ArticleOptions position="top-right"/>
+                                    </div>
+                                )}
+
+                                <div style={styles.tag}>
+                                    <TopicTag label={article.topic}/>
                                 </div>
-                            )}
+                            </div>
 
-                            <div style={styles.tag}>
-                                <TopicTag label={article.topic}/>
+                            <div style={{flex: 1, minWidth: 0}}>
+                                <p style={styles.authorDate}>
+                                    {article.author} - {article.date}
+                                </p>
+                                <p style={styles.titleText}>{article.title}</p>
                             </div>
                         </div>
-
-                        <div>
-                            <p style={styles.authorDate}>
-                                {article.author} - {article.date}
-                            </p>
-                            <p style={styles.titleText}>{article.title}</p>
-                        </div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </div>

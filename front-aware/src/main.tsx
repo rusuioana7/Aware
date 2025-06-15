@@ -36,8 +36,8 @@ root.render(
 
                 </Route>
                 <Route path="/article/:id" element={<Layout><ArticlePage/></Layout>}/>
-                <Route path="/thread" element={<Layout><ThreadPage/></Layout>}/>
-                <Route path="/topic" element={<Layout><TopicPage/></Layout>}/>
+                <Route path="/thread/:id" element={<Layout><ThreadPage/></Layout>}/>
+                <Route path="/topic/:topic" element={<Layout><TopicPage/></Layout>}/>
             </Routes>
         </BrowserRouter>
     </React.StrictMode>
