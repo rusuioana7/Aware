@@ -1,132 +1,315 @@
-import React, {useState} from 'react';
-
+import React, {useEffect, useRef, useState} from 'react';
 import ArticleFeed from '../../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
 import ThreadFeed from '../../Cards/ThreadLayouts/ThreadFeedLayout.tsx';
+import {BASE_URL} from '../../../api/config.ts';
+import {FaArrowLeft, FaArrowRight} from 'react-icons/fa';
 
 type Article = {
+    id: string;
     title: string;
     date: string;
     topic: string;
     author: string;
     site: string;
     description: string;
-    comments: number;
+    commentsCount: number;
     views: number;
     image: string;
-    credibilityStatus?:  'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review';
+    isThread: false;
+    rawDate: string;
 };
 
 type Thread = {
+    id: string;
     threadTitle: string;
     lastUpdated: string;
     articles: Article[];
     isThread: true;
+    rawDate: string;
 };
+
+type RawArticle = {
+    _id: string;
+    title: string;
+    author?: string;
+    topic?: string;
+    topics?: string[];
+    published: string;
+    source: string;
+    description?: string;
+    commentsCount?: number;
+    views?: number;
+    image?: string;
+};
+
+type RawThread = {
+    _id: string;
+    title: string;
+    last_updated: string;
+    articles: string[];
+};
+
 
 type FeedItem = Article | Thread;
 
-type ViewProps = {
+type Props = {
     selectedView: 'All' | 'Articles' | 'Threads';
+    selectedTopics: string[];
+    selectedLanguages: string[];
+    selectedSort: 'Newest' | 'Popular' | 'Verified Only';
 };
 
-const feedItems: FeedItem[] = [
-    {
-        title: 'Breakthrough in Quantum Computing',
-        date: '18 May 2025',
-        topic: 'travel',
-        author: 'Elena Maxwell',
-        site: 'ScienceDaily',
-        description:
-            'Researchers have made a significant leap in quantum processing power, opening new doors for tech innovation.',
-        comments: 23,
-        views: 1052,
-        image: '/news1.jpg',
-        credibilityStatus: "unknown",
-    },
-    {
-        isThread: true,
-        threadTitle: 'The Future of Renewable Energy',
-        lastUpdated: '17 May 2025',
-        articles: [
-            {
-                title: 'Major Advancements in Renewable Energy',
-                date: '17 May 2025',
-                topic: 'travel',
-                author: 'Thomas Weller',
-                site: 'GreenFuture',
-                description:
-                    'The latest innovations in solar and wind tech may soon replace traditional fossil fuels on a large scale.',
-                comments: 41,
-                views: 2379,
-                image: '/news2.jpg',
-                credibilityStatus: "verified",
-            },
-            {
-                title: 'How Countries are Adopting Clean Power',
-                date: '16 May 2025',
-                topic: 'travel',
-                author: 'Nina Kumar',
-                site: 'EcoNews',
-                description:
-                    'Governments worldwide are making strategic moves toward energy independence and clean power.',
-                comments: 19,
-                views: 1323,
-                image: '/news3.jpg',
-                credibilityStatus: "untrustworthy",
-            },
-        ],
-    },
-    {
-        title: 'AI-Powered Education Tools Rise Globally',
-        date: '16 May 2025',
-        topic: 'travel',
-        author: 'Grace Nunez',
-        site: 'EdTech Times',
-        description:
-            'Artificial intelligence is reshaping the classroom experience, aiding both teachers and students worldwide.',
-        comments: 17,
-        views: 981,
-        image: '/news3.jpg',
-        credibilityStatus: "under-review",
-    },
-];
+const PAGE_SIZE = 15;
 
-const Feed: React.FC<ViewProps> = ({selectedView}) => {
-    const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+const languageToCode = (lang: string): string => {
+    const map: Record<string, string> = {
+        english: 'en',
+        romanian: 'ro',
+        french: 'fr',
+        german: 'de',
+        spanish: 'es',
+    };
+    return map[lang.toLowerCase()] || lang.toLowerCase();
+};
 
-    const filteredItems = feedItems.filter(item => {
-        if (selectedView === 'Articles') return !('isThread' in item);
-        if (selectedView === 'Threads') return 'isThread' in item;
-        return true;
-    });
+const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages, selectedSort}) => {
+    const feedRef = useRef<HTMLDivElement>(null);
+
+    const [allItems, setAllItems] = useState<FeedItem[]>([]);
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setPage(1);
+    }, [selectedView, selectedTopics, selectedLanguages, selectedSort]);
+
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        if (!token || selectedLanguages.length === 0 || selectedTopics.length === 0) return;
+
+        const fetchFeed = async () => {
+            setLoading(true);
+            try {
+                const type = selectedView === 'All' ? 'both' : selectedView.toLowerCase();
+                const sortField = selectedSort === 'Popular' ? 'views' : 'published';
+                const topics = selectedTopics.map(t => t.toLowerCase()).join(',');
+                const langs = selectedLanguages.map(languageToCode).join(',');
+
+                let pageNum = 1;
+                const accumulated: FeedItem[] = [];
+
+                while (true) {
+                    const url = `${BASE_URL}/feed?feed_type=${type}&topics=${topics}&languages=${langs}&page=${pageNum}&size=${PAGE_SIZE}&sort=${sortField}`;
+
+                    const res = await fetch(url, {
+                        headers: {Authorization: `Bearer ${token}`},
+                    });
+
+                    const {articles = [], threads = []} = await res.json();
+                    let filteredArticles = articles;
+                    let filteredThreads = threads;
+
+                    if (selectedView === 'Articles') {
+                        filteredThreads = [];
+                    } else if (selectedView === 'Threads') {
+                        filteredArticles = [];
+                    }
+
+                    if (articles.length === 0 && threads.length === 0) break;
+
+                    const articleMap = new Map<string, Article>(
+                        filteredArticles.map((a: RawArticle) => [
+                            a._id,
+                            {
+                                id: a._id,
+                                isThread: false,
+                                title: a.title,
+                                author: a.author || 'Unknown',
+                                topic: (a.topic || a.topics?.[0] || 'general').toLowerCase(),
+                                date: new Date(a.published).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                }),
+                                rawDate: a.published,
+                                site: a.source,
+                                description: a.description || '',
+                                commentsCount: a.commentsCount || 0,
+                                views: a.views || 0,
+                                image: a.image || '',
+                            },
+                        ])
+                    );
+
+                    const requiredArticleIds = new Set<string>();
+                    filteredThreads.forEach((t: RawThread) => {
+                        (t.articles || []).forEach((id: string) => {
+                            if (!articleMap.has(id)) requiredArticleIds.add(id);
+                        });
+                    });
+
+                    if (requiredArticleIds.size > 0) {
+                        const missing = await Promise.all(
+                            Array.from(requiredArticleIds).map(async id => {
+                                const r = await fetch(`${BASE_URL}/articles/${id}`, {
+                                    headers: {Authorization: `Bearer ${token}`},
+                                });
+                                const a = await r.json();
+                                return {
+                                    id: a._id,
+                                    isThread: false,
+                                    title: a.title,
+                                    author: a.author || 'Unknown',
+                                    topic: (a.topic || a.topics?.[0] || 'general').toLowerCase(),
+                                    date: new Date(a.published).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                    }),
+                                    rawDate: a.published,
+                                    site: a.source,
+                                    description: a.description || '',
+                                    commentsCount: a.commentsCount || 0,
+                                    views: a.views || 0,
+                                    image: a.image || '',
+                                };
+                            })
+                        );
+                        for (const a of missing) {
+                            articleMap.set(a.id, a as Article);
+                        }
+                    }
+
+                    const threadObjects: Thread[] = filteredThreads.map((t: RawThread) => {
+                        const resolved = (t.articles || [])
+                            .map((id: string) => articleMap.get(id))
+                            .filter(Boolean) as Article[];
+
+                        return {
+                            id: t._id,
+                            threadTitle: t.title,
+                            lastUpdated: new Date(t.last_updated).toLocaleDateString(),
+                            rawDate: t.last_updated,
+                            isThread: true,
+                            articles: resolved,
+                        };
+                    });
+
+                    let combined: FeedItem[] = [];
+
+                    if (selectedView === 'Articles') {
+                        const threadArticleIds = new Set<string>();
+                        threadObjects.forEach(t => t.articles.forEach(a => threadArticleIds.add(a.id)));
+
+                        for (const id of threadArticleIds) {
+                            articleMap.delete(id);
+                        }
+
+                        const flatArticles = Array.from(articleMap.values());
+                        combined = flatArticles;
+                    } else if (selectedView === 'Threads') {
+                        combined = threadObjects;
+                    } else {
+                        const threadArticleIds = new Set<string>();
+                        threadObjects.forEach(t => t.articles.forEach(a => threadArticleIds.add(a.id)));
+
+                        for (const id of threadArticleIds) {
+                            articleMap.delete(id);
+                        }
+
+                        const flatArticles = Array.from(articleMap.values());
+                        combined = [...flatArticles, ...threadObjects];
+                    }
+
+                    accumulated.push(...combined);
+
+
+                    pageNum++;
+                }
+
+                if (selectedSort === 'Newest') {
+                    accumulated.sort((a, b) => new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime());
+                } else if (selectedSort === 'Popular') {
+                    accumulated.sort((a, b) => {
+                        const aViews = a.isThread ? Math.max(...a.articles.map(art => art.views)) : a.views;
+                        const bViews = b.isThread ? Math.max(...b.articles.map(art => art.views)) : b.views;
+                        return bViews - aViews;
+                    });
+                }
+
+                setAllItems(accumulated);
+            } catch (err) {
+                console.error('[Feed] Failed to load:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFeed();
+    }, [selectedView, selectedTopics, selectedLanguages, selectedSort]);
+
+    const totalPages = Math.ceil(allItems.length / PAGE_SIZE);
+    const paginated = allItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    const nextPage = () => {
+        if (page < totalPages) setPage(p => p + 1);
+    };
+
+    const prevPage = () => {
+        if (page > 1) setPage(p => p - 1);
+    };
+
+    useEffect(() => {
+        if (feedRef.current) {
+            feedRef.current.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+    }, [page]);
 
     return (
-        <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '30px', marginLeft: '80px'}}>
-            {filteredItems.map((item, index) => {
-                if ('isThread' in item && item.isThread) {
-                    return (
-                        <ThreadFeed
-                            key={index}
-                            thread={item}
-                            threadIndex={index}
-                            hoveredItemId={hoveredItemId}
-                            setHoveredItemId={setHoveredItemId}
-                        />
-                    );
-                } else {
-                    const article = item as Article;
-                    const articleId = `article-${index}`;
-                    return (
-                        <ArticleFeed
-                            key={index}
-                            article={article}
-                            id={articleId}
-                            isHovered={hoveredItemId === articleId}
-                            onHover={setHoveredItemId}
-                        />
-                    );
-                }
-            })}
+        <div ref={feedRef} style={{display: 'flex', flexDirection: 'column', gap: 10, marginTop: 30, marginLeft: 20}}>
+            {loading ? (
+                <div style={{padding: 16}}>Loading feed...</div>
+            ) : (
+                <>
+                    {paginated.map((item, index) =>
+                        item.isThread ? (
+                            <ThreadFeed
+                                key={item.id}
+                                thread={item}
+                                threadIndex={index}
+                                hoveredItemId={null}
+                                setHoveredItemId={() => {
+                                }}
+                            />
+                        ) : (
+                            <ArticleFeed
+                                key={item.id}
+                                article={item}
+                                id={item.id}
+                                isHovered={false}
+                                onHover={() => {
+                                }}
+                            />
+                        )
+                    )}
+
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 12,
+                        marginTop: 24
+                    }}>
+                        <button onClick={prevPage} disabled={page === 1}>
+                            <FaArrowLeft/> Prev
+                        </button>
+                        <span>Page {page} of {totalPages}</span>
+                        <button onClick={nextPage} disabled={page === totalPages}>
+                            Next <FaArrowRight/>
+                        </button>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

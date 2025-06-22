@@ -12,6 +12,7 @@ import { UpdateNotificationsDto } from './dto/update-notifications.dto';
 import { UpdateVisibilityDto } from './dto/update-visibility.dto';
 import { UnlinkOauthDto } from './dto/unlink-oauth.dto';
 import { hash } from 'bcrypt';
+import { HttpService } from '@nestjs/axios';
 
 export type UserProfile = {
   id: number;
@@ -24,11 +25,16 @@ export type UserProfile = {
   createdAt: Date;
   profilePhoto: string | null;
   bannerPhoto: string | null;
+  recentViews?: string[];
+  isPublic?: boolean;
 };
 
 @Injectable()
 export class UsersService {
-  constructor(readonly prisma: PrismaService) {}
+  constructor(
+    readonly prisma: PrismaService,
+    private readonly httpService: HttpService,
+  ) {}
 
   async findById(userId: number): Promise<UserProfile> {
     const user = await this.prisma.user.findUnique({
@@ -44,6 +50,7 @@ export class UsersService {
         createdAt: true,
         profilePhoto: true,
         bannerPhoto: true,
+        recentViews: true,
       },
     });
 
@@ -207,6 +214,7 @@ export class UsersService {
         createdAt: true,
         profilePhoto: true,
         bannerPhoto: true,
+        recentViews: true,
         provider: true,
         providerId: true,
         isPublic: true,
@@ -222,5 +230,36 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async trackViewedArticle(userId: number, articleId: string): Promise<void> {
+    // update recentViews
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const updated = [
+      articleId,
+      ...(user?.recentViews || []).filter((id) => id !== articleId),
+    ].slice(0, 5);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { recentViews: updated },
+    });
+
+    // notify Python news service to increment views
+    try {
+      await this.httpService.axiosRef.post(
+        `${process.env.NEWS_SERVICE_URL}/articles/${articleId}/track-view`,
+      );
+    } catch (err) {
+      console.error('Failed to track view in news service:', err);
+    }
+  }
+
+  async getRecentArticleIds(userId: number): Promise<string[]> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { recentViews: true },
+    });
+    return user?.recentViews || [];
   }
 }

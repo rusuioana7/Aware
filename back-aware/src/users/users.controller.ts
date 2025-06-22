@@ -6,11 +6,15 @@ import {
   UseGuards,
   Req,
   HttpCode,
+  Post,
+  Param,
 } from '@nestjs/common';
 import { UserProfile, UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthenticatedRequest } from '../types/express';
+import { HttpService } from '@nestjs/axios';
+import { ArticleDto } from '../articles/dto/article.dto';
 
 interface FullProfileResponse {
   id: number;
@@ -23,11 +27,15 @@ interface FullProfileResponse {
   createdAt: string;
   profilePhoto?: string | null;
   bannerPhoto?: string | null;
+  isPublic: boolean;
 }
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly httpService: HttpService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -46,6 +54,7 @@ export class UsersController {
       createdAt: user.createdAt.toISOString(),
       profilePhoto: user.profilePhoto ?? null,
       bannerPhoto: user.bannerPhoto ?? null,
+      isPublic: user.isPublic ?? true,
     };
   }
 
@@ -58,5 +67,36 @@ export class UsersController {
   ): Promise<UserProfile> {
     const userId = req.user.id;
     return this.usersService.updateProfile(userId, data);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('viewed/:id')
+  async trackViewed(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') articleId: string,
+  ) {
+    await this.usersService.trackViewedArticle(req.user.id, articleId);
+    return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('recent-articles')
+  async getRecentArticles(@Req() req: AuthenticatedRequest) {
+    const articleIds = await this.usersService.getRecentArticleIds(req.user.id);
+
+    const articles = await Promise.all(
+      articleIds.map(async (id) => {
+        try {
+          const { data } = await this.httpService.axiosRef.get<ArticleDto>(
+            `${process.env.NEWS_SERVICE_URL}/articles/${id}`,
+          );
+          return data;
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    return articles.filter((a): a is ArticleDto => a !== null);
   }
 }

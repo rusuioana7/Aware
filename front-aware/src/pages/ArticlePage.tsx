@@ -8,6 +8,13 @@ import RelatedArticles from '../components/ArticlePage/RelatedArticles';
 import CommentSection from "../components/ArticlePage/CommentSection";
 import {BASE_URL} from '../api/config';
 
+interface User {
+    id: number;
+    name: string | null;
+    profilePhoto: string | null;
+    isPublic: boolean;
+}
+
 export interface ThreadData {
     id: string;
     title: string;
@@ -29,11 +36,33 @@ interface ArticleData {
     image?: string;
     topics: string[];
     thread?: ThreadData | null;
+    views?: number;
+    commentsCount?: number;
 }
 
 const ArticlePage: React.FC = () => {
     const {id} = useParams<{ id: string }>();
     const [article, setArticle] = useState<ArticleData | null>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const fetchUrl = `${BASE_URL}/users/me`;
+        fetch(fetchUrl, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        })
+            .then(res => res.json())
+            .then(user =>
+                setCurrentUser({
+                    id: user.id,
+                    name: user.name,
+                    profilePhoto: user.profilePhoto,
+                    isPublic: user.isPublic,
+                })
+            )
+            .catch(err => console.error('User fetch failed', err));
+    }, []);
 
     useEffect(() => {
         if (!id) return;
@@ -58,9 +87,12 @@ const ArticlePage: React.FC = () => {
                             last_updated: raw.thread.last_updated,
                             image: raw.thread.image,
                             topic: raw.thread.topic,
+                            views: raw.views ?? 0,
+                            commentsCount: raw.commentsCount ?? 0,
                         }
                         : null,
                 };
+                console.log('[views]', raw.views)
 
                 console.log('[ArticlePage] normalized thread:', normalized.thread);
                 setArticle(normalized);
@@ -69,6 +101,19 @@ const ArticlePage: React.FC = () => {
             }
         })();
     }, [id]);
+
+    useEffect(() => {
+        if (!article?._id) return;
+
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            // Only one call: tracks view (Mongo) + recent (PostgreSQL)
+            fetch(`${BASE_URL}/users/viewed/${article._id}`, {
+                method: 'POST',
+                headers: {Authorization: `Bearer ${token}`},
+            });
+        }
+    }, [article?._id]);
 
     if (!article) return <div>Loading…</div>;
 
@@ -129,8 +174,16 @@ const ArticlePage: React.FC = () => {
                         publishedAt={new Date(article.published).toLocaleDateString()}
                         readingTime={readingTime}
                         originalUrl={article.url}
+                        viewsCount={article.views}
+                        commentsCount={article.commentsCount}
                     />
-                    <CommentSection/>
+
+                    {!currentUser ? (
+                        <div>Loading comments…</div>
+                    ) : (
+                        <CommentSection articleId={article._id} currentUser={currentUser}/>
+                    )}
+
                 </div>
 
                 <div style={{flex: 3}}>

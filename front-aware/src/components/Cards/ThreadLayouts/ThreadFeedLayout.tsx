@@ -11,7 +11,7 @@ export interface ThreadFeedLayout {
     threadTitle: string;
     lastUpdated: string;
     articles: ArticleFeedLayout[];
-    isThread: true;
+    isThread: boolean;
 }
 
 interface Props {
@@ -95,7 +95,8 @@ const ThreadFeed: React.FC<Props> = ({
                                             display: 'flex',
                                             alignItems: 'center'
                                         }}>
-                                            💬 {article.comments} comments 👁️ {article.views} views
+                                            💬 {typeof article.commentsCount === 'number' ? article.commentsCount : 0} comments
+                                            👁️ {typeof article.views === 'number' ? article.views : 0} views
                                             {article.credibilityStatus && (
                                                 <CredibilityLabel status={article.credibilityStatus}/>
                                             )}

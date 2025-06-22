@@ -12,6 +12,7 @@ export class FeedController {
     @Query('languages') languages?: string,
     @Query('page') page = '1',
     @Query('size') size = '10',
+    @Query('sort') sort = 'published',
   ) {
     return this.svc.getFeed(
       feed_type,
@@ -19,6 +20,7 @@ export class FeedController {
       languages,
       parseInt(page, 10),
       parseInt(size, 10),
+      sort,
     );
   }
 }

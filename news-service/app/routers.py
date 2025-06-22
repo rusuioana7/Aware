@@ -26,6 +26,10 @@ async def get_article(id: str):
     if not doc:
         raise HTTPException(status_code=404, detail="Not found")
 
+    doc['views'] = doc.get('views', 0)
+
+    doc['commentsCount'] = doc.get('commentsCount', 0)
+
     pub = doc.get("published")
     if isinstance(pub, datetime):
         doc["published"] = pub.isoformat()
@@ -208,9 +212,9 @@ async def get_feed(
             description="Comma-separated list of topics, e.g. 'tech,science'; omit for all",
         ),
         languages: Optional[str] = Query(None, description="Comma-separated lang codes, e.g. 'en,fr'"),
-
         page: int = Query(1, ge=1),
         size: int = Query(20, ge=1, le=100),
+        sort: Optional[str] = Query("published", description="Sort by 'published' or 'views'"),
 ) -> FeedResponse:
     global count_articles
     skip = (page - 1) * size
@@ -225,11 +229,12 @@ async def get_feed(
         if languages:
             lang_list = [l.strip() for l in languages.split(",") if l.strip()]
             art_q["language"] = {"$in": lang_list}
+        order_field = sort if sort in ("published", "views") else "published"
 
         art_cursor = (
             articles_col
             .find(art_q)
-            .sort("published", -1)
+            .sort(order_field, -1)
             .skip(skip)
             .limit(size)
         )
@@ -256,6 +261,8 @@ async def get_feed(
         if topics:
             tlist = [t.strip() for t in topics.split(",") if t.strip()]
             art_q["topic"] = {"$in": tlist}
+
+        lang_list = []
         if languages:
             lang_list = [l.strip() for l in languages.split(",") if l.strip()]
             art_q["language"] = {"$in": lang_list}
@@ -268,6 +275,8 @@ async def get_feed(
             "articles": {"$in": art_ids},
             "$expr": {"$gte": [{"$size": "$articles"}, 2]},
         }
+        if lang_list:
+            thr_q["languages"] = {"$in": lang_list}
 
         thr_cursor = (
             threads_col
@@ -286,5 +295,37 @@ async def get_feed(
             t["articles"] = [str(a) for a in t.get("articles", [])]
 
         result.threads = [Thread.model_validate(t) for t in ths]
-
+    if feed_type == "articles":
+        result.threads = []
+    elif feed_type == "threads":
+        result.articles = []
     return result
+
+
+@router.post("/articles/{id}/track-view")
+async def track_article_view(id: str):
+    try:
+        oid = ObjectId(id)
+    except:
+        raise HTTPException(400, "Invalid article ID")
+
+    await articles_col.update_one({"_id": oid}, {"$inc": {"views": 10}})
+    return {"success": True}
+
+
+@router.patch("/articles/{id}/comments-count")
+async def update_comments_count(id: str, payload: dict):
+    try:
+        oid = ObjectId(id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="invalid article id")
+
+    count = payload.get("count")
+    if not isinstance(count, int):
+        raise HTTPException(status_code=400, detail="invalid count (must be int)")
+
+    result = await articles_col.update_one({"_id": oid}, {"$set": {"commentsCount": count}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    return {"success": True, "updated": result.modified_count}

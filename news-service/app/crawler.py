@@ -119,7 +119,7 @@ async def crawl_and_process() -> int:
             else:
                 content_en = clean_content
 
-            thread_id = await assigner.assign(content_en)
+            thread_id = await assigner.assign(content_en, topic)
 
             doc = {
                 "url": url,
@@ -149,6 +149,12 @@ async def crawl_and_process() -> int:
                 },
                 upsert=True
             )
+
+            thread_doc = await threads_col.find_one({"_id": thread_id}, {"articles": 1})
+            if thread_doc:
+                lang_cursor = articles_col.find({"_id": {"$in": thread_doc["articles"]}}, {"language": 1})
+                langs = list({a["language"] async for a in lang_cursor if "language" in a})
+                await threads_col.update_one({"_id": thread_id}, {"$set": {"languages": langs}})
 
             total += 1
             time.sleep(DELAY)

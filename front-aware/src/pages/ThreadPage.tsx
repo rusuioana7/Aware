@@ -23,6 +23,8 @@ interface RawArticle {
     author?: string;
     image?: string;
     topics: string[];
+    views?: number;
+    commentsCount?: number;
 }
 
 export const ThreadPage: React.FC = () => {
@@ -74,8 +76,8 @@ export const ThreadPage: React.FC = () => {
         date: new Date(a.published).toLocaleDateString(),
         site: a.source,
         description: a.description || '',
-        comments: 0,
-        views: 0,
+        commentsCount: a.commentsCount || 0,
+        views: a.views || 0,
         id: a._id,
     }));
 
