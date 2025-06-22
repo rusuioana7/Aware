@@ -22,6 +22,7 @@ model User {
   provider       String?
   providerId     String?
   isPublic       Boolean  @default(true)
+  recentViews    String[] @default([])
 
   notifyWeeklyEmail      Boolean @default(false)
   notifyDailyEmail       Boolean @default(false)
@@ -30,4 +31,26 @@ model User {
   notifyWeeklyPush      Boolean @default(false)
   notifyDailyPush       Boolean @default(false)
   notifyTopicAlertsPush Boolean @default(false)
+
+  Comment Comment[]
 }
+
+model Comment {
+  id          String   @id @default(uuid())
+  text        String
+  articleId   String
+
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  isAnonymous Boolean
+  createdAt   DateTime @default(now())
+
+  parentId    String?
+  parent      Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentReplies")
+
+  @@index([articleId])
+}
+
+

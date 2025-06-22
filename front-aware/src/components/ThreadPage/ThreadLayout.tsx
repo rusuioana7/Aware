@@ -113,7 +113,8 @@ const ThreadLayout: React.FC<Props> = ({threadTitle, lastUpdated, articles}) => 
                                 }}>{article.description}</p>
 
                                 <p style={{fontSize: '13px', color: '#777'}}>
-                                    💬 {article.comments} comments &nbsp;&nbsp; 👁️ {article.views} views
+                                    💬 {typeof article.commentsCount === 'number' ? article.commentsCount : 0} comments &nbsp;
+                                    👁️ {typeof article.views === 'number' ? article.views : 0} views
                                 </p>
                             </div>
                         </Link>

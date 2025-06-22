@@ -1,4 +1,5 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import {useLocation, useNavigate} from 'react-router-dom';
 import TopicTag from '../../Cards/Tags/TopicTag.tsx';
 import {TOPIC_COLORS} from '../../Cards/Tags/TagColor.tsx';
 import SortSelector from '../../Cards/SelectMenu/SelectSort.tsx';
@@ -6,27 +7,72 @@ import ViewSelector from '../../Cards/SelectMenu/SelectView.tsx';
 
 type FeedOptionsProps = {
     onViewChange: (view: 'All' | 'Articles' | 'Threads') => void;
+    onTopicChange: (topics: string[]) => void;
+    onSortChange: (sort: 'Newest' | 'Popular' | 'Verified Only') => void;
 };
 
 const sortOptions: Array<'Newest' | 'Popular' | 'Verified Only'> = ['Newest', 'Popular', 'Verified Only'];
 const viewOptions: Array<'All' | 'Articles' | 'Threads'> = ['All', 'Articles', 'Threads'];
 
-const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange}) => {
+const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange, onTopicChange, onSortChange}) => {
     const allTopics = Object.keys(TOPIC_COLORS)
-        .filter((key) => key !== 'general')
-        .map((key) => key.charAt(0).toUpperCase() + key.slice(1));
+        .filter(key => key !== 'general')
+        .map(key => key.charAt(0).toUpperCase() + key.slice(1));
 
-    const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular' | 'Verified Only'>('Newest');
-    const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+    const location = useLocation();
+    const navigate = useNavigate();
+    const search = new URLSearchParams(location.search);
+    const initialTopics = search.get('topics')?.split(',').filter(Boolean) || [];
+    const initialView = (search.get('view') as 'All' | 'Articles' | 'Threads') || 'All';
+    const initialSort = (search.get('sort') as 'Newest' | 'Popular' | 'Verified Only') || 'Newest';
+
+    const [selectedTopics, setSelectedTopics] = useState<string[]>(initialTopics);
+    const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>(initialView);
+    const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular' | 'Verified Only'>(initialSort);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>('All');
+
+    useEffect(() => {
+        onTopicChange(selectedTopics);
+    }, []);
+
+    const toggleTopic = (topic: string) => {
+        const updated = selectedTopics.includes(topic)
+            ? selectedTopics.filter(t => t !== topic)
+            : [...selectedTopics, topic];
+
+        const query = new URLSearchParams(location.search);
+        if (updated.length) query.set('topics', updated.join(','));
+        else query.delete('topics');
+
+        navigate({pathname: location.pathname, search: query.toString()});
+        setSelectedTopics(updated);
+        onTopicChange(updated);
+    };
 
     const handleViewChange = (option: 'All' | 'Articles' | 'Threads') => {
-        const newView = selectedView === option ? 'All' : option;
-        setSelectedView(newView);
-        onViewChange(newView);
+        const query = new URLSearchParams(location.search);
+
+        query.set('view', option);
+        const feedType = option === 'All' ? 'both' : option.toLowerCase();
+        query.set('feed_type', feedType);
+
+        navigate({pathname: location.pathname, search: query.toString()});
+
+        setSelectedView(option);
+        onViewChange(option);
     };
+
+
+    const handleSortChange = (option: 'Newest' | 'Popular' | 'Verified Only') => {
+        const query = new URLSearchParams(location.search);
+        query.set('sort', option);
+        navigate({pathname: location.pathname, search: query.toString()});
+
+        setSelectedSort(option);
+        onSortChange(option);
+    };
+
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -38,62 +84,49 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange}) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const toggleTopic = (topic: string) => {
-        setSelectedTopics((prev) =>
-            prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]
-        );
-    };
-
-    const sortedSelectedTopics = selectedTopics.slice().sort((a, b) => {
-        return allTopics.indexOf(a) - allTopics.indexOf(b);
-    });
+    const sortedSelectedTopics = selectedTopics.slice().sort(
+        (a, b) => allTopics.indexOf(a) - allTopics.indexOf(b)
+    );
 
     return (
         <div>
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    marginBottom: 7,
-                    marginTop: 15,
-                    paddingLeft: 5,
-                    paddingRight: 5,
-                }}
-            >
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                marginBottom: 7,
+                marginTop: 15,
+                paddingLeft: 5,
+                paddingRight: 5,
+            }}>
                 <h2 style={{fontSize: 22, fontWeight: 'bold', color: '#000', margin: 0, flexShrink: 0}}>
                     Feed
                 </h2>
 
-                <div
-                    style={{
-                        flexGrow: 1,
+                <div style={{
+                    flexGrow: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    flexWrap: 'wrap',
+                    position: 'relative',
+                }} ref={dropdownRef}>
+                    <div style={{
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 8,
                         flexWrap: 'wrap',
-                        position: 'relative',
-                    }}
-                    ref={dropdownRef}
-                >
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 8,
-                            justifyContent: 'center',
-                            flexGrow: 1,
-                        }}
-                    >
-                        {sortedSelectedTopics.map((topic) => (
+                        gap: 8,
+                        justifyContent: 'center',
+                        flexGrow: 1,
+                    }}>
+                        {sortedSelectedTopics.map(topic => (
                             <TopicTag key={topic} label={topic} onClick={() => toggleTopic(topic)} selected={true}/>
                         ))}
                     </div>
 
                     <button
-                        onClick={() => setDropdownOpen((open) => !open)}
+                        onClick={() => setDropdownOpen(open => !open)}
                         style={{
                             border: '1px solid #031A6B',
                             backgroundColor: 'transparent',
@@ -109,36 +142,29 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange}) => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             padding: 0,
-                            userSelect: 'none',
-                            transition: 'background-color 0.2s ease',
-                            flexShrink: 0,
                             marginLeft: 12,
                         }}
-                        aria-label="Add topic"
                         title="Add topic"
                     >
                         +
                     </button>
 
                     {dropdownOpen && (
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: 36,
-                                right: 0,
-                                backgroundColor: 'white',
-                                border: '1px solid #CCC',
-                                borderRadius: 8,
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                                padding: 8,
-                                zIndex: 10,
-                                minWidth: 180,
-                                maxHeight: 240,
-                                overflowY: 'auto',
-                                userSelect: 'none',
-                            }}
-                        >
-                            {allTopics.map((topic) => {
+                        <div style={{
+                            position: 'absolute',
+                            top: 36,
+                            right: 0,
+                            backgroundColor: 'white',
+                            border: '1px solid #CCC',
+                            borderRadius: 8,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                            padding: 8,
+                            zIndex: 10,
+                            minWidth: 180,
+                            maxHeight: 240,
+                            overflowY: 'auto',
+                        }}>
+                            {allTopics.map(topic => {
                                 const isSelected = selectedTopics.includes(topic);
                                 return (
                                     <div
@@ -146,43 +172,25 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange}) => {
                                         onClick={() => toggleTopic(topic)}
                                         style={{
                                             display: 'flex',
+                                            justifyContent: 'space-between',
                                             alignItems: 'center',
                                             gap: 8,
                                             padding: '6px 10px',
                                             borderRadius: 6,
                                             cursor: 'pointer',
                                             backgroundColor: isSelected ? '#e0e7ff' : 'transparent',
-                                            transition: 'background-color 0.2s ease',
-                                            justifyContent: 'space-between',
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            (e.currentTarget as HTMLDivElement).style.backgroundColor = '#f0f0f0';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            (e.currentTarget as HTMLDivElement).style.backgroundColor = isSelected
-                                                ? '#e0e7ff'
-                                                : 'transparent';
                                         }}
                                     >
                                         <TopicTag
                                             label={topic}
                                             selected={isSelected}
-                                            style={{cursor: 'default', userSelect: 'none'}}
+                                            style={{cursor: 'default'}}
                                         />
-                                        {isSelected && (
-                                            <span
-                                                style={{
-                                                    color: '#031A6B',
-                                                    fontWeight: 'bold',
-                                                    fontSize: 18,
-                                                    userSelect: 'none',
-                                                }}
-                                                aria-label="Selected"
-                                                title="Selected"
-                                            >
-                        ✓
-                      </span>
-                                        )}
+                                        {isSelected && <span style={{
+                                            color: '#031A6B',
+                                            fontWeight: 'bold',
+                                            fontSize: 18,
+                                        }}>✓</span>}
                                     </div>
                                 );
                             })}
@@ -191,20 +199,19 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange}) => {
                 </div>
             </div>
 
-            <div style={{flex: 1, height: 1, backgroundColor: '#CCC', marginBottom: 16}}/>
+            <div style={{height: 1, backgroundColor: '#CCC', marginBottom: 16}}/>
 
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    gap: 60,
-                    flexWrap: 'wrap',
-                    marginBottom: 10,
-                }}
-            >
-                <SortSelector options={sortOptions} selected={selectedSort} onSelect={setSelectedSort}/>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 60,
+                flexWrap: 'wrap',
+                marginBottom: 10,
+            }}>
+                <SortSelector options={sortOptions} selected={selectedSort} onSelect={handleSortChange}/>
                 <ViewSelector options={viewOptions} selected={selectedView} onSelect={handleViewChange}/>
+
             </div>
         </div>
     );

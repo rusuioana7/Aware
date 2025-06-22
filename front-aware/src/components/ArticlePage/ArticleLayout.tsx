@@ -23,7 +23,7 @@ interface ArticleProps {
     readingTime?: string;
     originalUrl?: string;
     commentsCount?: number;
-    viewsCount?: string;
+    viewsCount?: number;
     credibilityStatus?: 'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review';
 }
 
@@ -194,10 +194,10 @@ const Article: React.FC<ArticleProps> = ({
                 marginTop: '30px',
                 gap: '20px'
             }}>
-                {viewsCount && (
+                {typeof viewsCount === 'number' && (
                     <span><strong>{viewsCount}</strong> views</span>
                 )}
-                {commentsCount && (
+                {typeof commentsCount == 'number' && (
                     <span><strong>{commentsCount}</strong> comments</span>
                 )}
             </div>

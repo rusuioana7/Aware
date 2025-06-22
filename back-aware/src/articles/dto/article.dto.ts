@@ -13,4 +13,6 @@ export interface ArticleDto {
   topics: string[];
   thread_id?: string;
   thread?: ThreadDto;
+  views?: number;
+  comments?: number;
 }

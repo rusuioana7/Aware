@@ -21,11 +21,13 @@ export class FeedService {
     languages?: string,
     page = 1,
     size = 10,
+    sort = 'published',
   ) {
     const params = new URLSearchParams({
       feed_type,
       page: String(page),
       size: String(size),
+      sort,
     });
     if (topics) params.append('topics', topics);
     if (languages) params.append('languages', languages);

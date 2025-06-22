@@ -4,6 +4,7 @@ import {
   IsArray,
   ArrayNotEmpty,
   ArrayUnique,
+  IsBoolean,
 } from 'class-validator';
 
 export class UpdateProfileDto {
@@ -38,4 +39,8 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   bannerPhoto?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublic!: boolean;
 }
