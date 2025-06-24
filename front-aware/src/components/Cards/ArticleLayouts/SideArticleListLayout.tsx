@@ -106,10 +106,17 @@ const SideArticleListLayout: React.FC<SideArticleListProps> = ({title, articles}
                                 />
 
                                 {hoveredIndex === index && (
-                                    <div style={styles.options}>
-                                        <ArticleOptions position="top-right"/>
+                                    <div
+                                        style={styles.options}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                        }}
+                                    >
+                                        <ArticleOptions articleId={article.id} position="top-right"/>
                                     </div>
                                 )}
+
 
                                 <div style={styles.tag}>
                                     <TopicTag label={article.topic}/>

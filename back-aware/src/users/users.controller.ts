@@ -8,6 +8,7 @@ import {
   HttpCode,
   Post,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { UserProfile, UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -98,5 +99,31 @@ export class UsersController {
     );
 
     return articles.filter((a): a is ArticleDto => a !== null);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('threads/:id/follow')
+  async followThread(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') threadId: string,
+  ) {
+    await this.usersService.followThread(req.user.id, threadId);
+    return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('threads/:id/unfollow')
+  async unfollowThread(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') threadId: string,
+  ) {
+    await this.usersService.unfollowThread(req.user.id, threadId);
+    return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('threads-followed')
+  async getFollowedThreads(@Req() req: AuthenticatedRequest) {
+    return this.usersService.getFollowedThreads(req.user.id);
   }
 }

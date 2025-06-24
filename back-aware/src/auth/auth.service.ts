@@ -31,6 +31,15 @@ export class AuthService {
       data: { email, password: hashedPassword },
     });
 
+    await this.prisma.bookmarkFolder.create({
+      data: {
+        name: 'Save for Later',
+        color: '#999999',
+        articleIds: [],
+        user: { connect: { id: user.id } },
+      },
+    });
+
     return user;
   }
 
@@ -74,6 +83,14 @@ export class AuthService {
           email: user.email,
           name: user.name,
           provider: user.provider,
+        },
+      });
+      await this.prisma.bookmarkFolder.create({
+        data: {
+          name: 'Save for Later',
+          color: '#000000',
+          articleIds: [],
+          user: { connect: { id: user.id } },
         },
       });
       const token = this.jwtService.sign({

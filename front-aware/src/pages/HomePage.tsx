@@ -6,11 +6,12 @@ import SavedForLater from '../components/HomePage/SavedForLater';
 import FeedOptions from '../components/HomePage/Feed/FeedOptions.tsx';
 import Trending from '../components/HomePage/Side/Trending.tsx';
 import ThreadsYouFollow from "../components/HomePage/Side/ThreadsYouFollow.tsx";
-import ActiveThreads from "../components/HomePage/Side/ActiveThreads.tsx";
+
 import Feed from '../components/HomePage/Feed/Feed.tsx';
 import RecentlyViewed from "../components/HomePage/Side/RecentlyViewed.tsx";
 
 import {BASE_URL} from '../api/config.ts';
+
 
 const HomePage: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -97,9 +98,9 @@ const HomePage: React.FC = () => {
             }}>
                 <div style={{flex: 3}}>
                     <Trending/>
-                    <ActiveThreads/>
-                    <RecentlyViewed/>
                     <ThreadsYouFollow/>
+                    <RecentlyViewed/>
+
                 </div>
 
                 <div style={{flex: 7}}>

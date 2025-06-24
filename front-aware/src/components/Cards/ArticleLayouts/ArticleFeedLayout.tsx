@@ -42,10 +42,17 @@ const ArticleFeed: React.FC<Props> = ({article, id, isHovered, onHover}) => (
                 />
 
                 {isHovered && (
-                    <div style={{position: 'absolute', top: '6px', right: '6px', zIndex: 2}}>
-                        <ArticleOptions position="top-right"/>
+                    <div
+                        style={{position: 'absolute', top: '6px', right: '6px', zIndex: 2}}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }}
+                    >
+                        <ArticleOptions articleId={article.id} position="top-right"/>
                     </div>
                 )}
+
 
                 <div style={{position: 'absolute', top: '6px', left: '6px', zIndex: 2}}>
                     <TopicTag label={article.topic || 'general'}/>

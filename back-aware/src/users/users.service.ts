@@ -262,4 +262,42 @@ export class UsersService {
     });
     return user?.recentViews || [];
   }
+
+  async followThread(userId: number, threadId: string) {
+    await this.prisma.threadFollow.upsert({
+      where: { userId_threadId: { userId, threadId } },
+      update: {},
+      create: { userId, threadId },
+    });
+  }
+
+  async unfollowThread(userId: number, threadId: string) {
+    await this.prisma.threadFollow.deleteMany({
+      where: { userId, threadId },
+    });
+  }
+
+  async getFollowedThreads(userId: number) {
+    const follows = await this.prisma.threadFollow.findMany({
+      where: { userId },
+      select: { threadId: true },
+    });
+
+    const threadIds = follows.map((f) => f.threadId);
+
+    const threads = await Promise.all(
+      threadIds.map(async (id) => {
+        try {
+          const { data } = await this.httpService.axiosRef.get(
+            `${process.env.NEWS_SERVICE_URL}/threads/${id}`,
+          );
+          return data;
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    return threads.filter((t) => t !== null);
+  }
 }

@@ -6,6 +6,7 @@ export interface ArticleDto {
   source: string;
   title: string;
   description?: string;
+  language: string;
   published: string;
   author?: string;
   content: string;

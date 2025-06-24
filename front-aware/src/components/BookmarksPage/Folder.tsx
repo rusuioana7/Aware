@@ -1,175 +1,160 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useState} from 'react';
+import {Link} from 'react-router-dom';
 import ArticleFeed, {type ArticleFeedLayout} from '../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
-import SelectSort from '../Cards/SelectMenu/SelectSort.tsx';
-import SelectView from '../Cards/SelectMenu/SelectView.tsx';
-import SelectLength from "../Cards/SelectMenu/SelectLength.tsx";
+import ThreadFeed from '../Cards/ThreadLayouts/ThreadFeedLayout.tsx';
+import {BASE_URL} from '../../api/config';
 
 type Props = {
     folderId: string;
 };
 
-const exampleArticles: Record<string, ArticleFeedLayout[]> = {
-    work: [
-        {
-            title: 'React Hooks Deep Dive',
-            date: '2025-05-01',
-            topic: 'React',
-            author: 'Jane Doe',
-            site: 'reactblog.com',
-            description: 'Learn the ins and outs of React Hooks with practical examples.',
-            comments: 12,
-            views: 1500,
-            image: '../news1.jpg',
-        },
-        {
-            title: 'Understanding TypeScript Generics',
-            date: '2025-04-15',
-            topic: 'TypeScript',
-            author: 'John Smith',
-            site: 'typescriptweekly.com',
-            description: 'A beginner-friendly guide to generics in TypeScript.',
-            comments: 8,
-            views: 900,
-            image: '../news1.jpg',
-        },
-    ],
-    ideas: [
-        {
-            title: 'CSS Grid vs Flexbox',
-            date: '2025-03-20',
-            topic: 'CSS',
-            author: 'Alice Blue',
-            site: 'cssdaily.com',
-            description: 'When and how to use CSS Grid and Flexbox effectively.',
-            comments: 15,
-            views: 1100,
-            image: '../news1.jpg',
-        },
-        {
-            title: 'Brainstorming Techniques',
-            date: '2025-02-28',
-            topic: 'Productivity',
-            author: 'Mark Green',
-            site: 'productivityhub.io',
-            description: 'Boost creativity with these proven brainstorming methods.',
-            comments: 5,
-            views: 700,
-            image: '../news1.jpg',
-        },
-    ],
-    personal: [
-        {
-            title: 'My Travel Blog',
-            date: '2025-01-10',
-            topic: 'Travel',
-            author: 'Chris Wander',
-            site: 'wanderlust.com',
-            description: 'Experiences and tips from my latest trips around the world.',
-            comments: 20,
-            views: 1800,
-            image: '../news1.jpg',
-        },
-        {
-            title: 'Gardening Tips',
-            date: '2025-04-22',
-            topic: 'Lifestyle',
-            author: 'Sarah Green',
-            site: 'gardeninglife.com',
-            description: 'Simple tips for a beautiful garden.',
-            comments: 7,
-            views: 450,
-            image: '../news1.jpg',
-        },
-    ],
-    default: [],
-};
+interface RawArticle {
+    _id: string;
+    title: string;
+    published: string;
+    topics?: string[];
+    author?: string;
+    source?: string;
+    description?: string;
+    commentsCount?: number;
+    views?: number;
+    image?: string;
+}
 
-type SortOption = 'Newest' | 'Popular' | 'Verified Only';
-type ViewOption = 'All' | 'Articles' | 'Threads';
+interface ThreadDto {
+    _id: string;
+    title: string;
+    articles: string[];
+    last_updated: string;
+}
+
+const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
 
 const Folder: React.FC<Props> = ({folderId}) => {
-    const articles = exampleArticles[folderId] || exampleArticles.default;
+    const [articles, setArticles] = useState<ArticleFeedLayout[]>([]);
+    const [threads, setThreads] = useState<
+        {
+            id: string;
+            threadTitle: string;
+            lastUpdated: string;
+            articles: ArticleFeedLayout[];
+        }[]
+    >([]);
+    const [loading, setLoading] = useState(true);
 
-    const [selectedSort, setSelectedSort] = useState<SortOption>('Newest');
-    const [selectedView, setSelectedView] = useState<ViewOption>('All');
-    const [length, setLength] = useState<'All' | 'Short' | 'Medium' | 'Long'>('All');
+    useEffect(() => {
+        const fetchContent = async () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
 
-    const sortedArticles = useMemo(() => {
-        let filtered = articles;
+            try {
+                setLoading(true);
+                const res = await fetch(`${BASE_URL}/bookmarks/${folderId}`, {
+                    headers: {Authorization: `Bearer ${token}`},
+                });
 
-        if (selectedView === 'Articles') {
-            //
-        } else if (selectedView === 'Threads') {
-            //
-            filtered = [];
-        } else if (selectedView === 'All') {
-            //
-        }
+                const data: { articles: RawArticle[]; threads: ThreadDto[] } = await res.json();
 
-        return [...filtered].sort((a, b) => {
-            if (selectedSort === 'Newest') {
-                //
-                return new Date(b.date).getTime() - new Date(a.date).getTime();
-            } else if (selectedSort === 'Popular') {
-                //
-                return b.views - a.views;
-            } else if (selectedSort === 'Verified Only') {
-                //
-                //
-                return 0;
+                const articleIdsInThreads = new Set(data.threads.flatMap((t) => t.articles));
+
+                const parsedArticles: ArticleFeedLayout[] = data.articles
+                    .filter((a) => !articleIdsInThreads.has(a._id))
+                    .map((a) => ({
+                        id: a._id,
+                        title: a.title,
+                        date: formatDate(a.published),
+                        topic: a.topics?.[0] || '',
+                        author: a.author || '',
+                        site: a.source || '',
+                        description: a.description || '',
+                        commentsCount: a.commentsCount || 0,
+                        views: a.views || 0,
+                        image: a.image || '',
+                    }));
+
+                const parsedThreads = await Promise.all(
+                    data.threads.map(async (t) => {
+                        const previews: ArticleFeedLayout[] = await Promise.all(
+                            t.articles.slice(0, 3).map(async (aid) => {
+                                const aRes = await fetch(`${BASE_URL}/articles/${aid}`);
+                                const a: RawArticle = await aRes.json();
+                                return {
+                                    id: a._id,
+                                    title: a.title,
+                                    date: formatDate(a.published),
+                                    topic: a.topics?.[0] || '',
+                                    author: a.author || '',
+                                    site: a.source || '',
+                                    description: a.description || '',
+                                    commentsCount: a.commentsCount || 0,
+                                    views: a.views || 0,
+                                    image: a.image || '',
+                                };
+
+                            })
+                        );
+
+                        return {
+                            id: t._id,
+                            threadTitle: t.title,
+                            lastUpdated: formatDate(t.last_updated),
+                            articles: previews.filter((a): a is ArticleFeedLayout => a !== null),
+                        };
+                    })
+                );
+
+                setArticles(parsedArticles);
+                setThreads(parsedThreads);
+            } catch (err) {
+                console.error('Failed to load folder content:', err);
+            } finally {
+                setLoading(false);
             }
-            return 0;
-        });
-    }, [articles, selectedSort, selectedView]);
+        };
+
+        fetchContent();
+    }, [folderId]);
 
     return (
-        <div
-            style={{
-                marginLeft: '20px',
-            }}
-        >
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    gap: 40,
-                    marginBottom: 25,
-                }}
-            >
-                <SelectSort
-                    options={['Newest', 'Popular', 'Verified Only']}
-                    selected={selectedSort}
-                    onSelect={setSelectedSort}
-                />
-                <SelectView
-                    options={['All', 'Articles', 'Threads']}
-                    selected={selectedView}
-                    onSelect={setSelectedView}
-                />
-                <SelectLength
-                    options={['All', 'Short', 'Medium', 'Long']}
-                    selected={length}
-                    onSelect={setLength}
-                />
-            </div>
-
-            {sortedArticles.length === 0 ? (
-                <p>No articles in this folder.</p>
+        <div style={{marginLeft: '20px'}}>
+            {loading ? (
+                <p style={{padding: '1rem', color: '#666'}}>Loading content...</p>
+            ) : threads.length + articles.length === 0 ? (
+                <p>No items in this folder.</p>
             ) : (
-                sortedArticles.map((article, index) => (
-                    <ArticleFeed
-                        key={index}
-                        id={`${folderId}-article-${index}`}
-                        article={article}
-                        isHovered={false}
-                        onHover={() => {
-                        }}
-                    />
-                ))
+                <>
+                    {threads.map((t) => (
+                        <Link key={t.id} to={`/thread/${t.id}`} style={{textDecoration: 'none', color: 'inherit'}}>
+                            <ThreadFeed
+                                thread={{...t, isThread: true}}
+                                threadIndex={0}
+                                hoveredItemId={null}
+                                setHoveredItemId={() => {
+                                }}
+                            />
+                        </Link>
+                    ))}
+
+                    {articles.map((a, i) => (
+                        <Link key={a.id} to={`/article/${a.id}`} style={{textDecoration: 'none', color: 'inherit'}}>
+                            <ArticleFeed
+                                id={`${folderId}-article-${i}`}
+                                article={a}
+                                isHovered={false}
+                                onHover={() => {
+                                }}
+                            />
+                        </Link>
+                    ))}
+                </>
             )}
         </div>
     );
-
 };
 
 export default Folder;

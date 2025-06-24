@@ -8,21 +8,23 @@ datasource db {
 }
 
 model User {
-  id             Int      @id @default(autoincrement())
-  email          String   @unique
-  password       String?
-  name           String?
-  bio            String?
-  language       String[]
-  country        String[]
-  favoriteTopics String[]
-  createdAt      DateTime @default(now())
-  profilePhoto   String?
-  bannerPhoto    String?
-  provider       String?
-  providerId     String?
-  isPublic       Boolean  @default(true)
-  recentViews    String[] @default([])
+  id              Int              @id @default(autoincrement())
+  email           String           @unique
+  password        String?
+  name            String?
+  bio             String?
+  language        String[]
+  country         String[]
+  favoriteTopics  String[]
+  createdAt       DateTime         @default(now())
+  profilePhoto    String?
+  bannerPhoto     String?
+  provider        String?
+  providerId      String?
+  isPublic        Boolean          @default(true)
+  recentViews     String[]         @default([])
+  threadFollows   ThreadFollow[]
+  bookmarkFolders BookmarkFolder[]
 
   notifyWeeklyEmail      Boolean @default(false)
   notifyDailyEmail       Boolean @default(false)
@@ -36,21 +38,49 @@ model User {
 }
 
 model Comment {
-  id          String   @id @default(uuid())
-  text        String
-  articleId   String
+  id        String @id @default(uuid())
+  text      String
+  articleId String
 
-  userId      Int?
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   isAnonymous Boolean
   createdAt   DateTime @default(now())
 
-  parentId    String?
-  parent      Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies     Comment[] @relation("CommentReplies")
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
 
   @@index([articleId])
 }
 
+model ThreadFollow {
+  userId     Int
+  threadId   String
+  followedAt DateTime @default(now())
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, threadId])
+}
+
+model BookmarkFolder {
+  id      String  @id @default(cuid())
+  name    String
+  color   String?
+  starred Boolean @default(false)
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int
+
+  parent   BookmarkFolder?  @relation("Subfolders", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String?
+  children BookmarkFolder[] @relation("Subfolders")
+
+  articleIds String[]
+  threadIds  String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, name])
+}

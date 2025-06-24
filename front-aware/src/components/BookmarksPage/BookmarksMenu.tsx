@@ -1,8 +1,7 @@
-import React from 'react';
+import React, {type ReactNode} from 'react';
 import {FaFolder, FaPlus, FaRegClock, FaStar} from 'react-icons/fa';
 import {SlOptionsVertical} from 'react-icons/sl';
 import {IoIosArrowForward, IoIosArrowDown} from 'react-icons/io';
-
 import FolderOptions from './FolderOptions';
 
 export type Folder = {
@@ -11,6 +10,7 @@ export type Folder = {
     color?: string;
     children?: Folder[];
     pinned?: boolean;
+    icon?: ReactNode;
 };
 
 type Props = {
@@ -61,7 +61,6 @@ const FolderItem: React.FC<{
                     userSelect: 'none',
                 }}
             >
-                {/* toggle */}
                 {hasChildren ? (
                     <div
                         onClick={(e) => {
@@ -76,7 +75,6 @@ const FolderItem: React.FC<{
                     <div style={{width: '1em'}}/>
                 )}
 
-                {/* folder icon + nume */}
                 <div
                     onClick={() => onSelectFolder(folder.id)}
                     style={{display: 'flex', alignItems: 'center', gap: '6px', flex: 1}}
@@ -86,7 +84,6 @@ const FolderItem: React.FC<{
                     {folder.name}
                 </div>
 
-                {/* optiuni folder icon */}
                 {(hovered || dropdownOpen) && (
                     <div
                         onClick={(e) => {
@@ -101,7 +98,6 @@ const FolderItem: React.FC<{
                 )}
             </div>
 
-            {/* dropdown optiuni folder */}
             {dropdownOpen && (
                 <FolderOptions
                     pinned={folder.pinned}
@@ -112,7 +108,6 @@ const FolderItem: React.FC<{
                 />
             )}
 
-            {/* optiuni */}
             {expanded && hasChildren && (
                 <div style={{marginLeft: '16px', borderLeft: '1px solid #ccc', paddingLeft: '12px'}}>
                     {folder.children!.map((child) => (
@@ -151,9 +146,8 @@ const BookmarksMenu: React.FC<Props> = ({
     return (
         <div
             style={{
-                width: '250px',
+                width: '400px',
                 borderRight: '1px solid #ccc',
-
                 padding: '20px 15px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -162,7 +156,6 @@ const BookmarksMenu: React.FC<Props> = ({
                 boxSizing: 'border-box',
             }}
         >
-
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -187,10 +180,8 @@ const BookmarksMenu: React.FC<Props> = ({
                 </div>
             </div>
 
-            {/* linia verticala */}
             <div style={{height: '1px', backgroundColor: '#ccc', width: '100%', margin: '5px 0'}}/>
 
-            {/* foldere */}
             <div style={{overflowY: 'auto', flex: 1}}>
                 <div style={{display: 'flex', flexDirection: 'column', gap: '18px'}}>
                     <div
@@ -208,17 +199,19 @@ const BookmarksMenu: React.FC<Props> = ({
                         <FaRegClock/> Save for Later
                     </div>
 
-                    {sortedFolders.map((folder) => (
-                        <FolderItem
-                            key={folder.id}
-                            folder={folder}
-                            selectedFolderId={selectedFolderId}
-                            onSelectFolder={onSelectFolder}
-                            onAddSubfolder={onAddSubfolder}
-                            onRemoveFolder={onRemoveFolder}
-                            onTogglePinned={onTogglePinned}
-                        />
-                    ))}
+                    {sortedFolders
+                        .filter(folder => folder.id !== 'save-for-later')
+                        .map((folder) => (
+                            <FolderItem
+                                key={folder.id}
+                                folder={folder}
+                                selectedFolderId={selectedFolderId}
+                                onSelectFolder={onSelectFolder}
+                                onAddSubfolder={onAddSubfolder}
+                                onRemoveFolder={onRemoveFolder}
+                                onTogglePinned={onTogglePinned}
+                            />
+                        ))}
                 </div>
             </div>
         </div>

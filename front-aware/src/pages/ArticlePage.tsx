@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import TopicTag from '../components/Cards/Tags/TopicTag';
 import {FaComments} from 'react-icons/fa';
@@ -44,6 +44,7 @@ const ArticlePage: React.FC = () => {
     const {id} = useParams<{ id: string }>();
     const [article, setArticle] = useState<ArticleData | null>(null);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const commentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchUrl = `${BASE_URL}/users/me`;
@@ -115,6 +116,15 @@ const ArticlePage: React.FC = () => {
         }
     }, [article?._id]);
 
+    useEffect(() => {
+        if (window.location.hash === '#comments' && commentRef.current) {
+            setTimeout(() => {
+                commentRef.current?.scrollIntoView({behavior: 'smooth'});
+            }, 200);
+        }
+    }, []);
+
+
     if (!article) return <div>Loading…</div>;
 
     const wordCount = article.content.split(/\s+/).length;
@@ -165,6 +175,7 @@ const ArticlePage: React.FC = () => {
             <div style={{display: 'flex', gap: 20}}>
                 <div style={{flex: 7}}>
                     <Article
+                        _id={article._id}
                         title={article.title}
                         category={mainTopic}
                         image={article.image}
@@ -181,7 +192,9 @@ const ArticlePage: React.FC = () => {
                     {!currentUser ? (
                         <div>Loading comments…</div>
                     ) : (
-                        <CommentSection articleId={article._id} currentUser={currentUser}/>
+                        <div ref={commentRef}>
+                            <CommentSection articleId={article._id} currentUser={currentUser}/>
+                        </div>
                     )}
 
                 </div>

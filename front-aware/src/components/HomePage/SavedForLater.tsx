@@ -1,10 +1,11 @@
-import React, {useRef, useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import {Link} from 'react-router-dom';
 import ZoomIfSmall from './ZoomIfSmallPicture';
 import TopicTag from '../Cards/Tags/TopicTag.tsx';
 import ArticleOptions from '../Cards/ArticleLayouts/ArticleOptions.tsx';
-
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
+import {BASE_URL} from '../../api/config.ts';
 
 const smallCardHeight = 170;
 const containerWidth = 300;
@@ -12,44 +13,15 @@ const cardGap = 8;
 const scrollStep = containerWidth + cardGap;
 const autoScrollInterval = 3000;
 
-const savedItems = [
-    {
-        title: 'Doctors Warn of New Flu Strain Emerging in Asia',
-        date: '26 April 2025',
-        src: '/news1.jpg',
-        alt: 'Health News',
-        topic: 'health',
-    },
-    {
-        title: 'Minimum Wage Increased in 25 Countries',
-        date: '30 April 2025',
-        src: '/news2.jpg',
-        alt: 'Economy News',
-        topic: 'economy',
-    },
-    {
-        title: 'Minimum Wage Increased in 25 Countries',
-        date: '30 April 2025',
-        src: '/news2.jpg',
-        alt: 'Economy News',
-        topic: 'economy',
-    },
-    {
-        title: 'Minimum Wage Increased in 25 Countries',
-        date: '30 April 2025',
-        src: '/news2.jpg',
-        alt: 'Economy News',
-        topic: 'economy',
-    },
-    {
-        title: 'Minimum Wage Increased in 25 Countries',
-        date: '30 April 2025',
-        src: '/news2.jpg',
-        alt: 'Economy News',
-        topic: 'economy',
-    },
-];
-
+interface SavedArticle {
+    _id: string;
+    title: string;
+    author?: string;
+    published: string;
+    image?: string;
+    topics?: string[];
+    source: string;
+}
 
 const arrowStyle = (side: 'left' | 'right') => ({
     position: 'absolute' as const,
@@ -70,11 +42,30 @@ const arrowStyle = (side: 'left' | 'right') => ({
     fontSize: '17px',
 });
 
-
 const SavedForLater: React.FC = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [hovering, setHovering] = useState(false);
     const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    const [savedArticles, setSavedArticles] = useState<SavedArticle[]>([]);
+
+    useEffect(() => {
+        const fetchSaved = async () => {
+            const token = localStorage.getItem('authToken');
+            if (!token) return;
+
+            try {
+                const res = await fetch(`${BASE_URL}/bookmarks/save-for-later`, {
+                    headers: {Authorization: `Bearer ${token}`},
+                });
+                const data = await res.json();
+                setSavedArticles(data.articles || []);
+            } catch (err) {
+                console.error('Error fetching saved articles:', err);
+            }
+        };
+
+        fetchSaved();
+    }, []);
 
     useEffect(() => {
         if (hovering) return;
@@ -93,22 +84,27 @@ const SavedForLater: React.FC = () => {
         return () => clearInterval(interval);
     }, [hovering]);
 
-    const scrollLeft = () => scrollRef.current?.scrollBy({left: -scrollStep, behavior: 'smooth'});
-    const scrollRight = () => scrollRef.current?.scrollBy({left: scrollStep, behavior: 'smooth'});
+    const scrollLeft = () =>
+        scrollRef.current?.scrollBy({left: -scrollStep, behavior: 'smooth'});
+    const scrollRight = () =>
+        scrollRef.current?.scrollBy({left: scrollStep, behavior: 'smooth'});
 
     return (
-        <div style={{paddingLeft: '15px', paddingRight: '15px', marginTop: '20px'}}
-             onMouseEnter={() => setHovering(true)}
-             onMouseLeave={() => setHovering(false)}
+        <div
+            style={{paddingLeft: '15px', paddingRight: '15px', marginTop: '20px'}}
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
         >
-            <p style={{
-                fontSize: '22px',
-                fontWeight: 'bold',
-                color: '#000000',
-                marginTop: '20px',
-                marginBottom: '16px',
-                marginLeft: '3px',
-            }}>
+            <p
+                style={{
+                    fontSize: '22px',
+                    fontWeight: 'bold',
+                    color: '#000000',
+                    marginTop: '20px',
+                    marginBottom: '16px',
+                    marginLeft: '3px',
+                }}
+            >
                 Saved for Later
             </p>
 
@@ -127,79 +123,97 @@ const SavedForLater: React.FC = () => {
                     }}
                     className="hide-scrollbar"
                 >
-                    {savedItems.map((item, idx) => (
+                    {savedArticles.map((item, idx) => (
                         <div
-                            key={idx}
+                            key={item._id}
                             style={{
                                 height: `${smallCardHeight}px`,
                                 minWidth: `${containerWidth}px`,
                                 width: `${containerWidth}px`,
-                                position: 'relative', // important for absolute children
+                                position: 'relative',
                                 overflow: 'hidden',
                                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                                 backgroundColor: 'white',
                                 flexShrink: 0,
+                                borderRadius: '6px',
                             }}
                             onMouseEnter={() => setHoveredIndex(idx)}
                             onMouseLeave={() => setHoveredIndex(null)}
                         >
-                            <ZoomIfSmall
-                                src={item.src}
-                                alt={item.alt}
-                                containerWidth={containerWidth}
-                                containerHeight={smallCardHeight}
-                                className="rounded"
-                            />
-
-
                             {hoveredIndex === idx && (
                                 <div style={{position: 'absolute', top: '8px', right: '8px', zIndex: 10}}>
-                                    <ArticleOptions position="top-right"/>
+                                    <ArticleOptions articleId={item._id} position="top-right"/>
                                 </div>
                             )}
 
-                            <div style={{position: 'absolute', top: '8px', left: '8px', zIndex: 3}}>
-                                <TopicTag label={item.topic || 'general'}/>
-                            </div>
-
-                            <div
+                            <Link
+                                to={`/article/${item._id}`}
                                 style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    width: '100%',
+                                    textDecoration: 'none',
+                                    color: 'inherit',
+                                    display: 'block',
                                     height: '100%',
-                                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                    pointerEvents: 'none',
-                                    borderRadius: 'inherit',
-                                    zIndex: 1,
-                                }}
-                            />
-
-                            <div
-                                style={{
-                                    position: 'absolute',
-                                    bottom: '12px',
-                                    left: '8px',
-                                    zIndex: 2,
-                                    color: 'white',
+                                    width: '100%',
+                                    position: 'relative',
                                 }}
                             >
-                                <p
+                                <ZoomIfSmall
+                                    src={item.image || '/default.jpg'}
+                                    alt={item.title}
+                                    containerWidth={containerWidth}
+                                    containerHeight={smallCardHeight}
+                                    className="rounded"
+                                />
+
+                                <div style={{position: 'absolute', top: '8px', left: '8px', zIndex: 3}}>
+                                    <TopicTag label={item.topics?.[0] || 'general'}/>
+                                </div>
+
+                                <div
                                     style={{
-                                        fontSize: '17px',
-                                        fontWeight: 'bold',
-                                        margin: '3px 0 0 0',
-                                        lineHeight: '1.1',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                        pointerEvents: 'none',
+                                        borderRadius: 'inherit',
+                                        zIndex: 1,
+                                    }}
+                                />
+
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '12px',
+                                        left: '8px',
+                                        zIndex: 2,
+                                        color: 'white',
+                                        maxWidth: '90%',
                                     }}
                                 >
-                                    {item.title}
-                                </p>
-                                <p style={{fontSize: '12px', margin: '3px 0 0 0'}}>{item.date}</p>
-                            </div>
+                                    <p
+                                        style={{
+                                            fontSize: '17px',
+                                            fontWeight: 'bold',
+                                            margin: '3px 0',
+                                            lineHeight: '1.1',
+                                            overflow: 'hidden',
+                                            whiteSpace: 'nowrap',
+                                            textOverflow: 'ellipsis',
+                                        }}
+                                    >
+                                        {item.title}
+                                    </p>
+                                    <p style={{fontSize: '12px', margin: 0}}>
+                                        {item.author || 'Unknown'} •{' '}
+                                        {new Date(item.published).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            </Link>
                         </div>
                     ))}
-
                 </div>
 
                 {hovering && (
@@ -216,6 +230,5 @@ const SavedForLater: React.FC = () => {
         </div>
     );
 };
-
 
 export default SavedForLater;

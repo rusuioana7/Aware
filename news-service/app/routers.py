@@ -167,24 +167,24 @@ async def get_related_threads(
     summary="List articles by one or more topics",
 )
 async def list_by_topic(
-        topics: str = Path(
-            ...,
-            description="Comma-separated list of topics to filter on, e.g. 'tech,science'",
-        ),
-        page: int = Query(1, ge=1),
-        size: int = Query(20, ge=1, le=100),
+    topics: str = Path(..., description="Comma-separated topics"),
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    sort: str = Query("published", description="Sort by 'published' or 'views'")
 ):
     topic_list = [t.strip() for t in topics.split(",") if t.strip()]
     skip = (page - 1) * size
+    order_field = sort if sort in ("published", "views") else "published"
 
     cursor = (
         articles_col
         .find({"topic": {"$in": topic_list}})
-        .sort("published", -1)
+        .sort(order_field, -1)
         .skip(skip)
         .limit(size)
     )
     docs = await cursor.to_list(length=size)
+
     for doc in docs:
         pub = doc.get("published")
         if isinstance(pub, datetime):
