@@ -6,6 +6,7 @@ import { UploadModule } from './upload/upload.module';
 import { ArticlesModule } from './articles/articles.module';
 import { ThreadsModule } from './threads/threads.module';
 import { FeedModule } from './feed/feed.module';
+import { BookmarksModule } from './bookmarks/bookmarks.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { FeedModule } from './feed/feed.module';
     ArticlesModule,
     ThreadsModule,
     FeedModule,
+    BookmarksModule,
   ],
 })
 export class AppModule {}

@@ -1,5 +1,3 @@
-// src/pages/TopicPage.tsx
-
 import React, {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
 import {FaArrowLeft, FaArrowRight, FaStar} from 'react-icons/fa';
@@ -64,13 +62,14 @@ const PAGE_SIZE = 10;
 const TopicPage: React.FC = () => {
     const {topic} = useParams<{ topic: string }>();
     const [allItems, setAllItems] = useState<CombinedItem[]>([]);
+    const [topArticles, setTopArticles] = useState<ArticleFeedLayout[]>([]);
+    const [topThreads, setTopThreads] = useState<ThreadFeedLayout[]>([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
     const [userFavorites, setUserFavorites] = useState<string[]>([]);
     const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular' | 'Verified Only'>('Newest');
     const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>('All');
-
 
     const toggleFavorite = () => setIsFavorite(f => !f);
 
@@ -84,10 +83,7 @@ const TopicPage: React.FC = () => {
                 let pageNum = 1;
 
                 while (true) {
-                    const url =
-                        `${BASE_URL}/feed?feed_type=both` +
-                        `&topics=${encodeURIComponent(topic)}` +
-                        `&page=${pageNum}&size=${PAGE_SIZE}`;
+                    const url = `${BASE_URL}/feed?feed_type=both&topics=${encodeURIComponent(topic)}&page=${pageNum}&size=${PAGE_SIZE}`;
                     const res = await fetch(url);
                     if (!res.ok) throw new Error(`Page ${pageNum} failed: ${res.statusText}`);
                     const {articles: aDtos, threads: tDtos} = (await res.json()) as {
@@ -156,6 +152,21 @@ const TopicPage: React.FC = () => {
                 }
 
                 setAllItems(accumulated);
+
+                const articlesOnly = accumulated.filter(a => !a.isThread) as ArticleFeedLayout[];
+                const threadsOnly = accumulated.filter(t => t.isThread) as ThreadFeedLayout[];
+
+                const topArts = [...articlesOnly].sort((a, b) => b.views - a.views).slice(0, 5);
+                const topThs = [...threadsOnly]
+                    .sort((a, b) => {
+                        const aViews = Math.max(...a.articles.map(a => a.views));
+                        const bViews = Math.max(...b.articles.map(a => a.views));
+                        return bViews - aViews;
+                    })
+                    .slice(0, 5);
+
+                setTopArticles(topArts);
+                setTopThreads(topThs);
                 setPage(1);
             } catch (err) {
                 console.error('Error loading topic feed:', err);
@@ -195,7 +206,6 @@ const TopicPage: React.FC = () => {
         }
     }, [topic, userFavorites]);
 
-
     const filteredItems = allItems.filter(item => {
         if (selectedView === 'Articles') return !item.isThread;
         if (selectedView === 'Threads') return item.isThread;
@@ -216,7 +226,6 @@ const TopicPage: React.FC = () => {
     const paginated = sortedItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     const totalPages = Math.ceil(sortedItems.length / PAGE_SIZE);
 
-
     const prevPage = () => setPage(p => Math.max(1, p - 1));
     const nextPage = () => {
         if (allItems.length > PAGE_SIZE * page) {
@@ -230,7 +239,6 @@ const TopicPage: React.FC = () => {
 
     return (
         <div style={{display: 'flex', gap: 24, padding: 16}}>
-            {/* Main column */}
             <div style={{flex: 7}}>
                 <div style={{marginBottom: 0, display: 'inline-flex', alignItems: 'center', gap: 8}}>
                     <TopicTag label={topic || 'General'} style={{fontSize: 18, padding: '6px 10px'}}/>
@@ -270,7 +278,6 @@ const TopicPage: React.FC = () => {
                         onSelect={setSelectedView}
                     />
                 </div>
-
 
                 {loading ? (
                     <div>Loading all pages…</div>
@@ -319,10 +326,18 @@ const TopicPage: React.FC = () => {
                 )}
             </div>
 
-            {/* Sidebar */}
             <div style={{flex: 3, display: 'flex', flexDirection: 'column', gap: 16}}>
-                <TopTopicArticles/>
-                <TopTopicThreads/>
+                <TopTopicArticles articles={topArticles}/>
+                <TopTopicThreads
+                    threads={topThreads.map(t => ({
+                        id: t.id,
+                        name: t.threadTitle,
+                        date: t.lastUpdated,
+                        topic: t.articles[0]?.topic || 'general',
+                        image: t.articles[0]?.image || '/placeholder.jpg',
+                    }))}
+                />
+
             </div>
         </div>
     );

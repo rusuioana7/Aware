@@ -165,6 +165,7 @@ const ArticlePage: React.FC = () => {
             <div style={{display: 'flex', gap: 20}}>
                 <div style={{flex: 7}}>
                     <Article
+                        _id={article._id}
                         title={article.title}
                         category={mainTopic}
                         image={article.image}

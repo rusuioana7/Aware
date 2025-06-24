@@ -3,9 +3,8 @@ import {Link, useParams} from 'react-router-dom';
 import {FaComments} from 'react-icons/fa';
 import TopicTag from '../components/Cards/Tags/TopicTag';
 import ThreadLayout from '../components/ThreadPage/ThreadLayout';
-import RelatedThreads from '../components/ThreadPage/RelatedThreads';
-import TopArticles from '../components/ThreadPage/TopArticles';
 import {BASE_URL} from '../api/config';
+import SideArticleListLayout from '../components/Cards/ArticleLayouts/SideArticleListLayout.tsx';
 
 interface RawThread {
     _id: string;
@@ -32,6 +31,7 @@ export const ThreadPage: React.FC = () => {
     const [thread, setThread] = useState<RawThread | null>(null);
     const [articles, setArticles] = useState<RawArticle[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isFollowing, setIsFollowing] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -53,6 +53,17 @@ export const ThreadPage: React.FC = () => {
                     })
                 );
                 setArticles(arts);
+
+                const token = localStorage.getItem("authToken");
+                if (token) {
+                    const res = await fetch(`${BASE_URL}/users/threads-followed`, {
+                        headers: {Authorization: `Bearer ${token}`}
+                    });
+                    const followed = await res.json();
+                    const isFollowed = followed.some((t: any) => t._id === id);
+                    setIsFollowing(isFollowed);
+                }
+
             } catch (err) {
                 console.error('Error loading thread page', err);
             } finally {
@@ -81,6 +92,14 @@ export const ThreadPage: React.FC = () => {
         id: a._id,
     }));
 
+    const topViewed = [...feedItems]
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 5);
+
+    const topDiscussed = [...feedItems]
+        .sort((a, b) => b.commentsCount - a.commentsCount)
+        .slice(0, 5);
+
     return (
         <div style={{padding: 20}}>
             <div style={{
@@ -106,14 +125,16 @@ export const ThreadPage: React.FC = () => {
 
             <div style={{display: 'flex', gap: 24}}>
                 <ThreadLayout
+                    threadId={thread._id}
                     threadTitle={thread.title}
                     lastUpdated={new Date(thread.last_updated).toLocaleDateString()}
                     articles={feedItems}
+                    initialIsFollowing={isFollowing}
                 />
 
                 <div style={{flex: 3}}>
-                    <RelatedThreads/>
-                    <TopArticles/>
+                    <SideArticleListLayout title="Most Viewed in This Thread" articles={topViewed}/>
+                    <SideArticleListLayout title="Most Discussed in This Thread" articles={topDiscussed}/>
                 </div>
             </div>
         </div>

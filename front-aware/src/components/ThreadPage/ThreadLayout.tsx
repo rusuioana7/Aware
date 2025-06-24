@@ -1,21 +1,50 @@
 import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
 import ArticleOptions from '../Cards/ArticleLayouts/ArticleOptions.tsx';
-import TopicTag from '../Cards/Tags/TopicTag';
+import TopicTag from '../Cards/Tags/TopicTag.tsx';
 import type {ArticleFeedLayout} from '../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
+import {BASE_URL} from '../../api/config.ts';
 
 type Props = {
+    threadId: string;
     threadTitle: string;
     lastUpdated: string;
     articles: ArticleFeedLayout[];
+    initialIsFollowing: boolean;
 };
 
-const ThreadLayout: React.FC<Props> = ({threadTitle, lastUpdated, articles}) => {
+const ThreadLayout: React.FC<Props> = ({
+                                           threadId,
+                                           threadTitle,
+                                           lastUpdated,
+                                           articles,
+                                           initialIsFollowing
+                                       }) => {
     const [hoveredArticle, setHoveredArticle] = useState<number | null>(null);
-    const [isFollowing, setIsFollowing] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
+    const [loadingFollow, setLoadingFollow] = useState(false);
 
-    const toggleFollow = () => {
-        setIsFollowing(prev => !prev);
+    const toggleFollow = async () => {
+        const token = localStorage.getItem("authToken");
+        if (!token || !threadId) return;
+
+        setLoadingFollow(true);
+
+        try {
+            const method = isFollowing ? "DELETE" : "POST";
+            const url = `${BASE_URL}/users/threads/${threadId}/${isFollowing ? "unfollow" : "follow"}`;
+
+            await fetch(url, {
+                method,
+                headers: {Authorization: `Bearer ${token}`}
+            });
+
+            setIsFollowing(prev => !prev);
+        } catch (err) {
+            console.error("Failed to toggle follow:", err);
+        } finally {
+            setLoadingFollow(false);
+        }
     };
 
     return (
@@ -32,11 +61,12 @@ const ThreadLayout: React.FC<Props> = ({threadTitle, lastUpdated, articles}) => 
             >
                 {threadTitle}
                 <span style={{fontSize: '16px', fontWeight: 'normal', color: '#777'}}>
-          • Last updated on {lastUpdated} •
-        </span>
+                    • Last updated on {lastUpdated} •
+                </span>
 
                 <button
                     onClick={toggleFollow}
+                    disabled={loadingFollow}
                     style={{
                         cursor: 'pointer',
                         padding: '6px 14px',
@@ -48,6 +78,7 @@ const ThreadLayout: React.FC<Props> = ({threadTitle, lastUpdated, articles}) => 
                         color: isFollowing ? '#fff' : '#031A6B',
                         transition: 'all 0.3s ease',
                         userSelect: 'none',
+                        opacity: loadingFollow ? 0.6 : 1
                     }}
                     aria-pressed={isFollowing}
                     aria-label={isFollowing ? 'Unfollow thread' : 'Follow thread'}
@@ -106,11 +137,9 @@ const ThreadLayout: React.FC<Props> = ({threadTitle, lastUpdated, articles}) => 
                                     <span style={{fontStyle: 'italic'}}>{article.site}</span>
                                 </p>
 
-                                <p style={{
-                                    fontSize: '15px',
-                                    margin: '6px 0 6px',
-                                    color: '#333'
-                                }}>{article.description}</p>
+                                <p style={{fontSize: '15px', margin: '6px 0 6px', color: '#333'}}>
+                                    {article.description}
+                                </p>
 
                                 <p style={{fontSize: '13px', color: '#777'}}>
                                     💬 {typeof article.commentsCount === 'number' ? article.commentsCount : 0} comments &nbsp;

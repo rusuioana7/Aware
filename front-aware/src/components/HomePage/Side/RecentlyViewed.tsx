@@ -4,6 +4,15 @@ import type {Article} from "../../Cards/ArticleLayouts/SideArticleListLayout.tsx
 import {useNavigate} from "react-router-dom";
 import {BASE_URL} from "../../../api/config.ts";
 
+interface RawArticle {
+    _id: string;
+    title: string;
+    author?: string;
+    published: string;
+    topics?: string[];
+    image?: string;
+}
+
 const RecentlyViewed: React.FC = () => {
     const [articles, setArticles] = useState<Article[]>([]);
     const navigate = useNavigate();
@@ -20,20 +29,23 @@ const RecentlyViewed: React.FC = () => {
                     },
                 });
 
-                const data = await res.json();
+                const data: RawArticle[] = await res.json();
 
-                const normalized: Article[] = data.map((a: any) => ({
-                    title: a.title,
-                    author: a.author || "Unknown",
-                    topic: (a.topics?.[0] || "General").toLowerCase(),
-                    date: new Date(a.published).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                    }),
-                    image: a.image || "/placeholder.jpg",
-                    onClick: () => navigate(`/articles/${a._id}`),
-                }));
+                const normalized: Article[] = data
+                    .map((a) => ({
+                        id: a._id,
+                        title: a.title,
+                        author: a.author || "Unknown",
+                        topic: (a.topics?.[0] || "General").toLowerCase(),
+                        date: new Date(a.published).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                        }),
+                        image: a.image || "/placeholder.jpg",
+                        onClick: () => navigate(`/articles/${a._id}`),
+                    }))
+                    .filter((a) => !!a.id);
 
                 setArticles(normalized);
             } catch (err) {
@@ -42,7 +54,7 @@ const RecentlyViewed: React.FC = () => {
         };
 
         fetchRecent();
-    }, []);
+    }, [navigate]);
 
     return <SideArticleListLayout title="Recently Viewed" articles={articles}/>;
 };
