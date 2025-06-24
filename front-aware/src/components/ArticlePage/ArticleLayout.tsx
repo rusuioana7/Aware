@@ -1,14 +1,13 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
     FaBookmark,
     FaDownload,
     FaFlag,
     FaHeadphones,
     FaRegClock,
-    FaFileAlt,
     FaShareAlt,
     FaExternalLinkAlt,
-    FaCheck,
+    FaCheck, FaPause, FaPlay,
 } from 'react-icons/fa';
 import CredibilityLabel from '../Cards/Tags/CredibilityLabel.tsx';
 import {BASE_URL} from '../../api/config.ts';
@@ -72,6 +71,12 @@ const Article: React.FC<ArticleProps> = ({
     const [snackbar, setSnackbar] = useState<string | null>(null);
     const [bookmarkFolders, setBookmarkFolders] = useState<FolderResponse[]>([]);
     const [showBookmarkMenu, setShowBookmarkMenu] = useState(false);
+    const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+    const [audioUrl, setAudioUrl] = useState<string | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const [speechRate, setSpeechRate] = useState(1);
+    const [showListenMenu, setShowListenMenu] = useState(false);
 
 
     useEffect(() => {
@@ -203,6 +208,96 @@ const Article: React.FC<ArticleProps> = ({
                 </div>
             );
         });
+    const handleDownload = async (type: 'pdf' | 'txt' | 'md') => {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        try {
+            const res = await fetch(`${BASE_URL}/articles/${_id}/download/${type}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                throw new Error('Download failed');
+            }
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${title.replace(/\s+/g, '_')}.${type}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            setShowDownloadMenu(false);
+        } catch (err) {
+            console.error('Download error:', err);
+            setSnackbar('Download failed');
+            setTimeout(() => setSnackbar(null), 3000);
+        }
+    };
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            setSnackbar('Copied to clipboard');
+            setTimeout(() => setSnackbar(null), 3000);
+        } catch (err) {
+            console.error('Failed to copy URL:', err);
+            setSnackbar('Failed to copy');
+            setTimeout(() => setSnackbar(null), 3000);
+        }
+    };
+    const handleFetchAudio = async () => {
+        if (audioUrl) {
+            audioRef.current?.play();
+            setIsSpeaking(true);
+            return;
+        }
+
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        try {
+            const res = await fetch(`${BASE_URL}/articles/${_id}/audio`, {
+                headers: {Authorization: `Bearer ${token}`},
+            });
+
+            if (!res.ok) throw new Error('Audio fetch failed');
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            setAudioUrl(url);
+            const audio = new Audio(url);
+            audioRef.current = audio;
+            audio.play();
+            setIsSpeaking(true);
+
+            audio.onended = () => setIsSpeaking(false);
+            audio.onerror = () => setIsSpeaking(false);
+        } catch (err) {
+            console.error('Error fetching audio:', err);
+            setSnackbar('Audio unavailable');
+            setTimeout(() => setSnackbar(null), 3000);
+        }
+    };
+    const handlePauseAudio = () => {
+        audioRef.current?.pause();
+        setIsSpeaking(false);
+    };
+
+    const handleSpeedChange = (rate: number) => {
+        setSpeechRate(rate);
+        if (audioRef.current) {
+            audioRef.current.playbackRate = rate;
+        }
+    };
+
 
     return (
         <article style={{
@@ -267,10 +362,108 @@ const Article: React.FC<ArticleProps> = ({
                 <a href={originalUrl} target="_blank" rel="noopener noreferrer" style={buttonStyle}>
                     <FaExternalLinkAlt/> View Original
                 </a>
-                <button style={buttonStyle}><FaDownload/> Download</button>
-                <button style={buttonStyle}><FaShareAlt/> Share</button>
-                <button style={buttonStyle}><FaFileAlt/> Summarize</button>
-                <button style={buttonStyle}><FaHeadphones/> Listen</button>
+                <div style={{position: 'relative'}}>
+                    <button
+                        style={buttonStyle}
+                        onClick={() => setShowDownloadMenu(prev => !prev)}
+                    >
+                        <FaDownload/> Download
+                    </button>
+
+                    {showDownloadMenu && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '40px',
+                            left: 0,
+                            backgroundColor: 'white',
+                            border: '1px solid #ccc',
+                            borderRadius: '6px',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                            padding: '10px',
+                            zIndex: 999,
+                            minWidth: '160px',
+                        }}>
+                            <ul style={{listStyle: 'none', margin: 0, padding: 0}}>
+                                {['pdf', 'txt', 'md'].map(type => (
+                                    <li
+                                        key={type}
+                                        onClick={() => handleDownload(type as 'pdf' | 'txt' | 'md')}
+                                        style={{
+                                            padding: '6px 10px',
+                                            cursor: 'pointer',
+                                            borderRadius: '4px',
+                                            marginBottom: '4px',
+                                            backgroundColor: '#F9F9F9',
+                                        }}
+                                    >
+                                        {type.toUpperCase()}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+
+                <button style={buttonStyle} onClick={handleShare}>
+                    <FaShareAlt/> Share
+                </button>
+
+
+                <div style={{position: 'relative'}}>
+                    <button style={buttonStyle} onClick={() => setShowListenMenu(prev => !prev)}>
+                        <FaHeadphones/> Listen
+                    </button>
+
+                    {showListenMenu && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '40px',
+                            left: 0,
+                            backgroundColor: 'white',
+                            border: '1px solid #ccc',
+                            borderRadius: '6px',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                            padding: '10px',
+                            zIndex: 999,
+                            minWidth: '180px',
+                        }}>
+                            <ul style={{listStyle: 'none', margin: 0, padding: 0}}>
+                                <li
+                                    onClick={isSpeaking ? handlePauseAudio : handleFetchAudio}
+                                    style={{
+                                        padding: '6px 10px',
+                                        cursor: 'pointer',
+                                        borderRadius: '4px',
+                                        marginBottom: '6px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        backgroundColor: '#F9F9F9',
+                                    }}
+                                >
+                                    {isSpeaking ? <FaPause/> : <FaPlay/>} {isSpeaking ? 'Pause' : 'Play'}
+                                </li>
+                                {[0.75, 1, 1.25, 1.5].map((rate) => (
+                                    <li
+                                        key={rate}
+                                        onClick={() => handleSpeedChange(rate)}
+                                        style={{
+                                            padding: '6px 10px',
+                                            cursor: 'pointer',
+                                            borderRadius: '4px',
+                                            marginBottom: '4px',
+                                            backgroundColor: speechRate === rate ? '#E0F0FF' : 'transparent',
+                                        }}
+                                    >
+                                        Speed: {rate}x
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+
+
                 <button style={buttonStyle}><FaFlag/> Report</button>
             </div>
 

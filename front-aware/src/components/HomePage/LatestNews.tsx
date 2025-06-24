@@ -106,10 +106,16 @@ const LatestNews: React.FC = () => {
                             />
 
                             {hoveredIndex === -1 && (
-                                <div style={{position: 'absolute', top: '10px', right: '10px', zIndex: 2}}>
-                                    <ArticleOptions position="top-right"/>
+                                <div
+                                    style={{position: 'absolute', top: '10px', right: '10px', zIndex: 2}}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                    }}
+                                >
+                                    <ArticleOptions articleId={articles[0]._id} position="top-right"/>
                                 </div>
                             )}
+
 
                             <div style={{
                                 position: 'absolute',
@@ -162,10 +168,16 @@ const LatestNews: React.FC = () => {
                                 />
 
                                 {hoveredIndex === idx && (
-                                    <div style={{position: 'absolute', top: '10px', right: '10px', zIndex: 2}}>
-                                        <ArticleOptions position="top-right"/>
+                                    <div
+                                        style={{position: 'absolute', top: '8px', right: '8px', zIndex: 10}}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <ArticleOptions articleId={item._id} position="top-right"/>
                                     </div>
                                 )}
+
 
                                 <div style={{
                                     position: 'absolute',

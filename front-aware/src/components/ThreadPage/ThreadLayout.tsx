@@ -117,10 +117,17 @@ const ThreadLayout: React.FC<Props> = ({
                                     }}
                                 />
                                 {hoveredArticle === idx && (
-                                    <div style={{position: 'absolute', top: '6px', right: '6px', zIndex: 10}}>
-                                        <ArticleOptions position="top-right"/>
+                                    <div
+                                        style={{position: 'absolute', top: '6px', right: '6px', zIndex: 10}}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                        }}
+                                    >
+                                        <ArticleOptions articleId={article.id} position="top-right"/>
                                     </div>
                                 )}
+
                             </div>
 
                             <div style={{position: 'absolute', top: '10px', left: '10px', zIndex: 3}}>

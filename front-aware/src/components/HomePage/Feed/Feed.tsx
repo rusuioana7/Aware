@@ -74,6 +74,8 @@ const languageToCode = (lang: string): string => {
 
 const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages, selectedSort}) => {
     const feedRef = useRef<HTMLDivElement>(null);
+    const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+
 
     const [allItems, setAllItems] = useState<FeedItem[]>([]);
     const [page, setPage] = useState(1);
@@ -286,10 +288,10 @@ const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages,
                                 key={item.id}
                                 article={item}
                                 id={item.id}
-                                isHovered={false}
-                                onHover={() => {
-                                }}
+                                isHovered={hoveredItemId === item.id}
+                                onHover={setHoveredItemId}
                             />
+
                         )
                     )}
 
