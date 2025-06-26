@@ -4,6 +4,7 @@ import ArticleOptions from '../Cards/ArticleLayouts/ArticleOptions.tsx';
 import TopicTag from '../Cards/Tags/TopicTag.tsx';
 import type {ArticleFeedLayout} from '../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
 import {BASE_URL} from '../../api/config.ts';
+import CredibilityLabel from "../Cards/Tags/CredibilityLabel.tsx";
 
 type Props = {
     threadId: string;
@@ -151,6 +152,9 @@ const ThreadLayout: React.FC<Props> = ({
                                 <p style={{fontSize: '13px', color: '#777'}}>
                                     💬 {typeof article.commentsCount === 'number' ? article.commentsCount : 0} comments &nbsp;
                                     👁️ {typeof article.views === 'number' ? article.views : 0} views
+                                    {article.credibility_label && (
+                                        <CredibilityLabel level={article.credibility_label}/>
+                                    )}
                                 </p>
                             </div>
                         </Link>

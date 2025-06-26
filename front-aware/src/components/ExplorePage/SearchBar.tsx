@@ -3,18 +3,29 @@ import React from 'react';
 type SearchBarProps = {
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    onSearch?: () => void;
+    onSearch: () => void;
     placeholder?: string;
 };
 
-const SearchBar: React.FC<SearchBarProps> = ({value, onChange, onSearch, placeholder = 'Search...'}) => {
-    return (
+const SearchBar: React.FC<SearchBarProps> = ({
+                                                 value,
+                                                 onChange,
+                                                 onSearch,
+                                                 placeholder = 'Search...'
+                                             }) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            onSearch();
+        }
+    };
 
-        <div style={{display: 'flex', width: '70%',}}>
+    return (
+        <div style={{display: 'flex', width: '70%'}}>
             <input
                 type="text"
                 value={value}
                 onChange={onChange}
+                onKeyDown={handleKeyDown}
                 placeholder={placeholder}
                 style={{
                     flex: 1,

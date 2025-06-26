@@ -38,6 +38,7 @@ interface ArticleData {
     thread?: ThreadData | null;
     views?: number;
     commentsCount?: number;
+    credibility_label?: string;
 }
 
 const ArticlePage: React.FC = () => {
@@ -90,10 +91,12 @@ const ArticlePage: React.FC = () => {
                             topic: raw.thread.topic,
                             views: raw.views ?? 0,
                             commentsCount: raw.commentsCount ?? 0,
+                            credibility_label: raw.credibility_label || 'unrated',
                         }
                         : null,
                 };
                 console.log('[views]', raw.views)
+                console.log('[credibility_label]', raw.credibility_label)
 
                 console.log('[ArticlePage] normalized thread:', normalized.thread);
                 setArticle(normalized);
@@ -187,6 +190,7 @@ const ArticlePage: React.FC = () => {
                         originalUrl={article.url}
                         viewsCount={article.views}
                         commentsCount={article.commentsCount}
+                        credibilityLabel={article.credibility_label || 'unrated'}
                     />
 
                     {!currentUser ? (

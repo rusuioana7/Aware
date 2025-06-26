@@ -30,6 +30,8 @@ async def get_article(id: str):
 
     doc['commentsCount'] = doc.get('commentsCount', 0)
 
+    doc["credibility_label"] = doc.get("credibility_label", "unrated")
+
     pub = doc.get("published")
     if isinstance(pub, datetime):
         doc["published"] = pub.isoformat()
@@ -167,10 +169,10 @@ async def get_related_threads(
     summary="List articles by one or more topics",
 )
 async def list_by_topic(
-    topics: str = Path(..., description="Comma-separated topics"),
-    page: int = Query(1, ge=1),
-    size: int = Query(20, ge=1, le=100),
-    sort: str = Query("published", description="Sort by 'published' or 'views'")
+        topics: str = Path(..., description="Comma-separated topics"),
+        page: int = Query(1, ge=1),
+        size: int = Query(20, ge=1, le=100),
+        sort: str = Query("published", description="Sort by 'published' or 'views'")
 ):
     topic_list = [t.strip() for t in topics.split(",") if t.strip()]
     skip = (page - 1) * size
@@ -250,6 +252,7 @@ async def get_feed(
                 d["thread_id"] = str(d["thread_id"])
             if isinstance(d.get("fetched_at"), datetime):
                 d["fetched_at"] = d["fetched_at"].isoformat()
+            d["credibility_label"] = d.get("credibility_label", "unrated")
 
             d["thread"] = None
 
@@ -329,3 +332,97 @@ async def update_comments_count(id: str, payload: dict):
         raise HTTPException(status_code=404, detail="Article not found")
 
     return {"success": True, "updated": result.modified_count}
+
+
+@router.get("/search", response_model=FeedResponse)
+async def search_items(
+        q: str = Query(..., description="Search query string"),
+        view: str = Query("both", pattern="^(articles|threads|both)$"),
+        sort: str = Query("published", description="Sort by 'published' or 'views'"),
+        page: int = Query(1, ge=1),
+        size: int = Query(20, ge=1, le=100)
+):
+    skip = (page - 1) * size
+    result = FeedResponse()
+    article_map: dict[str, dict] = {}
+
+    # --- ARTICLES ---
+    art_docs = []
+    if view in ("articles", "both", "threads"):
+        art_cursor = (
+            articles_col.find({"$text": {"$search": q}})
+            .sort(sort if sort in ("published", "views") else "published", -1)
+            .skip(skip)
+            .limit(size)
+        )
+        art_docs = await art_cursor.to_list(length=size)
+
+        for d in art_docs:
+            d["_id"] = str(d["_id"])
+            d["published"] = d.get("published").isoformat() if isinstance(d.get("published"), datetime) else None
+            d["topics"] = d.get("topics") or ([d.get("topic")] if d.get("topic") else [])
+            d["views"] = d.get("views", 0)
+            d["commentsCount"] = d.get("commentsCount", 0)
+            d["thread"] = None
+            if "thread_id" in d:
+                d["thread_id"] = str(d["thread_id"])
+            if isinstance(d.get("fetched_at"), datetime):
+                d["fetched_at"] = d["fetched_at"].isoformat()
+            d["credibility_label"] = d.get("credibility_label", "unrated")
+
+            article_map[d["_id"]] = d
+
+        result.articles = [Article.model_validate(d) for d in art_docs]
+
+    # --- THREADS ---
+    if view in ("threads", "both"):
+        thr_cursor = (
+            threads_col.find({"$text": {"$search": q}})
+            .sort("last_updated", -1)
+            .skip(skip)
+            .limit(size)
+        )
+        thr_docs = await thr_cursor.to_list(length=size)
+
+        missing_ids = []
+        for t in thr_docs:
+            for aid in t.get("articles", []):
+                if str(aid) not in article_map:
+                    try:
+                        missing_ids.append(ObjectId(aid))
+                    except Exception:
+                        continue
+
+        if missing_ids:
+            missing_docs = await articles_col.find({"_id": {"$in": missing_ids}}).to_list(length=None)
+            for d in missing_docs:
+                d["_id"] = str(d["_id"])
+                d["published"] = d.get("published").isoformat() if isinstance(d.get("published"), datetime) else None
+                d["topics"] = d.get("topics") or ([d.get("topic")] if d.get("topic") else [])
+                d["views"] = d.get("views", 0)
+                d["commentsCount"] = d.get("commentsCount", 0)
+                d["credibility_label"] = d.get("credibility_label", "unrated")
+                d["thread"] = None
+                article_map[d["_id"]] = d
+                result.articles.append(Article.model_validate(d))
+
+        threads = []
+        for t in thr_docs:
+            t["_id"] = str(t["_id"])
+            t["language"] = t.get("language", "en")
+            t["last_updated"] = t.get("last_updated").isoformat() if isinstance(t.get("last_updated"),
+                                                                                datetime) else None
+            t["articles"] = [str(aid) for aid in t.get("articles", [])]
+
+            if t["articles"]:
+                first = article_map.get(t["articles"][0])
+                if first:
+                    t["image"] = first.get("image")
+                    topics = first.get("topics") or ([first.get("topic")] if first.get("topic") else [])
+                    t["topic"] = topics[0] if topics else None
+
+            threads.append(Thread.model_validate(t))
+
+        result.threads = threads
+
+    return result

@@ -17,6 +17,7 @@ type Article = {
     image: string;
     isThread: false;
     rawDate: string;
+    credibility_label: string;
 };
 
 type Thread = {
@@ -40,6 +41,7 @@ type RawArticle = {
     commentsCount?: number;
     views?: number;
     image?: string;
+    credibility_label?: string;
 };
 
 type RawThread = {
@@ -139,6 +141,7 @@ const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages,
                                 commentsCount: a.commentsCount || 0,
                                 views: a.views || 0,
                                 image: a.image || '',
+                                credibility_label: a.credibility_label || '',
                             },
                         ])
                     );
@@ -174,6 +177,8 @@ const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages,
                                     commentsCount: a.commentsCount || 0,
                                     views: a.views || 0,
                                     image: a.image || '',
+                                    credibility_label: a.credibility_label || '',
+
                                 };
                             })
                         );

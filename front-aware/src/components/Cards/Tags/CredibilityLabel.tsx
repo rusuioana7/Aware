@@ -1,21 +1,25 @@
 import React from 'react';
 
-type SourceTrustStatus = 'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review';
+type CredibilityLevel = 'high' | 'medium' | 'low' | 'unrated';
 
 type Props = {
-    status: SourceTrustStatus;
+    level?: string;
 };
 
-const trustMap: Record<SourceTrustStatus, { label: string; color: string }> = {
-    verified: {label: 'Verified Source', color: '#2ecc71'},
-    unknown: {label: 'Unknown Source', color: '#95a5a6'},
-    suspicious: {label: 'Suspicious', color: '#e67e22'},
-    untrustworthy: {label: 'Untrustworthy', color: '#e74c3c'},
-    'under-review': {label: 'Under Review', color: '#3498db'},
+const trustMap: Record<CredibilityLevel, { label: string; color: string }> = {
+    high: {label: 'Reliable Source', color: '#2ecc71'},
+    medium: {label: 'Moderate Source', color: '#f39c12'},
+    low: {label: 'Unreliable Source', color: '#e74c3c'},
+    unrated: {label: 'Under Review', color: '#7f8c8d'},
 };
 
-const CredibilityLabel: React.FC<Props> = ({status}) => {
-    const {label, color} = trustMap[status];
+const CredibilityLabel: React.FC<Props> = ({level}) => {
+    const normalized = (level || '').trim().toLowerCase();
+
+    const isValid = Object.keys(trustMap).includes(normalized);
+    const key = isValid ? (normalized as CredibilityLevel) : 'unrated';
+
+    const {label, color} = trustMap[key];
 
     return (
         <span
@@ -29,10 +33,10 @@ const CredibilityLabel: React.FC<Props> = ({status}) => {
                 marginLeft: '12px',
                 whiteSpace: 'nowrap',
             }}
-            title={`Source rating: ${label}`}
+            title={`Credibility rating: ${label}`}
         >
-            {label}
-        </span>
+      {label}
+    </span>
     );
 };
 

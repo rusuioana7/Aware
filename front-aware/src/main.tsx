@@ -16,8 +16,11 @@ import ArticlePage from "./pages/ArticlePage.tsx";
 import ThreadPage from "./pages/ThreadPage.tsx";
 import TopicPage from "./pages/TopicPage.tsx";
 import CreateProfilePage from "./pages/CreateProfilePage.tsx";
+import SearchResults from "./components/ExplorePage/SearchResults.tsx";
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+
+
 root.render(
     <React.StrictMode>
         <BrowserRouter>
@@ -28,6 +31,7 @@ root.render(
                 <Route path="/createprofile" element={<CreateProfilePage/>}/>
                 <Route path="/home" element={<Layout><HomePage/></Layout>}/>
                 <Route path="/explore" element={<Layout><ExplorePage/></Layout>}/>
+                <Route path="/search" element={<Layout><SearchResults/></Layout>}/>
                 <Route path="/profile" element={<Layout><ProfilePage/></Layout>}/>
                 <Route path="/bookmarks" element={<Layout><BookmarksPage/></Layout>}>
                     <Route index element={<Navigate to="save-for-later"/>}/>

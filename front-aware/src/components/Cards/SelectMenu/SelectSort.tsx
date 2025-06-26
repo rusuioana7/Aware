@@ -1,6 +1,6 @@
 import React from 'react';
 
-type SortOption = 'Newest' | 'Popular' | 'Verified Only';
+type SortOption = 'Newest' | 'Popular';
 
 type Props = {
     options: SortOption[];

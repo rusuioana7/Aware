@@ -22,6 +22,7 @@ interface ArticleDto {
     topics: string[];
     views?: number;
     commentsCount?: number;
+    credibility_label?: string;
 }
 
 interface ThreadDto {
@@ -44,6 +45,7 @@ type ArticleFeedLayout = {
     views: number;
     rawDate: string;
     isThread: false;
+    credibility_label?: string;
 };
 
 type ThreadFeedLayout = {
@@ -68,7 +70,7 @@ const TopicPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
     const [userFavorites, setUserFavorites] = useState<string[]>([]);
-    const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular' | 'Verified Only'>('Newest');
+    const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular'>('Newest');
     const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>('All');
 
     const toggleFavorite = () => setIsFavorite(f => !f);
@@ -106,6 +108,7 @@ const TopicPage: React.FC = () => {
                         views: a.views || 0,
                         rawDate: a.published,
                         isThread: false,
+                        credibility_label: a.credibility_label,
                     }));
 
                     const ths: ThreadFeedLayout[] = await Promise.all(
@@ -129,6 +132,7 @@ const TopicPage: React.FC = () => {
                                             views: art.views || 0,
                                             rawDate: art.published,
                                             isThread: false,
+                                            credibility_label: art.credibility_label,
                                         };
                                     })
                                 );
