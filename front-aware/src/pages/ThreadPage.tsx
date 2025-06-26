@@ -24,6 +24,7 @@ interface RawArticle {
     topics: string[];
     views?: number;
     commentsCount?: number;
+    credibility_label?: string;
 }
 
 export const ThreadPage: React.FC = () => {
@@ -90,6 +91,7 @@ export const ThreadPage: React.FC = () => {
         commentsCount: a.commentsCount || 0,
         views: a.views || 0,
         id: a._id,
+        credibility_label: a.credibility_label || 'unrated',
     }));
 
     const topViewed = [...feedItems]

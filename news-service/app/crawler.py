@@ -1,38 +1,111 @@
 import os
+import re
 import json
 import time
 import feedparser
+import language_tool_python
+from urllib.parse import urlparse
 from datetime import datetime
 from dateutil import parser as date_parser
 from newspaper import Article as NewsArticle
 from langdetect import detect, DetectorFactory
 from typing import Tuple
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from app.thread_assigner import assigner
 from app.database import articles_col, threads_col
-from app.config import RSS_SOURCES, MAX_ARTICLES_PER_SOURCE, DELAY, TOPICS
+from app.config import RSS_SOURCES, MAX_ARTICLES_PER_SOURCE, DELAY, TOPICS, credibility_map, CLICKBAIT_PATTERNS, \
+    AD_PATTERNS
 
 load_dotenv()
-
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 DetectorFactory.seed = 0
+tool = language_tool_python.LanguageTool('en-US')
 
 
-async def process_article_via_llm(
-        raw_content: str,
-        raw_description: str
-) -> Tuple[str, str, str]:
+def get_domain(url: str) -> str:
+    try:
+        return urlparse(url).netloc.replace("www.", "")
+    except:
+        return ""
+
+
+def is_clickbait(title: str) -> bool:
+    return any(re.search(pat, title.lower()) for pat in CLICKBAIT_PATTERNS)
+
+
+def is_ad_content(title: str, content: str) -> bool:
+    combined = f"{title} {content}".lower()
+    return any(re.search(pat, combined) for pat in AD_PATTERNS)
+
+
+def assess_grammar(text: str) -> bool:
+    if not text.strip():
+        return False
+    matches = tool.check(text)
+    error_rate = len(matches) / max(len(text.split()), 1)
+    return error_rate < 0.05
+
+
+def label_from_score(score: int) -> str:
+    if score >= 80:
+        return "high"
+    elif score >= 50:
+        return "medium"
+    return "low"
+
+
+def compute_score_fields(article: dict) -> dict:
+    score = 0
+    domain = get_domain(article.get("url", ""))
+    trust = credibility_map.get(domain, "unrated")
+
+    if trust == "high":
+        score += 40
+    elif trust == "medium":
+        score += 20
+
+    if assess_grammar(article.get("content", "")):
+        score += 15
+
+    title = article.get("title", "")
+    content = article.get("content", "")
+    ad = is_ad_content(title, content)
+    clickbait = is_clickbait(title)
+
+    if not clickbait:
+        score += 10
+    if not ad:
+        score += 5
+    else:
+        score -= 10
+
+    if article.get("author"):
+        score += 5
+    if article.get("image"):
+        score += 5
+    if article.get("description"):
+        score += 5
+    if len(content) > 500:
+        score += 10
+
+    final_score = max(0, min(score, 100))
+    return {
+        "credibility_score": final_score,
+        "credibility_label": label_from_score(final_score),
+        "is_clickbait": clickbait,
+        "is_ad": ad
+    }
+
+
+async def process_article_via_llm(raw_content: str, raw_description: str) -> Tuple[str, str, str]:
     system = {
         "role": "system",
         "content": (
             "You are an assistant that takes raw news article text and a raw summary, "
             "then outputs a JSON object with exactly three keys: "
-            "`content`, `description`, and `topic`. "
-            "- `content`: cleaned article body, free of cookie banners, duplicates, ads, and boilerplate. "
-            "- `description`: a concise 1–2 sentence summary. "
-            "- `topic`: exactly one of the provided topics matching the main theme."
+            "`content`, `description`, and `topic`."
         )
     }
     user = {
@@ -43,12 +116,7 @@ async def process_article_via_llm(
                 "```\n" + raw_content[:3000] + "\n```\n\n"
                                                "Raw description (if any):\n"
                                                "```\n" + (raw_description or "")[:500] + "\n```\n\n"
-                                                                                         "Respond **only** with a valid JSON object, e.g.:\n"
-                                                                                         "{\n"
-                                                                                         '  "content": "…cleaned text…",\n'
-                                                                                         '  "description": "…short summary…",\n'
-                                                                                         '  "topic": "tech"\n'
-                                                                                         "}"
+                                                                                         "Respond only with a valid JSON object."
         )
     }
 
@@ -58,9 +126,8 @@ async def process_article_via_llm(
         temperature=0.0,
         max_tokens=2000
     )
-    out = resp.choices[0].message.content.strip()
     try:
-        data = json.loads(out)
+        data = json.loads(resp.choices[0].message.content.strip())
         return data["content"], data["description"], data["topic"]
     except json.JSONDecodeError:
         return raw_content, raw_description or "", ""
@@ -90,7 +157,7 @@ async def crawl_and_process() -> int:
 
             try:
                 art = NewsArticle(url)
-                art.download();
+                art.download()
                 art.parse()
             except:
                 continue
@@ -113,15 +180,10 @@ async def crawl_and_process() -> int:
                     pass
 
             clean_content, clean_desc, topic = await process_article_via_llm(raw_content, raw_desc)
-
-            if lang != "en":
-                content_en = await translate_to_english(clean_content)
-            else:
-                content_en = clean_content
-
+            content_en = await translate_to_english(clean_content) if lang != "en" else clean_content
             thread_id = await assigner.assign(content_en, topic)
 
-            doc = {
+            base_doc = {
                 "url": url,
                 "source": src["source"],
                 "title": art.title,
@@ -136,6 +198,9 @@ async def crawl_and_process() -> int:
                 "thread_id": thread_id,
                 "fetched_at": datetime.utcnow(),
             }
+
+            score_fields = compute_score_fields(base_doc)
+            doc = {**base_doc, **score_fields}
 
             res = await articles_col.insert_one(doc)
             article_oid = res.inserted_id
@@ -166,4 +231,4 @@ if __name__ == "__main__":
     import asyncio
 
     count = asyncio.run(crawl_and_process())
-    print(f"Crawled and processed {count} new articles")
+    print(f"Crawled and processed {count} new articles.")

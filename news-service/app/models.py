@@ -48,6 +48,8 @@ class Article(BaseModel):
     source: str
     title: str
     description: Optional[str]
+    credibility_score: int
+    credibility_label: str
     published: Optional[str]
     author: Optional[str]
     content: str

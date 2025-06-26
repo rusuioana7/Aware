@@ -127,8 +127,8 @@ const ThreadFeed: React.FC<Props> = ({
                                     >
                                         💬 {typeof article.commentsCount === 'number' ? article.commentsCount : 0} comments
                                         &nbsp; 👁️ {typeof article.views === 'number' ? article.views : 0} views
-                                        {article.credibilityStatus && (
-                                            <CredibilityLabel status={article.credibilityStatus}/>
+                                        {article.credibility_label && (
+                                            <CredibilityLabel level={article.credibility_label}/>
                                         )}
                                     </p>
                                 </div>

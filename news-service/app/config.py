@@ -125,6 +125,50 @@ RSS_SOURCES = [
      "feedUrl": "https://www.derstandard.at/rss/kultur"},
 ]
 
+credibility_map = {
+    "foreignpolicy.com": "high",
+    "bbc.com": "high",
+    "cnn.com": "medium",
+    "theguardian.com": "medium",
+    "nytimes.com": "high",
+    "npr.org": "medium",
+    "theverge.com": "high",
+    "sciencedaily.com": "medium",
+    "tmz.com": "low",
+    "etonline.com": "low",
+    "onbetterliving.com": "low",
+    "nomadicmatt.com": "low",
+    "pinchofyum.com": "low",
+    "pistonheads.com": "high",
+    "adevarul.ro": "medium",
+    "hotnews.ro": "high",
+    "observatornews.ro": "medium",
+    "realitatea.net": "low",
+    "stiripesurse.ro": "medium",
+    "france24.com": "high",
+    "lefigaro.fr": "medium",
+    "leparisien.fr": "medium",
+    "elpais.com": "high",
+    "abc.es": "medium",
+    "spiegel.de": "high",
+    "welt.de": "medium",
+    "derstandard.at": "medium"
+}
+
+CLICKBAIT_PATTERNS = [
+    r"\b(you won’t believe|this is what happened|what happened next|you’ll be shocked|this will blow your mind)\b",
+    r"\b(top \d+|reasons why|can’t miss|things you didn’t know|secret revealed)\b",
+    r"\b(amazing|unbelievable|surprising|incredible|epic fail|jaw-dropping|gone wrong)\b",
+    r"\b(before you die|must see|no one talks about|caught on camera)\b",
+    r"\b(read this before|the truth about|finally exposed|don’t do this)\b",
+    r"^(how to|why you should|what happens when|the real reason)\b"
+]
+
+AD_PATTERNS = [
+    r"\b(sponsored|promo|buy now|special offer|brand partner|partnered with|affiliate link|discount)\b",
+    r"utm_source=|/shop/|/deal/|/discount/"
+]
+
 TOPICS = ["all", "sport", "health", "economy", "tech", "climate", "politics",
           "entertainment", "science", "travel", "education", "world", "business",
           "culture", "food", "lifestyle", "automotive", "weather", "crime", "opinion"]

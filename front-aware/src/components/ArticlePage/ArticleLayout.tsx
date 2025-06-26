@@ -26,7 +26,7 @@ interface ArticleProps {
     originalUrl?: string;
     commentsCount?: number;
     viewsCount?: number;
-    credibilityStatus?: 'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review';
+    credibilityLabel?: string;
 }
 
 interface FolderResponse {
@@ -63,7 +63,7 @@ const Article: React.FC<ArticleProps> = ({
                                              originalUrl,
                                              commentsCount,
                                              viewsCount,
-                                             credibilityStatus,
+                                             credibilityLabel
                                          }) => {
     const [savedForLater, setSavedForLater] = useState(false);
     const [saveFolderId, setSaveFolderId] = useState<string | null>(null);
@@ -297,6 +297,7 @@ const Article: React.FC<ArticleProps> = ({
             audioRef.current.playbackRate = rate;
         }
     };
+    console.log('[Article] credibilityLabel received:', credibilityLabel);
 
 
     return (
@@ -497,8 +498,9 @@ const Article: React.FC<ArticleProps> = ({
                     {readingTime && ` • ${readingTime}`}
                 </div>
                 <div style={{flex: 1, textAlign: 'right', minWidth: '33%'}}>
-                    {credibilityStatus && <CredibilityLabel status={credibilityStatus}/>}
+                    {credibilityLabel && <CredibilityLabel level={credibilityLabel}/>}
                 </div>
+
             </div>
 
             {image && (

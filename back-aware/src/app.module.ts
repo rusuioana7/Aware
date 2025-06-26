@@ -7,6 +7,7 @@ import { ArticlesModule } from './articles/articles.module';
 import { ThreadsModule } from './threads/threads.module';
 import { FeedModule } from './feed/feed.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { BookmarksModule } from './bookmarks/bookmarks.module';
     ThreadsModule,
     FeedModule,
     BookmarksModule,
+    SearchModule,
   ],
 })
 export class AppModule {}

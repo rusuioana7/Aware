@@ -7,6 +7,7 @@ export interface ArticleDto {
   title: string;
   description?: string;
   language: string;
+  credibility_label: string;
   published: string;
   author?: string;
   content: string;

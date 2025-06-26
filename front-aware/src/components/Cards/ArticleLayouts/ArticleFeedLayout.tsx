@@ -2,6 +2,7 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 import ArticleOptions from './ArticleOptions';
 import TopicTag from '../Tags/TopicTag';
+import CredibilityLabel from "../Tags/CredibilityLabel.tsx";
 
 export type ArticleFeedLayout = {
     id: string;
@@ -14,7 +15,7 @@ export type ArticleFeedLayout = {
     views: number;
     commentsCount?: number;
     image: string;
-    credibilityStatus?: 'verified' | 'unknown' | 'suspicious' | 'untrustworthy' | 'under-review';
+    credibility_label?: string;
 };
 
 interface Props {
@@ -70,11 +71,19 @@ const ArticleFeed: React.FC<Props> = ({article, id, isHovered, onHover}) => (
                 <p style={{fontSize: '15px', margin: '6px 0 8px', color: '#333'}}>
                     {article.description}
                 </p>
-                <p style={{fontSize: '13px', color: '#777', display: 'flex', alignItems: 'center'}}>
-                    💬 {typeof article.commentsCount === 'number' ? article.commentsCount : 0} comments &nbsp;
+                <p style={{
+                    fontSize: '13px',
+                    color: '#777',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    flexWrap: 'wrap'
+                }}>
+                    💬 {typeof article.commentsCount === 'number' ? article.commentsCount : 0} comments
                     👁️ {typeof article.views === 'number' ? article.views : 0} views
-
+                    {article.credibility_label && <CredibilityLabel level={article.credibility_label}/>}
                 </p>
+
             </div>
         </div>
     </Link>

@@ -8,10 +8,10 @@ import ViewSelector from '../../Cards/SelectMenu/SelectView.tsx';
 type FeedOptionsProps = {
     onViewChange: (view: 'All' | 'Articles' | 'Threads') => void;
     onTopicChange: (topics: string[]) => void;
-    onSortChange: (sort: 'Newest' | 'Popular' | 'Verified Only') => void;
+    onSortChange: (sort: 'Newest' | 'Popular') => void;
 };
 
-const sortOptions: Array<'Newest' | 'Popular' | 'Verified Only'> = ['Newest', 'Popular', 'Verified Only'];
+const sortOptions: Array<'Newest' | 'Popular'> = ['Newest', 'Popular'];
 const viewOptions: Array<'All' | 'Articles' | 'Threads'> = ['All', 'Articles', 'Threads'];
 
 const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange, onTopicChange, onSortChange}) => {
@@ -24,11 +24,11 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange, onTopicChange, o
     const search = new URLSearchParams(location.search);
     const initialTopics = search.get('topics')?.split(',').filter(Boolean) || [];
     const initialView = (search.get('view') as 'All' | 'Articles' | 'Threads') || 'All';
-    const initialSort = (search.get('sort') as 'Newest' | 'Popular' | 'Verified Only') || 'Newest';
+    const initialSort = (search.get('sort') as 'Newest' | 'Popular') || 'Newest';
 
     const [selectedTopics, setSelectedTopics] = useState<string[]>(initialTopics);
     const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>(initialView);
-    const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular' | 'Verified Only'>(initialSort);
+    const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular'>(initialSort);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +64,7 @@ const FeedOptions: React.FC<FeedOptionsProps> = ({onViewChange, onTopicChange, o
     };
 
 
-    const handleSortChange = (option: 'Newest' | 'Popular' | 'Verified Only') => {
+    const handleSortChange = (option: 'Newest' | 'Popular') => {
         const query = new URLSearchParams(location.search);
         query.set('sort', option);
         navigate({pathname: location.pathname, search: query.toString()});
