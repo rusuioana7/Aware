@@ -17,20 +17,22 @@ OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 
 mongo = AsyncIOMotorClient(MONGO_URI)
 threads_col = mongo["aware_news"]["threads"]
+
 openai_client = AsyncOpenAI(api_key=OPENAI_KEY)
 
 
 async def generate_thread_title(examples: List[str]) -> str:
     prompt = (
             "You are a headline-writing assistant. "
-            "Given these related news snippets, produce a 3–6 word title capturing their common theme like a news headline.\n\n"
+            "Given these related news snippets, produce a 3–6 word title"
+            " capturing their common theme like a news headline.\n\n"
             + "\n".join(f"- {e}" for e in examples)
             + "\n\nReply with just the title."
     )
     resp = await openai_client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Write a 3–6 word newsy title."},
+            {"role": "system", "content": "Write a 3–6 word news title."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.0,

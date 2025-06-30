@@ -81,11 +81,16 @@ const CredentialsForm: React.FC<CredentialsFormProps> = ({mode}) => {
             localStorage.setItem('authToken', accessToken);
 
 
-            if (mode === 'signup') {
-                navigate('/createprofile', {state: {email}});
+            if (mode === 'login') {
+                if (email.toLowerCase() === 'admin@aware.com') {
+                    navigate('/manage-users', {replace: true});
+                } else {
+                    navigate('/home', {replace: true});
+                }
             } else {
-                navigate('/home');
+                navigate('/createprofile', {state: {email}});
             }
+
         } catch (err) {
             console.log(err);
             setError('Network error');

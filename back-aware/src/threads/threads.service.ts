@@ -25,4 +25,27 @@ export class ThreadsService {
       throw new HttpException('Bad gateway', HttpStatus.BAD_GATEWAY);
     }
   }
+  async findAll(): Promise<ThreadDto[]> {
+    const url = `${this.newsBase}/threads`;
+    this.logger.log(`→ proxying GET ${url}`);
+    try {
+      const resp = await firstValueFrom(this.http.get<ThreadDto[]>(url));
+      this.logger.log(`← got ${resp.status} threads`);
+      return resp.data;
+    } catch (err: any) {
+      this.logger.error(`✖️ error fetching threads: ${err.message}`);
+      throw new HttpException('Bad gateway', HttpStatus.BAD_GATEWAY);
+    }
+  }
+  async delete(id: string): Promise<void> {
+    const url = `${this.newsBase}/threads/${id}`;
+    this.logger.log(`→ proxying DELETE ${url}`);
+    try {
+      const resp = await firstValueFrom(this.http.delete<void>(url));
+      this.logger.log(`← got ${resp.status} for DELETE thread ${id}`);
+    } catch (err: any) {
+      this.logger.error(`✖️ error deleting thread ${id}: ${err.message}`);
+      throw new HttpException('Bad gateway', HttpStatus.BAD_GATEWAY);
+    }
+  }
 }

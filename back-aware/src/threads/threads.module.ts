@@ -7,5 +7,6 @@ import { ThreadsController } from './threads.controller';
   imports: [HttpModule],
   providers: [ThreadsService],
   controllers: [ThreadsController],
+  exports: [ThreadsService],
 })
 export class ThreadsModule {}

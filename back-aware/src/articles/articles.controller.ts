@@ -16,6 +16,13 @@ export class ArticlesController {
     this.logger.log(`✅ Responding with article ${id}`);
     return result;
   }
+  @Get()
+  async getAllArticles() {
+    this.logger.log(`🔍 GET /articles`);
+    const result = await this.svc.findAll();
+    this.logger.log(`✅ Responding with all articles`);
+    return result;
+  }
   @Get(':id/download/:type')
   @UseGuards(JwtAuthGuard)
   async downloadArticle(

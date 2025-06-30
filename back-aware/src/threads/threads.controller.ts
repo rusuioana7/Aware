@@ -9,4 +9,9 @@ export class ThreadsController {
   getThread(@Param('id') id: string) {
     return this.svc.findOne(id);
   }
+  @Get()
+  async getAllThreads() {
+    const result = await this.svc.findAll();
+    return result;
+  }
 }

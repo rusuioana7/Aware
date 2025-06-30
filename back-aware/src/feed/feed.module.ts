@@ -7,5 +7,6 @@ import { FeedController } from './feed.controller';
   imports: [HttpModule],
   providers: [FeedService],
   controllers: [FeedController],
+  exports: [FeedService],
 })
 export class FeedModule {}
