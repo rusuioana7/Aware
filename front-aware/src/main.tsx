@@ -17,6 +17,10 @@ import ThreadPage from "./pages/ThreadPage.tsx";
 import TopicPage from "./pages/TopicPage.tsx";
 import CreateProfilePage from "./pages/CreateProfilePage.tsx";
 import SearchResults from "./components/ExplorePage/SearchResults.tsx";
+import AdminPage from "./pages/AdminPage.tsx";
+import AdminUsersPage from "./pages/AdminUsersPage.tsx";
+import AdminArticlesPage from "./pages/AdminArticlesPage.tsx";
+import AdminThreadsPage from "./pages/AdminThreadsPage.tsx";
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
@@ -28,6 +32,10 @@ root.render(
                 <Route path="/" element={<LandingPage/>}/>
                 <Route path="/login" element={<AuthPage/>}/>
                 <Route path="/register" element={<AuthPage/>}/>
+                <Route path="/admin" element={<AdminPage/>}/>
+                <Route path="/manage-users" element={<AdminUsersPage/>}/>
+                <Route path="/manage-articles" element={<AdminArticlesPage/>}/>
+                <Route path="/manage-threads" element={<AdminThreadsPage/>}/>
                 <Route path="/createprofile" element={<CreateProfilePage/>}/>
                 <Route path="/home" element={<Layout><HomePage/></Layout>}/>
                 <Route path="/explore" element={<Layout><ExplorePage/></Layout>}/>

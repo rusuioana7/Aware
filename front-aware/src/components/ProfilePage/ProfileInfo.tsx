@@ -40,6 +40,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
                 position: 'relative',
                 overflow: 'hidden',
                 height: 'fit-content',
+
             }}
         >
             {/* banner photo */}

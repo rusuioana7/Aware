@@ -173,8 +173,17 @@ const ProfilePage: React.FC = () => {
     }
 
     return (
-        <div style={{display: 'flex', padding: '10px', position: 'relative'}}>
-            <div style={{flex: 4}}>
+        <div
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'flex-start',
+                gap: '40px',
+                padding: '10px',
+                position: 'relative',
+            }}
+        >
+            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 <ProfileInfo
                     favoriteTopics={profileData.favoriteTopics}
                     language={profileData.language}
@@ -187,7 +196,7 @@ const ProfilePage: React.FC = () => {
                     profilePhoto={profileData.profilePhoto}
                 />
 
-                <div style={{display: 'flex', justifyContent: 'center', marginTop: '20px'}}>
+                <div style={{marginTop: '20px'}}>
                     <button
                         style={{
                             display: 'flex',
@@ -208,7 +217,7 @@ const ProfilePage: React.FC = () => {
                 </div>
             </div>
 
-            <div style={{flex: 6, padding: '20px', marginTop: '-20px'}}>
+            <div style={{display: 'flex', justifyContent: 'center'}}>
                 <Settings/>
             </div>
 
@@ -236,6 +245,7 @@ const ProfilePage: React.FC = () => {
             )}
         </div>
     );
+
 };
 
 export default ProfilePage;

@@ -46,6 +46,31 @@ export class ArticlesService {
       commentsCount,
     };
   }
+  async findAll(): Promise<ArticleDto[]> {
+    const url = `${this.newsBase}/articles`;
+    this.logger.log(`→ proxying GET ${url}`);
+    try {
+      const resp = await firstValueFrom(
+        this.httpService.get<ArticleDto[]>(url),
+      );
+      this.logger.log(`← got ${resp.status} articles`);
+      return resp.data;
+    } catch (err: any) {
+      this.logger.error(`✖️ upstream error: ${err.message}`);
+      throw new HttpException('Bad gateway', HttpStatus.BAD_GATEWAY);
+    }
+  }
+  async delete(id: string): Promise<void> {
+    const url = `${this.newsBase}/articles/${id}`;
+    this.logger.log(`→ proxying DELETE ${url}`);
+    try {
+      const resp = await firstValueFrom(this.httpService.delete<void>(url));
+      this.logger.log(`← got ${resp.status} for DELETE article ${id}`);
+    } catch (err: any) {
+      this.logger.error(`✖️ error deleting article ${id}: ${err.message}`);
+      throw new HttpException('Bad gateway', HttpStatus.BAD_GATEWAY);
+    }
+  }
   async generateArticleFile(id: string, type: 'pdf' | 'txt' | 'md') {
     const article = await this.findOne(id);
     const content = `${article.title}\n\nBy ${article.author} | ${article.source}\nPublished: ${article.published}\n\n${article.content}`;
@@ -56,14 +81,12 @@ export class ArticlesService {
 
       doc.on('data', (chunk: Uint8Array) => chunks.push(chunk));
 
-      // Write title
       doc.fontSize(18).text(article.title, { underline: true });
       doc.moveDown();
       doc.fontSize(12).text(`By ${article.author} | ${article.source}`);
       doc.text(`Published: ${article.published}`);
       doc.moveDown();
 
-      // Try to fetch and embed the image
       if (article.image) {
         try {
           const imgRes = await this.httpService.axiosRef.get<ArrayBuffer>(
@@ -81,12 +104,10 @@ export class ArticlesService {
             doc.page.margins.left + (pageWidth - imageMaxWidth) / 2;
           const imageHeight = 250;
 
-          // Place image and manually track vertical movement
           doc.image(imageBuffer, imageX, doc.y, {
             fit: [imageMaxWidth, imageHeight],
           });
 
-          // Move the Y position down by the image height + padding
           doc.moveDown();
           doc.y += imageHeight + 10;
         } catch (err: unknown) {
@@ -95,7 +116,6 @@ export class ArticlesService {
         }
       }
 
-      // Article body
       doc.fontSize(12).text(article.content, { align: 'left' });
       doc.end();
 

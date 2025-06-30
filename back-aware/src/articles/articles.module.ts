@@ -8,5 +8,6 @@ import { CommentsModule } from '../comments/comments.module';
   imports: [HttpModule, CommentsModule],
   providers: [ArticlesService],
   controllers: [ArticlesController],
+  exports: [ArticlesService],
 })
 export class ArticlesModule {}

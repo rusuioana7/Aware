@@ -70,7 +70,7 @@ model BookmarkFolder {
   name    String
   color   String?
   starred Boolean @default(false)
-  user    User    @relation(fields: [userId], references: [id])
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  Int
 
   parent   BookmarkFolder?  @relation("Subfolders", fields: [parentId], references: [id], onDelete: Cascade)

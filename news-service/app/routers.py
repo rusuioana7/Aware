@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi import APIRouter, HTTPException, Path, Query, status
 from typing import List, Optional
 from bson import ObjectId
 from datetime import datetime
@@ -109,6 +109,47 @@ async def get_thread(
             thr_doc["topic"] = topics[0] if topics else None
 
     return Thread.model_validate(thr_doc)
+
+
+@router.delete(
+    "/articles/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a single article by its ObjectId"
+)
+async def delete_article(id: str = Path(..., description="Mongo ObjectId of the article")):
+    try:
+        oid = ObjectId(id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid article id")
+
+    result = await articles_col.delete_one({"_id": oid})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return
+
+
+@router.delete(
+    "/threads/{thread_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a single thread by its ObjectId or integer ID"
+)
+async def delete_thread(
+        thread_id: str = Path(..., description="Either integer cluster ID or Mongo ObjectId")
+):
+    if thread_id.isdigit():
+        query = {"_id": int(thread_id)}
+    else:
+        try:
+            oid = ObjectId(thread_id)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid thread ID format")
+        query = {"_id": oid}
+
+    result = await threads_col.delete_one(query)
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    return
 
 
 @router.get(

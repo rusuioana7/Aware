@@ -8,6 +8,7 @@ import { ThreadsModule } from './threads/threads.module';
 import { FeedModule } from './feed/feed.module';
 import { BookmarksModule } from './bookmarks/bookmarks.module';
 import { SearchModule } from './search/search.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SearchModule } from './search/search.module';
     FeedModule,
     BookmarksModule,
     SearchModule,
+    AdminModule,
   ],
 })
 export class AppModule {}
