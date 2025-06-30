@@ -59,6 +59,7 @@ class Article(BaseModel):
     thread: Optional[Thread]
     views: Optional[int] = 0
     commentsCount: Optional[int] = 0
+    reports: Optional[int] = 0
 
     model_config = {
         "validate_by_name": True,

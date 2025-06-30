@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {FaFlag} from 'react-icons/fa';
 import Header from '../components/Cards/PageLayout/Header';
 import AdminMenu from '../components/AdminPage/AdminMenu';
 import {BASE_URL} from '../api/config';
@@ -6,6 +7,7 @@ import {BASE_URL} from '../api/config';
 interface Article {
     _id: string;
     title: string;
+    reports?: number;
 
     [key: string]: any;
 }
@@ -16,7 +18,6 @@ const AdminArticlesPage: React.FC = () => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [page, setPage] = useState(1);
-
     const [searchId, setSearchId] = useState<string>('');
     const [isSearching, setIsSearching] = useState(false);
 
@@ -118,15 +119,12 @@ const AdminArticlesPage: React.FC = () => {
         .aup-container { display: flex; flex-direction: column; min-height: 100vh; background: #f9fafb; }
         .aup-menu { border-bottom: 1px solid #ddd; }
         .aup-content { flex: 1; padding: 24px; }
-
         .aup-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .aup-toolbar h2 { margin: 0; font-size: 1.5rem; color: #333; }
-
         .aup-search { display: flex; gap: 8px; margin-bottom: 16px; }
         .aup-search input { flex: 1; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; }
         .aup-search button { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; background: #031A6B; color: #fff; }
         .aup-search button.clear { background: #555; }
-
         .aup-table-container { background: #fff; border: 1px solid #ddd; border-radius: 4px; overflow-x: auto; }
         .aup-table { width: 100%; border-collapse: collapse; min-width: 600px; }
         .aup-table th, .aup-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.95rem; color: #333; }
@@ -134,18 +132,15 @@ const AdminArticlesPage: React.FC = () => {
         .aup-row:hover { background: #f5f5f5; }
         .aup-details-row td { padding: 0; }
         .aup-no-items { text-align: center; color: #777; padding: 20px 0; }
-
         .button-group button { margin-right: 8px; }
         .btn-details { background: #031A6B; color: #fff; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
         .btn-details:hover { background: #0069d9; }
         .btn-delete { background: #dc3545; color: #fff; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; }
         .btn-delete:hover { background: #c82333; }
-
         .details-list { background: #fafafa; padding: 16px; border-radius: 4px; }
         .detail-item { margin-bottom: 12px; }
         .detail-label { font-weight: 600; color: #555; margin-bottom: 4px; }
         .detail-value { color: #333; font-size: 0.95rem; white-space: pre-wrap; word-break: break-word; }
-
         .pagination { display: flex; justify-content: center; align-items: center; margin-top: 16px; gap: 8px; }
         .btn-page { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; background: #031A6B; color: #fff; }
         .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -175,6 +170,7 @@ const AdminArticlesPage: React.FC = () => {
                             <tr>
                                 <th>_ID</th>
                                 <th>Title</th>
+                                <th>Reports</th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
@@ -184,6 +180,12 @@ const AdminArticlesPage: React.FC = () => {
                                     <tr className="aup-row">
                                         <td>{article._id}</td>
                                         <td>{article.title}</td>
+                                        <td>
+                                            {article.reports && article.reports > 0
+                                                ? <FaFlag color="red" title={`${article.reports} report(s)`}/>
+                                                : '—'
+                                            }
+                                        </td>
                                         <td className="button-group">
                                             <button
                                                 className="btn-details"
@@ -201,7 +203,7 @@ const AdminArticlesPage: React.FC = () => {
                                     </tr>
                                     {expandedId === article._id && (
                                         <tr className="aup-details-row">
-                                            <td colSpan={3}>
+                                            <td colSpan={4}>
                                                 <div className="details-list">
                                                     {Object.entries(article)
                                                         .filter(([key]) => !['_id', 'title'].includes(key))
@@ -229,7 +231,7 @@ const AdminArticlesPage: React.FC = () => {
                             ))}
                             {articles.length === 0 && (
                                 <tr>
-                                    <td colSpan={3} className="aup-no-items">
+                                    <td colSpan={4} className="aup-no-items">
                                         No articles found.
                                     </td>
                                 </tr>

@@ -178,4 +178,15 @@ export class ArticlesService {
 
     return Buffer.from(response.audioContent);
   }
+  async report(articleId: string): Promise<void> {
+    const url = `${this.newsBase}/articles/${articleId}/report`;
+    this.logger.log(`→ PATCH ${url}`);
+    try {
+      await firstValueFrom(this.httpService.patch(url, {}));
+    } catch (err: any) {
+      this.logger.error(
+        `Failed to report article ${articleId}: ${err.message}`,
+      );
+    }
+  }
 }

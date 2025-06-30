@@ -297,6 +297,40 @@ const Article: React.FC<ArticleProps> = ({
             audioRef.current.playbackRate = rate;
         }
     };
+    const handleReport = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            setSnackbar('You must be logged in to report');
+            setTimeout(() => setSnackbar(null), 3000);
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `${BASE_URL}/articles/${_id}/report`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (res.ok) {
+                setSnackbar('Article reported');
+            } else {
+                const text = await res.text();
+                console.error('Report failed:', text);
+                setSnackbar('Failed to report');
+            }
+        } catch (err) {
+            console.error('Error reporting article:', err);
+            setSnackbar('Error reporting');
+        } finally {
+            setTimeout(() => setSnackbar(null), 3000);
+        }
+    };
+
     console.log('[Article] credibilityLabel received:', credibilityLabel);
 
 
@@ -465,7 +499,7 @@ const Article: React.FC<ArticleProps> = ({
                 </div>
 
 
-                <button style={buttonStyle}><FaFlag/> Report</button>
+                <button style={buttonStyle} onClick={handleReport}><FaFlag/> Report</button>
             </div>
 
             <h1 style={{

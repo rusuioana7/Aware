@@ -1,4 +1,12 @@
-import { Controller, Get, Logger, Param, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Patch,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Response } from 'express';
@@ -56,5 +64,13 @@ export class ArticlesController {
       this.logger.error(`Failed to generate audio: ${error.message}`);
       res.status(500).send('Failed to generate audio');
     }
+  }
+  @Patch(':id/report')
+  @UseGuards(JwtAuthGuard)
+  async reportArticle(@Param('id') id: string) {
+    this.logger.log(`⚠️ PATCH /articles/${id}/report`);
+    await this.svc.report(id);
+    this.logger.log(`✅ Article ${id} flagged`);
+    return { message: 'Article reported' };
   }
 }

@@ -29,6 +29,7 @@ async def get_article(id: str):
     doc['views'] = doc.get('views', 0)
 
     doc['commentsCount'] = doc.get('commentsCount', 0)
+    doc["reports"] = doc.get("reports", 0)
 
     doc["credibility_label"] = doc.get("credibility_label", "unrated")
 
@@ -294,6 +295,7 @@ async def get_feed(
             if isinstance(d.get("fetched_at"), datetime):
                 d["fetched_at"] = d["fetched_at"].isoformat()
             d["credibility_label"] = d.get("credibility_label", "unrated")
+            d["reports"] = d.get("reports", 0)
 
             d["thread"] = None
 
@@ -373,6 +375,14 @@ async def update_comments_count(id: str, payload: dict):
         raise HTTPException(status_code=404, detail="Article not found")
 
     return {"success": True, "updated": result.modified_count}
+
+
+@router.patch("/articles/{id}/report", status_code=204)
+async def report_article(id: str):
+    oid = ObjectId(id)
+    result = await articles_col.update_one({"_id": oid}, {"$inc": {"reports": 1}})
+    if result.matched_count == 0:
+        raise HTTPException(404, "Not found")
 
 
 @router.get("/search", response_model=FeedResponse)
