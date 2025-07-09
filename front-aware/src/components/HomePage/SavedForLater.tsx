@@ -109,6 +109,19 @@ const SavedForLater: React.FC = () => {
             </p>
 
             <div style={{position: 'relative', marginLeft: '3px'}}>
+                {savedArticles.length === 0 ? (
+                    <div
+                        style={{
+                            padding: '20px',
+                            textAlign: 'center',
+                            color: '#666',
+                            fontStyle: 'italic',
+                            fontSize: '16px',
+                        }}
+                    >
+                        No articles in Saved for Later.
+                    </div>
+                ) : (
                 <div
                     ref={scrollRef}
                     style={{
@@ -135,7 +148,6 @@ const SavedForLater: React.FC = () => {
                                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                                 backgroundColor: 'white',
                                 flexShrink: 0,
-                                borderRadius: '6px',
                             }}
                             onMouseEnter={() => setHoveredIndex(idx)}
                             onMouseLeave={() => setHoveredIndex(null)}
@@ -215,6 +227,7 @@ const SavedForLater: React.FC = () => {
                         </div>
                     ))}
                 </div>
+                )}
 
                 {hovering && (
                     <>

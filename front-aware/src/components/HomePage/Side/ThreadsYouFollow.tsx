@@ -38,12 +38,14 @@ const ThreadsYouFollow: React.FC = () => {
         fetchFollowedThreads();
     }, []);
 
-    return (
+    return threads.length === 0 ? null : (
         <SideThreadsListLayout
             title="Threads You Follow"
             threads={threads}
         />
     );
+
+
 };
 
 export default ThreadsYouFollow;

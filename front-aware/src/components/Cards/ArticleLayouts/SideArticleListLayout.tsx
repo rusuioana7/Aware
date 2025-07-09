@@ -83,55 +83,61 @@ const SideArticleListLayout: React.FC<SideArticleListProps> = ({title, articles}
             <div style={styles.divider}/>
 
             <div style={styles.list}>
-                {articles.map((article, index) => (
-                    <Link
-                        key={article.id}
-                        to={`/article/${article.id}`}
-                        style={{
-                            textDecoration: "none",
-                            color: "inherit",
-                            display: "block",
-                        }}
-                    >
-                        <div
-                            style={styles.item}
-                            onMouseEnter={() => setHoveredIndex(index)}
-                            onMouseLeave={() => setHoveredIndex(null)}
+                {articles.length === 0 ? (
+                    <div style={{fontStyle: "italic", color: "#666", padding: "8px 0"}}>
+                        No related articles.
+                    </div>
+                ) : (
+                    articles.map((article, index) => (
+                        <Link
+                            key={article.id}
+                            to={`/article/${article.id}`}
+                            style={{
+                                textDecoration: "none",
+                                color: "inherit",
+                                display: "block",
+                            }}
                         >
-                            <div style={{position: "relative"}}>
-                                <img
-                                    src={article.image}
-                                    alt={article.title}
-                                    style={styles.image}
-                                />
+                            <div
+                                style={styles.item}
+                                onMouseEnter={() => setHoveredIndex(index)}
+                                onMouseLeave={() => setHoveredIndex(null)}
+                            >
+                                <div style={{position: "relative"}}>
+                                    <img
+                                        src={article.image}
+                                        alt={article.title}
+                                        style={styles.image}
+                                    />
 
-                                {hoveredIndex === index && (
-                                    <div
-                                        style={styles.options}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                        }}
-                                    >
-                                        <ArticleOptions articleId={article.id} position="top-right"/>
+                                    {hoveredIndex === index && (
+                                        <div
+                                            style={styles.options}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                e.preventDefault();
+                                            }}
+                                        >
+                                            <ArticleOptions articleId={article.id} position="top-right"/>
+                                        </div>
+                                    )}
+
+
+                                    <div style={styles.tag}>
+                                        <TopicTag label={article.topic}/>
                                     </div>
-                                )}
+                                </div>
 
-
-                                <div style={styles.tag}>
-                                    <TopicTag label={article.topic}/>
+                                <div style={{flex: 1, minWidth: 0}}>
+                                    <p style={styles.authorDate}>
+                                        {article.author} - {article.date}
+                                    </p>
+                                    <p style={styles.titleText}>{article.title}</p>
                                 </div>
                             </div>
-
-                            <div style={{flex: 1, minWidth: 0}}>
-                                <p style={styles.authorDate}>
-                                    {article.author} - {article.date}
-                                </p>
-                                <p style={styles.titleText}>{article.title}</p>
-                            </div>
-                        </div>
-                    </Link>
-                ))}
+                        </Link>
+                    ))
+                )}
             </div>
         </div>
     );

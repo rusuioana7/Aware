@@ -2,15 +2,14 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 import Button from '../components/Cards/Button.tsx';
 import Header from '../components/Cards/PageLayout/Header.tsx';
-import ImageSection from "../components/LandingPage/ImageSection.tsx";
-import TextSection from "../components/LandingPage/TextSection.tsx";
+import Footer from "../components/Cards/PageLayout/Footer.tsx";
 
 const LandingPage: React.FC = () => {
     return (
         <div>
             <Header/>
 
-            <section className="relative w-full h-[500px]">
+            <section className="relative w-full h-[700px]">
                 <img
                     src="/background.jpg"
                     alt="Landing Background"
@@ -40,27 +39,10 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
-            <section className="w-full px-6 py-12 bg-[#f3f3f3]">
 
-                <h3 className="font-bold text-center mb-12" style={{fontSize: '2rem'}}>
-                    HOW DOES IT WORK?
-                </h3>
-
-
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start justify-between gap-10">
-
-                    <TextSection
-                        title="HOW DOES IT WORK?"
-                        content="Our app brings you the latest news from trusted sources, while ensuring the accuracy of every article with real-time fact-checking. Personalized news, reliable information, and a fake news tracker – all in one place."
-                    />
-
-                    <ImageSection
-                        imageSrc="/landing.png"
-                        altText="How it works"
-                    />
-
-                </div>
-            </section>
+            <div style={{marginTop: '-40px'}}>
+                <Footer/>
+            </div>
 
 
         </div>

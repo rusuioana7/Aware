@@ -1,8 +1,8 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ArticleFeed from '../../Cards/ArticleLayouts/ArticleFeedLayout.tsx';
 import ThreadFeed from '../../Cards/ThreadLayouts/ThreadFeedLayout.tsx';
-import {BASE_URL} from '../../../api/config.ts';
-import {FaArrowLeft, FaArrowRight} from 'react-icons/fa';
+import { BASE_URL } from '../../../api/config.ts';
+import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 
 type Article = {
     id: string;
@@ -51,7 +51,6 @@ type RawThread = {
     articles: string[];
 };
 
-
 type FeedItem = Article | Thread;
 
 type Props = {
@@ -74,18 +73,15 @@ const languageToCode = (lang: string): string => {
     return map[lang.toLowerCase()] || lang.toLowerCase();
 };
 
-const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages, selectedSort}) => {
+const Feed: React.FC<Props> = ({ selectedView, selectedTopics, selectedLanguages, selectedSort }) => {
     const feedRef = useRef<HTMLDivElement>(null);
     const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
-
-
     const [allItems, setAllItems] = useState<FeedItem[]>([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [scrollTriggered, setScrollTriggered] = useState(false);
 
-    useEffect(() => {
-        setPage(1);
-    }, [selectedView, selectedTopics, selectedLanguages, selectedSort]);
+    useEffect(() => { setPage(1); }, [selectedView, selectedTopics, selectedLanguages, selectedSort]);
 
     useEffect(() => {
         const token = localStorage.getItem('authToken');
@@ -104,37 +100,40 @@ const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages,
 
                 while (true) {
                     const url = `${BASE_URL}/feed?feed_type=${type}&topics=${topics}&languages=${langs}&page=${pageNum}&size=${PAGE_SIZE}&sort=${sortField}`;
-
-                    const res = await fetch(url, {
-                        headers: {Authorization: `Bearer ${token}`},
-                    });
-
-                    const {articles = [], threads = []} = await res.json();
-                    let filteredArticles = articles;
-                    let filteredThreads = threads;
-
-                    if (selectedView === 'Articles') {
-                        filteredThreads = [];
-                    } else if (selectedView === 'Threads') {
-                        filteredArticles = [];
-                    }
-
+                    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+                    const { articles = [], threads = [] } = await res.json();
                     if (articles.length === 0 && threads.length === 0) break;
 
-                    const articleMap = new Map<string, Article>(
-                        filteredArticles.map((a: RawArticle) => [
-                            a._id,
-                            {
+                    const articleMap = new Map<string, Article>(articles.map((a: RawArticle) => [a._id, {
+                        id: a._id,
+                        isThread: false,
+                        title: a.title,
+                        author: a.author || 'Unknown',
+                        topic: (a.topic || a.topics?.[0] || 'general').toLowerCase(),
+                        date: new Date(a.published).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                        rawDate: a.published,
+                        site: a.source,
+                        description: a.description || '',
+                        commentsCount: a.commentsCount || 0,
+                        views: a.views || 0,
+                        image: a.image || '',
+                        credibility_label: a.credibility_label || '',
+                    }]));
+
+                    const requiredArticleIds = new Set<string>();
+                    threads.forEach((t: RawThread) => (t.articles || []).forEach(id => { if (!articleMap.has(id)) requiredArticleIds.add(id); }));
+
+                    if (requiredArticleIds.size > 0) {
+                        const missing = await Promise.all(Array.from(requiredArticleIds).map(async id => {
+                            const r = await fetch(`${BASE_URL}/articles/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+                            const a = await r.json();
+                            return {
                                 id: a._id,
                                 isThread: false,
                                 title: a.title,
                                 author: a.author || 'Unknown',
                                 topic: (a.topic || a.topics?.[0] || 'general').toLowerCase(),
-                                date: new Date(a.published).toLocaleDateString('en-US', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                }),
+                                date: new Date(a.published).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
                                 rawDate: a.published,
                                 site: a.source,
                                 description: a.description || '',
@@ -142,95 +141,30 @@ const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages,
                                 views: a.views || 0,
                                 image: a.image || '',
                                 credibility_label: a.credibility_label || '',
-                            },
-                        ])
-                    );
-
-                    const requiredArticleIds = new Set<string>();
-                    filteredThreads.forEach((t: RawThread) => {
-                        (t.articles || []).forEach((id: string) => {
-                            if (!articleMap.has(id)) requiredArticleIds.add(id);
-                        });
-                    });
-
-                    if (requiredArticleIds.size > 0) {
-                        const missing = await Promise.all(
-                            Array.from(requiredArticleIds).map(async id => {
-                                const r = await fetch(`${BASE_URL}/articles/${id}`, {
-                                    headers: {Authorization: `Bearer ${token}`},
-                                });
-                                const a = await r.json();
-                                return {
-                                    id: a._id,
-                                    isThread: false,
-                                    title: a.title,
-                                    author: a.author || 'Unknown',
-                                    topic: (a.topic || a.topics?.[0] || 'general').toLowerCase(),
-                                    date: new Date(a.published).toLocaleDateString('en-US', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                    }),
-                                    rawDate: a.published,
-                                    site: a.source,
-                                    description: a.description || '',
-                                    commentsCount: a.commentsCount || 0,
-                                    views: a.views || 0,
-                                    image: a.image || '',
-                                    credibility_label: a.credibility_label || '',
-
-                                };
-                            })
-                        );
-                        for (const a of missing) {
-                            articleMap.set(a.id, a as Article);
-                        }
+                            };
+                        }));
+                        for (const a of missing) articleMap.set(a.id, a as Article);
                     }
 
-                    const threadObjects: Thread[] = filteredThreads.map((t: RawThread) => {
-                        const resolved = (t.articles || [])
-                            .map((id: string) => articleMap.get(id))
-                            .filter(Boolean) as Article[];
+                    const threadObjects: Thread[] = threads.map((t: RawThread) => ({
+                        id: t._id,
+                        threadTitle: t.title,
+                        lastUpdated: new Date(t.last_updated).toLocaleDateString(),
+                        rawDate: t.last_updated,
+                        isThread: true,
+                        articles: (t.articles || []).map(id => articleMap.get(id)).filter(Boolean) as Article[],
+                    }));
 
-                        return {
-                            id: t._id,
-                            threadTitle: t.title,
-                            lastUpdated: new Date(t.last_updated).toLocaleDateString(),
-                            rawDate: t.last_updated,
-                            isThread: true,
-                            articles: resolved,
-                        };
-                    });
+                    const threadArticleIds = new Set<string>();
+                    threadObjects.forEach(t => t.articles.forEach(a => threadArticleIds.add(a.id)));
+                    for (const id of threadArticleIds) articleMap.delete(id);
 
-                    let combined: FeedItem[] = [];
-
-                    if (selectedView === 'Articles') {
-                        const threadArticleIds = new Set<string>();
-                        threadObjects.forEach(t => t.articles.forEach(a => threadArticleIds.add(a.id)));
-
-                        for (const id of threadArticleIds) {
-                            articleMap.delete(id);
-                        }
-
-                        const flatArticles = Array.from(articleMap.values());
-                        combined = flatArticles;
-                    } else if (selectedView === 'Threads') {
-                        combined = threadObjects;
-                    } else {
-                        const threadArticleIds = new Set<string>();
-                        threadObjects.forEach(t => t.articles.forEach(a => threadArticleIds.add(a.id)));
-
-                        for (const id of threadArticleIds) {
-                            articleMap.delete(id);
-                        }
-
-                        const flatArticles = Array.from(articleMap.values());
-                        combined = [...flatArticles, ...threadObjects];
-                    }
+                    const flatArticles = Array.from(articleMap.values());
+                    const combined = selectedView === 'Articles' ? flatArticles :
+                        selectedView === 'Threads' ? threadObjects :
+                            [...flatArticles, ...threadObjects];
 
                     accumulated.push(...combined);
-
-
                     pageNum++;
                 }
 
@@ -259,23 +193,46 @@ const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages,
     const paginated = allItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     const nextPage = () => {
-        if (page < totalPages) setPage(p => p + 1);
+        if (page < totalPages) {
+            setPage(p => p + 1);
+            setScrollTriggered(true);
+        }
     };
 
     const prevPage = () => {
-        if (page > 1) setPage(p => p - 1);
+        if (page > 1) {
+            setPage(p => p - 1);
+            setScrollTriggered(true);
+        }
     };
 
     useEffect(() => {
-        if (feedRef.current) {
-            feedRef.current.scrollIntoView({behavior: 'smooth', block: 'start'});
+        if (scrollTriggered && feedRef.current) {
+            feedRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setScrollTriggered(false);
         }
-    }, [page]);
+    }, [page, scrollTriggered]);
 
     return (
-        <div ref={feedRef} style={{display: 'flex', flexDirection: 'column', gap: 10, marginTop: 30, marginLeft: 20}}>
+        <div ref={feedRef} style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 30, marginLeft: 20 }}>
+            <style>{`
+        .btn {
+          padding: 6px 12px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          transition: background-color 0.2s ease;
+        }
+        .btn-create {
+          background: #031A6B;
+          color: #fff;
+        }
+        
+      `}</style>
+
             {loading ? (
-                <div style={{padding: 16}}>Loading feed...</div>
+                <div style={{ padding: 16 }}>Loading feed...</div>
             ) : (
                 <>
                     {paginated.map((item, index) =>
@@ -285,8 +242,7 @@ const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages,
                                 thread={item}
                                 threadIndex={index}
                                 hoveredItemId={null}
-                                setHoveredItemId={() => {
-                                }}
+                                setHoveredItemId={() => {}}
                             />
                         ) : (
                             <ArticleFeed
@@ -296,7 +252,6 @@ const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages,
                                 isHovered={hoveredItemId === item.id}
                                 onHover={setHoveredItemId}
                             />
-
                         )
                     )}
 
@@ -307,14 +262,37 @@ const Feed: React.FC<Props> = ({selectedView, selectedTopics, selectedLanguages,
                         gap: 12,
                         marginTop: 24
                     }}>
-                        <button onClick={prevPage} disabled={page === 1}>
-                            <FaArrowLeft/> Prev
+                        <button
+                            onClick={prevPage}
+                            disabled={page === 1}
+                            className="btn btn-create"
+                            style={{
+                                opacity: page === 1 ? 0.5 : 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            <FaArrowLeft/> <span>Prev</span>
                         </button>
+
                         <span>Page {page} of {totalPages}</span>
-                        <button onClick={nextPage} disabled={page === totalPages}>
-                            Next <FaArrowRight/>
+
+                        <button
+                            onClick={nextPage}
+                            disabled={page === totalPages}
+                            className="btn btn-create"
+                            style={{
+                                opacity: page === totalPages ? 0.5 : 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            <span>Next</span> <FaArrowRight/>
                         </button>
                     </div>
+
                 </>
             )}
         </div>

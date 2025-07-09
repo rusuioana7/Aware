@@ -56,7 +56,10 @@ const RecentlyViewed: React.FC = () => {
         fetchRecent();
     }, [navigate]);
 
-    return <SideArticleListLayout title="Recently Viewed" articles={articles}/>;
+    return articles.length === 0 ? null : (
+        <SideArticleListLayout title="Recently Viewed" articles={articles} />
+    );
+
 };
 
 export default RecentlyViewed;

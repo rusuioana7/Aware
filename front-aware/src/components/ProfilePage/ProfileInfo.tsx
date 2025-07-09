@@ -21,8 +21,8 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
                                                      name,
                                                      email,
                                                      bio,
-                                                     bannerPhoto = '/news1.jpg',
-                                                     profilePhoto = '/news2.jpg',
+                                                     bannerPhoto = '',
+                                                     profilePhoto = '/default.png',
                                                  }) => {
     const commaSeparated = (items: string[]) =>
         items.length > 0 ? items.join(', ') : '—';

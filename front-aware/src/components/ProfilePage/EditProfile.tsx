@@ -255,10 +255,11 @@ const EditProfile: React.FC<EditProfileProps> = ({
                 onClick={() => fileInputAvatarRef.current?.click()}
             >
                 <img
-                    src={formData.profilePhoto}
+                    src={formData.profilePhoto?.trim() ? formData.profilePhoto : '/default.png'}
                     alt="Avatar"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    style={{width: '100%', height: '100%', objectFit: 'cover'}}
                 />
+
                 {isProfileHover && (
                     <div
                         style={{

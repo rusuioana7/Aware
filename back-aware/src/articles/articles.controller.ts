@@ -32,12 +32,14 @@ export class ArticlesController {
   ) {
     const file = await this.svc.generateArticleFile(id, type); // ✅ FIX: `this.svc`
 
+    const sanitized = file.filename.replace(/[^\w.\- ]+/g, '_');
+
     res.set({
       'Content-Type': file.mimeType,
-      'Content-Disposition': `attachment; filename="${file.filename}"`,
+      'Content-Disposition': `attachment; filename="${sanitized}"`,
     });
 
-    return res.send(file.buffer); // ✅ Must be a real Buffer
+    return res.send(file.buffer);
   }
   @Get(':id/audio')
   @UseGuards(JwtAuthGuard)

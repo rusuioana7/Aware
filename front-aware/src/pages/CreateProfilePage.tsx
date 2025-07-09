@@ -34,7 +34,7 @@ const CreateProfilePage: React.FC = () => {
                 favoriteTopics: [],
                 language: [],
                 country: [],
-                profilePhoto: '/default-avatar.png',
+                profilePhoto: '',
                 bannerPhoto: '',
                 dateJoined: new Date().toISOString(),
             };
@@ -72,7 +72,7 @@ const CreateProfilePage: React.FC = () => {
                     favoriteTopics: [],
                     language: [],
                     country: [],
-                    profilePhoto: '/default-avatar.png',
+                    profilePhoto: '',
                     bannerPhoto: '',
                     dateJoined: data.createdAt || new Date().toISOString(),
                 };
