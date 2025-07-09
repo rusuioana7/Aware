@@ -394,7 +394,7 @@ const Article: React.FC<ArticleProps> = ({
                     )}
                 </div>
 
-                <a href={originalUrl} target="_blank" rel="noopener noreferrer" style={buttonStyle}>
+                <a href={originalUrl} target="_blank" rel="noopener noreferrer" style={{ ...buttonStyle, textDecoration: 'none' }}>
                     <FaExternalLinkAlt/> View Original
                 </a>
                 <div style={{position: 'relative'}}>

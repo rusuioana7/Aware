@@ -10,6 +10,7 @@ import SelectSort from '../components/Cards/SelectMenu/SelectSort';
 import SelectView from '../components/Cards/SelectMenu/SelectView';
 
 import {BASE_URL} from '../api/config';
+import ArticleOptions from "../components/Cards/ArticleLayouts/ArticleOptions.tsx";
 
 interface ArticleDto {
     _id: string;
@@ -72,6 +73,8 @@ const TopicPage: React.FC = () => {
     const [userFavorites, setUserFavorites] = useState<string[]>([]);
     const [selectedSort, setSelectedSort] = useState<'Newest' | 'Popular'>('Newest');
     const [selectedView, setSelectedView] = useState<'All' | 'Articles' | 'Threads'>('All');
+    const [hoveredArticleId, setHoveredArticleId] = useState<string | null>(null);
+
 
     const toggleFavorite = () => setIsFavorite(f => !f);
 
@@ -283,6 +286,22 @@ const TopicPage: React.FC = () => {
                     />
                 </div>
 
+                <style>{`
+                .btn {
+                  padding: 6px 12px;
+                  border: none;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  font-size: 0.9rem;
+                  transition: background-color 0.2s ease;
+                }
+                .btn-create {
+                  background: #031A6B;
+                  color: #fff;
+                }
+        
+      `         }</style>
+
                 {loading ? (
                     <div>Loading all pages…</div>
                 ) : (
@@ -299,17 +318,37 @@ const TopicPage: React.FC = () => {
                                         }}
                                     />
                                 ) : (
-                                    <ArticleFeed
+                                    <div
                                         key={item.id}
-                                        article={item}
-                                        id={item.id}
-                                        isHovered={false}
-                                        onHover={() => {
-                                        }}
-                                    />
+                                        style={{position: 'relative'}}
+                                        onMouseEnter={() => setHoveredArticleId(item.id)}
+                                        onMouseLeave={() => setHoveredArticleId(null)}
+                                    >
+                                        {hoveredArticleId === item.id && (
+                                            <ArticleOptions
+                                                articleId={item.id}
+                                                position="top-right"
+                                                customStyle={{
+                                                    position: 'absolute',
+                                                    top: 10,
+                                                    right: 10,
+                                                    zIndex: 10,
+                                                }}
+                                            />
+                                        )}
+                                        <ArticleFeed
+                                            article={item}
+                                            id={item.id}
+                                            isHovered={hoveredArticleId === item.id}
+                                            onHover={() => setHoveredArticleId(item.id)}
+                                        />
+                                    </div>
+
+
                                 )
                             )}
                         </div>
+
 
                         <div style={{
                             display: 'flex',
@@ -318,12 +357,34 @@ const TopicPage: React.FC = () => {
                             gap: 12,
                             marginTop: 24
                         }}>
-                            <button onClick={prevPage} disabled={page === 1}>
-                                <FaArrowLeft/> Prev
+                            <button
+                                onClick={prevPage}
+                                disabled={page === 1}
+                                className="btn btn-create"
+                                style={{
+                                    opacity: page === 1 ? 0.5 : 1,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                <FaArrowLeft/> <span>Prev</span>
                             </button>
+
                             <span>Page {page} of {totalPages}</span>
-                            <button onClick={nextPage} disabled={page === totalPages}>
-                                Next <FaArrowRight/>
+
+                            <button
+                                onClick={nextPage}
+                                disabled={page === totalPages}
+                                className="btn btn-create"
+                                style={{
+                                    opacity: page === totalPages ? 0.5 : 1,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}
+                            >
+                                <span>Next</span> <FaArrowRight/>
                             </button>
                         </div>
                     </>

@@ -19,22 +19,7 @@ const inputStyle: React.CSSProperties = {
     marginBottom: '16px',
 };
 
-const forgotPasswordStyle: React.CSSProperties = {
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'flex-start',
-    paddingLeft: '16px',
-    marginTop: '-8px',
-};
 
-const responsiveForgotPasswordTextStyle: React.CSSProperties = {
-    color: '#031A6B',
-    fontSize: '14px',
-    cursor: 'pointer',
-    width: '100%',
-    textAlign: 'left',
-    paddingLeft: '65px',
-};
 
 const formStyle: React.CSSProperties = {
     marginTop: '32px',
@@ -129,11 +114,7 @@ const CredentialsForm: React.FC<CredentialsFormProps> = ({mode}) => {
                 />
             )}
 
-            {mode === 'login' && (
-                <div style={forgotPasswordStyle}>
-                    <p style={responsiveForgotPasswordTextStyle}>Forgot Password?</p>
-                </div>
-            )}
+
 
             {error && <p style={{color: 'red'}}>{Array.isArray(error) ? error.join(', ') : error}</p>}
 

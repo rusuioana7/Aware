@@ -14,6 +14,7 @@ from typing import Tuple
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from app.thread_assigner import assigner
+from app.credibility_labeling import compute_score_fields
 from app.database import articles_col, threads_col
 from app.config import RSS_SOURCES, MAX_ARTICLES_PER_SOURCE, DELAY, TOPICS, credibility_map, CLICKBAIT_PATTERNS, \
     AD_PATTERNS
@@ -56,56 +57,25 @@ def label_from_score(score: int) -> str:
     return "low"
 
 
-def compute_score_fields(article: dict) -> dict:
-    score = 0
-    domain = get_domain(article.get("url", ""))
-    trust = credibility_map.get(domain, "unrated")
 
-    if trust == "high":
-        score += 40
-    elif trust == "medium":
-        score += 20
-
-    if assess_grammar(article.get("content", "")):
-        score += 15
-
-    title = article.get("title", "")
-    content = article.get("content", "")
-    ad = is_ad_content(title, content)
-    clickbait = is_clickbait(title)
-
-    if not clickbait:
-        score += 10
-    if not ad:
-        score += 5
-    else:
-        score -= 10
-
-    if article.get("author"):
-        score += 5
-    if article.get("image"):
-        score += 5
-    if article.get("description"):
-        score += 5
-    if len(content) > 500:
-        score += 10
-
-    final_score = max(0, min(score, 100))
-    return {
-        "credibility_score": final_score,
-        "credibility_label": label_from_score(final_score),
-        "is_clickbait": clickbait,
-        "is_ad": ad
-    }
-
-
-async def process_article_via_llm(raw_content: str, raw_description: str) -> Tuple[str, str, str]:
+async def process_article_via_llm(
+        raw_content: str,
+        raw_description: str
+) -> Tuple[str, str, str]:
+    """
+    1) Cleans & polishes the full article text.
+    2) Generates a 1–2 sentence summary.
+    3) Assigns exactly one topic from TOPICS.
+    """
     system = {
         "role": "system",
         "content": (
             "You are an assistant that takes raw news article text and a raw summary, "
             "then outputs a JSON object with exactly three keys: "
-            "`content`, `description`, and `topic`."
+            "`content`, `description`, and `topic`. "
+            "- `content`: cleaned article body, free of cookie banners, duplicates, ads, and boilerplate. "
+            "- `description`: a concise 1–2 sentence summary. "
+            "- `topic`: exactly one of the provided topics matching the main theme."
         )
     }
     user = {
@@ -116,7 +86,12 @@ async def process_article_via_llm(raw_content: str, raw_description: str) -> Tup
                 "```\n" + raw_content[:3000] + "\n```\n\n"
                                                "Raw description (if any):\n"
                                                "```\n" + (raw_description or "")[:500] + "\n```\n\n"
-                                                                                         "Respond only with a valid JSON object."
+                                                                                         "Respond **only** with a valid JSON object, e.g.:\n"
+                                                                                         '{\n'
+                                                                                         '  "content": "…cleaned text…",\n'
+                                                                                         '  "description": "…short summary…",\n'
+                                                                                         '  "topic": "tech"\n'
+                                                                                         '}'
         )
     }
 
@@ -199,7 +174,15 @@ async def crawl_and_process() -> int:
                 "fetched_at": datetime.utcnow(),
             }
 
-            score_fields = compute_score_fields(base_doc)
+            score_fields = compute_score_fields(
+                base_doc,
+                credibility_map,
+                assess_grammar,
+                is_clickbait,
+                is_ad_content,
+                get_domain
+            )
+
             doc = {**base_doc, **score_fields}
 
             res = await articles_col.insert_one(doc)

@@ -227,13 +227,14 @@ const DiscoverFeed: React.FC = () => {
             <div
                 style={{
                     display: 'flex',
-                    gap: '8px',
-                    overflowX: 'auto',
-                    paddingBottom: '4px',
-                    whiteSpace: 'nowrap',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                    justifyContent: 'center',
+                    paddingBottom: '10px',
                     marginBottom: '20px',
                 }}
             >
+
                 {Object.keys(TOPIC_COLORS)
                     .filter(k => k !== 'local' && k !== 'all' && k !== 'general')
                     .map((key) => (
@@ -252,6 +253,21 @@ const DiscoverFeed: React.FC = () => {
                         </Link>
                     ))}
             </div>
+            <style>{`
+            .btn {
+              padding: 6px 12px;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 0.9rem;
+              transition: background-color 0.2s ease;
+            }
+            .btn-create {
+              background: #031A6B;
+              color: #fff;
+            }
+            
+          `}</style>
 
             {loading ? (
                 <div style={{padding: 16}}>Loading discover feed...</div>
@@ -285,12 +301,34 @@ const DiscoverFeed: React.FC = () => {
                         gap: 12,
                         marginTop: 24
                     }}>
-                        <button onClick={prevPage} disabled={page === 1}>
-                            <FaArrowLeft/> Prev
+                        <button
+                            onClick={prevPage}
+                            disabled={page === 1}
+                            className="btn btn-create"
+                            style={{
+                                opacity: page === 1 ? 0.5 : 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            <FaArrowLeft/> <span>Prev</span>
                         </button>
+
                         <span>Page {page} of {totalPages}</span>
-                        <button onClick={nextPage} disabled={page === totalPages}>
-                            Next <FaArrowRight/>
+
+                        <button
+                            onClick={nextPage}
+                            disabled={page === totalPages}
+                            className="btn btn-create"
+                            style={{
+                                opacity: page === totalPages ? 0.5 : 1,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            <span>Next</span> <FaArrowRight/>
                         </button>
                     </div>
                 </>

@@ -43,22 +43,46 @@ const LatestNews: React.FC = () => {
 
             try {
                 const userRes = await fetch(`${BASE_URL}/users/me`, {
-                    headers: {Authorization: `Bearer ${token}`},
+                    headers: { Authorization: `Bearer ${token}` },
                 });
                 const user = await userRes.json();
                 const favoriteTopics = (user.favoriteTopics || []).map((t: string) => t.toLowerCase());
                 const languageCodes = (user.language || []).map(languageToCode).join(',');
 
+                const articleSet = new Map<string, RawArticle>();
 
-                const requests = favoriteTopics.map(async (topic: string) => {
-                    const url = `${BASE_URL}/feed?feed_type=articles&topics=${encodeURIComponent(topic)}&languages=${encodeURIComponent(languageCodes)}&sort=published&page=1&size=1`;
-                    const res = await fetch(url);
-                    const json = await res.json();
-                    return json.articles?.[0] || null;
-                });
+                // 1 article per topic
+                const topicArticles = await Promise.all(
+                    favoriteTopics.map(async (topic: string) => {
+                        const url = `${BASE_URL}/feed?feed_type=articles&topics=${encodeURIComponent(topic)}&languages=${encodeURIComponent(languageCodes)}&sort=published&page=1&size=1`;
+                        const res = await fetch(url);
+                        const json = await res.json();
+                        return json.articles?.[0] || null;
+                    })
+                );
 
-                const results = (await Promise.all(requests)).filter((a): a is RawArticle => !!a && !!a._id);
-                const sorted = results.sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime());
+                topicArticles
+                    .filter((a): a is RawArticle => !!a && !!a._id)
+                    .forEach((a) => articleSet.set(a._id, a));
+
+                // Fill the rest if we have < 5
+                if (articleSet.size < 5) {
+                    const remaining = 5 - articleSet.size;
+                    const backupUrl = `${BASE_URL}/feed?feed_type=articles&topics=${encodeURIComponent(favoriteTopics.join(','))}&languages=${encodeURIComponent(languageCodes)}&sort=published&page=1&size=${remaining + 3}`;
+                    const backupRes = await fetch(backupUrl);
+                    const backupJson = await backupRes.json();
+
+                    (backupJson.articles || []).forEach((a: RawArticle) => {
+                        if (a._id && !articleSet.has(a._id)) {
+                            articleSet.set(a._id, a);
+                        }
+                    });
+                }
+
+                const sorted = Array.from(articleSet.values()).sort(
+                    (a, b) => new Date(b.published).getTime() - new Date(a.published).getTime()
+                );
+
                 setArticles(sorted.slice(0, 5));
             } catch (err) {
                 console.error("[LatestNews] Failed to load:", err);
@@ -67,6 +91,7 @@ const LatestNews: React.FC = () => {
 
         fetchLatest();
     }, []);
+
 
     return (
         <div style={{padding: '15px', marginTop: '-20px'}}>
