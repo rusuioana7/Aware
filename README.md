@@ -1,1 +1,3 @@
 # Aware
+Aware is a news aggregation platform designed to deliver a personalized, trustworthy and accessible news experience. The system curates articles based on user preferences (topics and languages), clusters related stories into threads for easier tracking of ongoing events and assesses credibility using source reputation and content quality metrics. It includes features such as text-to-speech, bookmarking, commenting, and explore. The architecture is a modular microservices design: React frontend, NestJS backend and FastAPI microservice for content processing.
+https://drive.google.com/file/d/1hOCr6Cn70EJ8pDa7pNdZm9t_Ra0s0sY4/view?usp=sharing
